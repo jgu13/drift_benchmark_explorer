@@ -1,5 +1,4 @@
 {
-  "generated_at": "2026-08-26T19:05:06+00:00",
   "roots": [
     "/home/jiayao/Metaskill-library/data/C_drift_benchmark",
     "/home/jiayao/Metaskill-library/data/D_drift_benchmark"
@@ -3318,7 +3317,7 @@
     {
       "id": "D1.2",
       "title": "Repository Navigation",
-      "platform": "OSWorld design-level",
+      "platform": "Design-level",
       "mechanism": "Repository path relocation",
       "status_label": "Design-level",
       "drift_summary": "Semantic repository targets move or split across paths while the requested information remains unchanged.",
@@ -3494,7 +3493,7 @@
     {
       "id": "D2.1",
       "title": "Navigation Graph",
-      "platform": "OSWorld design-level",
+      "platform": "Design-level",
       "mechanism": "TravelHub navigation graph with D1 localization",
       "status_label": "Design-level",
       "drift_summary": "TravelHub hotel navigation changes by replacing an old route and adding a shortcut; D1 only localizes the stale navigation region.",
@@ -4020,7 +4019,7 @@
     {
       "id": "D2.2",
       "title": "Navigation Graph",
-      "platform": "OSWorld design-level",
+      "platform": "Design-level",
       "mechanism": "TravelHub D3-only navigation graph recovery",
       "status_label": "Design-level",
       "drift_summary": "The same TravelHub navigation drift as D2.1 must be localized and reconstructed through interaction alone.",

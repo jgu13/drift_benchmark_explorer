@@ -97,7 +97,7 @@
   },
   "D1.2": {
     "title": "Repository Navigation",
-    "platform": "OSWorld design-level",
+    "platform": "Design-level",
     "mechanism": "Repository path relocation",
     "status_label": "Design-level",
     "drift_summary": "Semantic repository targets move or split across paths while the requested information remains unchanged.",
@@ -113,7 +113,7 @@
   },
   "D2.1": {
     "title": "Navigation Graph",
-    "platform": "OSWorld design-level",
+    "platform": "Design-level",
     "mechanism": "TravelHub navigation graph with D1 localization",
     "status_label": "Design-level",
     "drift_summary": "TravelHub hotel navigation changes by replacing an old route and adding a shortcut; D1 only localizes the stale navigation region.",
@@ -136,7 +136,7 @@
   },
   "D2.2": {
     "title": "Navigation Graph",
-    "platform": "OSWorld design-level",
+    "platform": "Design-level",
     "mechanism": "TravelHub D3-only navigation graph recovery",
     "status_label": "Design-level",
     "drift_summary": "The same TravelHub navigation drift as D2.1 must be localized and reconstructed through interaction alone.",

@@ -7,7 +7,6 @@ import html
 import json
 import re
 import shutil
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -69,7 +68,6 @@ def main() -> None:
 
     families.sort(key=lambda family: natural_family_key(family["id"]))
     index = {
-        "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
         "roots": [str(root) for root in roots if root.exists()],
         "families": families,
     }
@@ -133,7 +131,7 @@ def build_family(family_dir: Path, site_dir: Path, overrides: dict[str, Any]) ->
     family = {
         "id": family_id,
         "title": family_overrides.get("title", family_id),
-        "platform": family_overrides.get("platform", "BFCL" if family_id.startswith("C") else "OSWorld design-level"),
+        "platform": family_overrides.get("platform", "BFCL" if family_id.startswith("C") else "Design-level"),
         "mechanism": family_overrides.get("mechanism", ""),
         "status_label": status_label,
         "drift_summary": extract_drift_summary(family_id, drift_spec, overrides),

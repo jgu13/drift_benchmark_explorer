@@ -62,7 +62,6 @@ function renderOverview() {
         ${summaryItem("Tasks", totalTasks)}
         ${summaryItem("BFCL Families", bfclCount)}
         ${summaryItem("Design-Level Families", designCount)}
-        ${summaryItem("Generated", formatTimestamp(benchmarkIndex.generated_at))}
       </div>
     </header>
     <section class="toolbar" aria-label="Overview filters">
@@ -134,11 +133,7 @@ function renderFamilyCard(family) {
         <span class="family-id">${escapeHtml(family.id)}</span>
         <h2 class="card-title">${escapeHtml(family.title)}</h2>
         <p class="meta">${escapeHtml(family.mechanism || family.platform)}</p>
-        <div class="badge-row">
-          <span class="badge">${escapeHtml(family.platform)}</span>
-          ${family.platform.includes("design") ? `<span class="badge design">Design-level</span>` : ""}
-          <span class="badge">${escapeHtml(family.status_label)}</span>
-        </div>
+        ${renderFamilyBadges(family)}
         <p class="card-summary">${escapeHtml(family.drift_summary)}</p>
         <strong class="summary-value">${family.task_count}</strong>
         <span class="summary-label">tasks</span>
@@ -150,6 +145,23 @@ function renderFamilyCard(family) {
       </div>
     </article>
   `;
+}
+
+function renderFamilyBadges(family, extraBadge) {
+  const platform = family.platform || "";
+  const status = family.status_label || "";
+  const isDesign = platform.toLowerCase().includes("design");
+  const statusDuplicatesPlatform = status.toLowerCase() === platform.toLowerCase();
+  const badges = [
+    `<span class="badge ${isDesign ? "design" : ""}">${escapeHtml(platform)}</span>`,
+  ];
+  if (status && !statusDuplicatesPlatform) {
+    badges.push(`<span class="badge">${escapeHtml(status)}</span>`);
+  }
+  if (extraBadge) {
+    badges.push(`<span class="badge">${escapeHtml(extraBadge)}</span>`);
+  }
+  return `<div class="badge-row">${badges.join("")}</div>`;
 }
 
 function renderFamily(family) {
@@ -166,12 +178,7 @@ function renderFamily(family) {
           <h1><span class="family-id">${escapeHtml(family.id)}</span> ${escapeHtml(family.title)}</h1>
           <p class="hero-copy">${escapeHtml(family.drift_summary)}</p>
         </div>
-        <div class="badge-row">
-          <span class="badge">${escapeHtml(family.platform)}</span>
-          ${family.platform.includes("design") ? `<span class="badge design">Design-level</span>` : ""}
-          <span class="badge">${escapeHtml(family.status_label)}</span>
-          <span class="badge">${family.task_count} tasks</span>
-        </div>
+        ${renderFamilyBadges(family, `${family.task_count} tasks`)}
       </div>
       ${family.paired_family ? `
         <div class="paired-note">
@@ -403,13 +410,6 @@ function summaryItem(label, value) {
       <span class="summary-label">${escapeHtml(label)}</span>
     </div>
   `;
-}
-
-function formatTimestamp(value) {
-  if (!value) return "Unknown";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleString();
 }
 
 function labelize(key) {
