@@ -1,0 +1,503 @@
+<h1>D1.2 Design-Level Drift Construction Plan</h1>
+<h2>Objective</h2>
+<p>Construct one **design-level D1.2 drift example** using **OSWorld-V2 &#96;task_041&#96;** as the source substrate.</p>
+<p>D1.2 tests **repository navigation drift**:</p>
+<pre><code>persistent skill:
+semantic target
+      ↓
+current repository path
+      +
+ordered search fallback</code></pre>
+<p>The physical drift is:</p>
+<pre><code>relocate + split_merge</code></pre>
+<p>The semantic information and answers remain unchanged, but repository locations change.</p>
+<p>The learner receives:</p>
+<pre><code>D1 = 0%
+D2 = 0%
+D3 = 100%</code></pre>
+<p>Therefore:</p>
+<ul>
+<li>Do **not** provide a refactor note.</li>
+<li>Do **not** provide demonstrations of the new mappings.</li>
+<li>New locations must be discoverable only from simulated search/file-access outcomes.</li>
+<li>This is a **static construction prototype only**. Do not execute OSWorld and do not claim measured &#96;δ_C&#96;, &#96;CRR&#96;, &#96;BE&#96;, or identification budgets.</li>
+</ul>
+<p>---</p>
+<h2>Step 1 — Inspect the source OSWorld task</h2>
+<p>Read:</p>
+<pre><code>sed -n &#x27;1,260p&#x27; evaluation_examples/task_class/task_041.py</code></pre>
+<p>Extract only:</p>
+<ol>
+<li>The original instruction.</li>
+<li>What repository/template is involved.</li>
+<li>The semantic outcome requested.</li>
+<li>Any repository/file concepts explicitly mentioned.</li>
+<li>The evaluator&#x27;s final semantic requirements, if available.</li>
+</ol>
+<p>Do not modify &#96;task_041.py&#96;.</p>
+<p>Create:</p>
+<pre><code>drift_benchmark/D1.2/repository_navigation/</code></pre>
+<p>with:</p>
+<pre><code>repository_navigation/
+├── source_task.md
+├── regime_r_minus.json
+├── regime_r_plus.json
+├── skill_r_minus.md
+├── skill_r_plus_oracle.md
+├── siblings.json
+├── d3_evidence.jsonl
+├── grader_spec.json
+└── README.md</code></pre>
+<p>---</p>
+<h2>Step 2 — Write &#96;source_task.md&#96;</h2>
+<p>Record that the sample is derived from OSWorld-V2 &#96;task_041&#96;.</p>
+<p>Include the original OSWorld instruction verbatim.</p>
+<p>Then add:</p>
+<pre><code>## D1.2 abstraction
+
+This construction does not drift the user&#x27;s semantic goal.
+
+Instead, it treats the repository underlying the task as a
+versioned layout and introduces repository-path drift.
+
+The same semantic targets exist in both regimes, but selected
+targets move, split, or merge across files.</code></pre>
+<p>Do not claim that proposed paths are actual files in the original repository unless &#96;task_041.py&#96; explicitly establishes them.</p>
+<p>Label synthetic paths as:</p>
+<pre><code>design-level repository abstraction</code></pre>
+<p>---</p>
+<h2>Step 3 — Define semantic targets first</h2>
+<p>Do **not** start by inventing paths.</p>
+<p>First define approximately 8 semantic repository targets, &#96;T1, ..., T8&#96;.</p>
+<p>For example:</p>
+<pre><code>T1 = paper/site metadata
+T2 = author information
+T3 = abstract/overview content
+T4 = method section content
+T5 = results section content
+T6 = project links/resources
+T7 = site styling/theme configuration
+T8 = deployment configuration</code></pre>
+<p>Adjust these names after inspecting &#96;task_041.py&#96;.</p>
+<p>The important principle is:</p>
+<pre><code>semantic target != path</code></pre>
+<p>Example:</p>
+<pre><code>semantic target:
+deployment configuration
+
+path under r-:
+deploy/pages.yml</code></pre>
+<p>The semantic target persists even if its path changes.</p>
+<p>---</p>
+<h2>Step 4 — Create the baseline regime &#96;r-&#96;</h2>
+<p>Create &#96;regime_r_minus.json&#96;.</p>
+<p>Use a simple design-level repository map such as:</p>
+<pre><code>{
+  &quot;regime&quot;: &quot;r_minus&quot;,
+  &quot;source_task&quot;: &quot;OSWorld-V2 task_041&quot;,
+  &quot;layout_type&quot;: &quot;design-level abstraction&quot;,
+
+  &quot;semantic_targets&quot;: {
+    &quot;paper_metadata&quot;: &quot;config/site.yml&quot;,
+    &quot;author_information&quot;: &quot;config/site.yml&quot;,
+    &quot;overview_content&quot;: &quot;content/overview.md&quot;,
+    &quot;method_content&quot;: &quot;content/method.md&quot;,
+    &quot;results_content&quot;: &quot;content/results.md&quot;,
+    &quot;project_links&quot;: &quot;content/resources.md&quot;,
+    &quot;site_style&quot;: &quot;assets/theme.yml&quot;,
+    &quot;deployment_config&quot;: &quot;deploy/pages.yml&quot;
+  }
+}</code></pre>
+<p>The exact names may be changed, but keep the mapping simple and explicit.</p>
+<p>---</p>
+<h2>Step 5 — Define the baseline persistent skill &#96;S-&#96;</h2>
+<p>Create &#96;skill_r_minus.md&#96;.</p>
+<p>It should contain a **semantic-target-to-path map plus an ordered fallback strategy**.</p>
+<p>Example:</p>
+<pre><code># Repository Navigation Skill — r-
+
+## Semantic map
+
+- Paper metadata → `config/site.yml`
+- Author information → `config/site.yml`
+- Overview → `content/overview.md`
+- Method → `content/method.md`
+- Results → `content/results.md`
+- Project links → `content/resources.md`
+- Site style → `assets/theme.yml`
+- Deployment configuration → `deploy/pages.yml`
+
+## Retrieval policy
+
+For a requested semantic target:
+
+1. Try its stored current path directly.
+2. If the path is unavailable or does not contain the target:
+   - perform bounded filename/path search;
+   - then perform bounded semantic/content search.
+3. Open the best candidate.
+4. Verify that the retrieved content satisfies the requested semantic target.
+5. Stop once verified.</code></pre>
+<p>This is the persistent competence being tested.</p>
+<p>---</p>
+<h2>Step 6 — Create &#96;r+&#96; using &#96;relocate + split_merge&#96;</h2>
+<p>For the supervisor-scale sample, use approximately **25% changed target access mass**.</p>
+<p>With 8 semantic targets, change two substantial mappings.</p>
+<h3>A. Relocate</h3>
+<p>Example:</p>
+<pre><code>results_content
+
+r-:
+content/results.md
+
+r+:
+sections/experiments/results.md</code></pre>
+<h3>B. Split / merge</h3>
+<p>Example split:</p>
+<pre><code>r-:
+
+config/site.yml
+    ├── paper metadata
+    └── author information</code></pre>
+<p>becomes:</p>
+<pre><code>r+:
+
+config/site.yml
+    └── paper metadata
+
+config/authors.yml
+    └── author information</code></pre>
+<p>The point is that **repository organization changes but information does not**.</p>
+<p>---</p>
+<h2>Step 7 — Write &#96;regime_r_plus.json&#96;</h2>
+<p>Example:</p>
+<pre><code>{
+  &quot;regime&quot;: &quot;r_plus&quot;,
+  &quot;source_task&quot;: &quot;OSWorld-V2 task_041&quot;,
+  &quot;layout_type&quot;: &quot;design-level abstraction&quot;,
+
+  &quot;semantic_targets&quot;: {
+    &quot;paper_metadata&quot;: &quot;config/site.yml&quot;,
+    &quot;author_information&quot;: &quot;config/authors.yml&quot;,
+    &quot;overview_content&quot;: &quot;content/overview.md&quot;,
+    &quot;method_content&quot;: &quot;content/method.md&quot;,
+    &quot;results_content&quot;: &quot;sections/experiments/results.md&quot;,
+    &quot;project_links&quot;: &quot;content/resources.md&quot;,
+    &quot;site_style&quot;: &quot;assets/theme.yml&quot;,
+    &quot;deployment_config&quot;: &quot;deploy/pages.yml&quot;
+  },
+
+  &quot;drift&quot;: {
+    &quot;operator&quot;: [
+      &quot;relocate&quot;,
+      &quot;split_merge&quot;
+    ],
+
+    &quot;topology&quot;: &quot;replacement&quot;,
+
+    &quot;changed_targets&quot;: [
+      &quot;author_information&quot;,
+      &quot;results_content&quot;
+    ],
+
+    &quot;changes&quot;: [
+      {
+        &quot;target&quot;: &quot;results_content&quot;,
+        &quot;type&quot;: &quot;relocate&quot;,
+        &quot;old_path&quot;: &quot;content/results.md&quot;,
+        &quot;new_path&quot;: &quot;sections/experiments/results.md&quot;
+      },
+      {
+        &quot;target&quot;: &quot;author_information&quot;,
+        &quot;type&quot;: &quot;split&quot;,
+        &quot;old_path&quot;: &quot;config/site.yml&quot;,
+        &quot;new_path&quot;: &quot;config/authors.yml&quot;
+      }
+    ]
+  }
+}</code></pre>
+<p>---</p>
+<h2>Step 8 — Do not change semantic gold</h2>
+<p>A sibling may ask:</p>
+<pre><code>Where is the author information for the paper stored?</code></pre>
+<p>Under &#96;r-&#96;:</p>
+<pre><code>config/site.yml</code></pre>
+<p>Under &#96;r+&#96;:</p>
+<pre><code>config/authors.yml</code></pre>
+<p>But for a semantic question such as:</p>
+<pre><code>Who are the listed authors?</code></pre>
+<p>the answer must remain identical.</p>
+<p>Think of D1.2 as:</p>
+<pre><code>content(r-) = content(r+)
+location(r-) != location(r+)</code></pre>
+<p>---</p>
+<h2>Step 9 — Keep &#96;skill_r_minus.md&#96; stale</h2>
+<p>After constructing &#96;r+&#96;, **do not edit the learner&#x27;s skill**.</p>
+<p>For example, it still says:</p>
+<pre><code>Results → content/results.md</code></pre>
+<p>while the new environment is:</p>
+<pre><code>Results → sections/experiments/results.md</code></pre>
+<p>Thus:</p>
+<pre><code>Environment = r+
+Skill       = S-</code></pre>
+<p>produces:</p>
+<pre><code>try content/results.md
+        ↓
+path unavailable
+        ↓
+fallback search
+        ↓
+discover sections/experiments/results.md
+        ↓
+correct answer</code></pre>
+<p>This is the intended D1.2 failure mode:</p>
+<p>&gt; Correctness may survive, but repeated rediscovery becomes expensive.</p>
+<p>---</p>
+<h2>Step 10 — Create the oracle &#96;S+&#96;</h2>
+<p>Create &#96;skill_r_plus_oracle.md&#96;.</p>
+<p>Copy the same structure as &#96;skill_r_minus.md&#96;, but update only changed mappings:</p>
+<pre><code># Repository Navigation Skill — r+
+
+## Semantic map
+
+- Paper metadata → `config/site.yml`
+- Author information → `config/authors.yml`
+- Overview → `content/overview.md`
+- Method → `content/method.md`
+- Results → `sections/experiments/results.md`
+- Project links → `content/resources.md`
+- Site style → `assets/theme.yml`
+- Deployment configuration → `deploy/pages.yml`</code></pre>
+<p>Do **not** give this file to the learner.</p>
+<p>It represents the oracle skill for &#96;r+&#96;.</p>
+<p>---</p>
+<h2>Step 11 — Construct D3-only evidence</h2>
+<p>This is the defining feature of D1.2.</p>
+<p>There must be:</p>
+<pre><code>NO refactor note
+NO changelog
+NO demonstration saying where the target moved</code></pre>
+<p>Instead create &#96;d3_evidence.jsonl&#96; containing **search/access observations**.</p>
+<p>For the relocated results file:</p>
+<pre><code>{
+  &quot;target&quot;: &quot;results_content&quot;,
+  &quot;observation_type&quot;: &quot;file_access&quot;,
+  &quot;action&quot;: &quot;open(content/results.md)&quot;,
+  &quot;outcome&quot;: &quot;path_not_found&quot;
+}</code></pre>
+<p>Then:</p>
+<pre><code>{
+  &quot;target&quot;: &quot;results_content&quot;,
+  &quot;observation_type&quot;: &quot;search&quot;,
+  &quot;action&quot;: &quot;search(repository, &quot;results experiments accuracy&quot;)&quot;,
+  &quot;outcome&quot;: [
+    &quot;sections/experiments/results.md&quot;
+  ]
+}</code></pre>
+<p>Then:</p>
+<pre><code>{
+  &quot;target&quot;: &quot;results_content&quot;,
+  &quot;observation_type&quot;: &quot;file_access&quot;,
+  &quot;action&quot;: &quot;open(sections/experiments/results.md)&quot;,
+  &quot;outcome&quot;: &quot;verified_target_content&quot;
+}</code></pre>
+<p>For author information:</p>
+<pre><code>{
+  &quot;target&quot;: &quot;author_information&quot;,
+  &quot;observation_type&quot;: &quot;file_access&quot;,
+  &quot;action&quot;: &quot;open(config/site.yml)&quot;,
+  &quot;outcome&quot;: &quot;paper metadata present; author information absent&quot;
+}</code></pre>
+<p>Then:</p>
+<pre><code>{
+  &quot;target&quot;: &quot;author_information&quot;,
+  &quot;observation_type&quot;: &quot;search&quot;,
+  &quot;action&quot;: &quot;search(repository, &quot;authors affiliation&quot;)&quot;,
+  &quot;outcome&quot;: [
+    &quot;config/authors.yml&quot;
+  ]
+}</code></pre>
+<p>These are **design-level simulated evidence atoms**.</p>
+<p>Do not claim they were observed from OSWorld.</p>
+<p>---</p>
+<h2>Step 12 — Specify what the learner should infer</h2>
+<p>The intended learning path is:</p>
+<pre><code>stale path map
+      ↓
+direct access failure
+      ↓
+bounded search
+      ↓
+successful new access
+      ↓
+semantic verification
+      ↓
+update path map</code></pre>
+<p>For example:</p>
+<pre><code>results_content:
+content/results.md
+        ↓
+sections/experiments/results.md</code></pre>
+<p>The learner should update only this mapping.</p>
+<p>It should **not rewrite unrelated mappings**.</p>
+<p>---</p>
+<h2>Step 13 — Create sibling tasks</h2>
+<p>Create &#96;siblings.json&#96;.</p>
+<p>For a supervisor-scale prototype, use **8–10 siblings**, not the full target volume yet.</p>
+<p>Use four categories.</p>
+<h3>A. Affected siblings</h3>
+<pre><code>{
+  &quot;id&quot;: &quot;D1.2-aff-001&quot;,
+  &quot;semantic_target&quot;: &quot;results_content&quot;,
+  &quot;question&quot;: &quot;Retrieve the reported experimental results for the TypeSQL project.&quot;,
+  &quot;slice&quot;: &quot;affected&quot;
+}</code></pre>
+<pre><code>{
+  &quot;id&quot;: &quot;D1.2-aff-002&quot;,
+  &quot;semantic_target&quot;: &quot;author_information&quot;,
+  &quot;question&quot;: &quot;Retrieve the author information used by the project website.&quot;,
+  &quot;slice&quot;: &quot;affected&quot;
+}</code></pre>
+<h3>B. Unchanged-retention siblings</h3>
+<pre><code>{
+  &quot;id&quot;: &quot;D1.2-ret-001&quot;,
+  &quot;semantic_target&quot;: &quot;method_content&quot;,
+  &quot;question&quot;: &quot;Retrieve the method description.&quot;,
+  &quot;slice&quot;: &quot;unchanged&quot;
+}</code></pre>
+<p>Its path remains:</p>
+<pre><code>content/method.md</code></pre>
+<p>under both regimes.</p>
+<h3>C. Boundary/open-set siblings</h3>
+<pre><code>{
+  &quot;id&quot;: &quot;D1.2-open-001&quot;,
+  &quot;semantic_target&quot;: &quot;supplementary_video&quot;,
+  &quot;question&quot;: &quot;Locate the supplementary video configuration.&quot;,
+  &quot;slice&quot;: &quot;boundary&quot;
+}</code></pre>
+<p>Expected behavior:</p>
+<pre><code>bounded search
+→ verify absence
+→ abstain / report not found</code></pre>
+<p>rather than hallucinating a path.</p>
+<h3>D. Matched null</h3>
+<p>Change surface naming or formatting without changing semantic location.</p>
+<p>The learner should **not update its map**.</p>
+<p>---</p>
+<h2>Step 14 — Add an abstract cost model</h2>
+<p>Because this is not executed, do not report real latency or real action counts.</p>
+<p>Define a simple **design cost model** in &#96;grader_spec.json&#96;:</p>
+<pre><code>{
+  &quot;cost_model&quot;: {
+    &quot;type&quot;: &quot;design_proxy&quot;,
+    &quot;direct_path_access&quot;: 1,
+    &quot;failed_path_access&quot;: 1,
+    &quot;repository_search&quot;: 1,
+    &quot;verification_read&quot;: 1
+  }
+}</code></pre>
+<p>Illustration:</p>
+<h3>Oracle &#96;S+&#96;</h3>
+<pre><code>open(new_path)
+→ verify
+
+design cost ≈ 2</code></pre>
+<h3>Stale &#96;S-&#96;</h3>
+<pre><code>open(old_path)       1
+search               1
+open(new_path)       1
+verify               1
+                   ----
+design cost ≈ 4</code></pre>
+<p>These are **abstract design costs, not benchmark measurements**.</p>
+<p>Do not calculate official &#96;CRR&#96;.</p>
+<p>---</p>
+<h2>Step 15 — Define the expected update</h2>
+<p>The learner should eventually produce something conceptually equivalent to:</p>
+<pre><code>- Results → content/results.md
++ Results → sections/experiments/results.md
+
+- Author information → config/site.yml
++ Author information → config/authors.yml</code></pre>
+<p>Everything else remains unchanged.</p>
+<p>---</p>
+<h2>Step 16 — Write &#96;README.md&#96;</h2>
+<p>The README should contain five sections.</p>
+<h3>1. Source</h3>
+<pre><code>OSWorld-V2 task_041</code></pre>
+<p>Note that the repository layout is a design abstraction.</p>
+<h3>2. Physical drift</h3>
+<pre><code>operator: relocate + split_merge
+topology: replacement
+schedule: abrupt
+sample scope: ~25%</code></pre>
+<h3>3. Evidence</h3>
+<pre><code>D1: 0%
+D2: 0%
+D3: 100%</code></pre>
+<p>Explain:</p>
+<p>&gt; The refactor note is withheld. New target locations are identifiable only through file-access failures, repository search, successful access, and semantic verification.</p>
+<h3>4. Before/after table</h3>
+<table><thead><tr><th>Semantic target</th><th>&#96;r-&#96;</th><th>&#96;r+&#96;</th><th>Status</th></tr></thead><tbody><tr><td>Paper metadata</td><td>&#96;config/site.yml&#96;</td><td>&#96;config/site.yml&#96;</td><td>unchanged</td></tr><tr><td>Author info</td><td>&#96;config/site.yml&#96;</td><td>&#96;config/authors.yml&#96;</td><td>split</td></tr><tr><td>Overview</td><td>&#96;content/overview.md&#96;</td><td>same</td><td>unchanged</td></tr><tr><td>Method</td><td>&#96;content/method.md&#96;</td><td>same</td><td>unchanged</td></tr><tr><td>Results</td><td>&#96;content/results.md&#96;</td><td>&#96;sections/experiments/results.md&#96;</td><td>relocated</td></tr><tr><td>Resources</td><td>&#96;content/resources.md&#96;</td><td>same</td><td>unchanged</td></tr><tr><td>Style</td><td>&#96;assets/theme.yml&#96;</td><td>same</td><td>unchanged</td></tr><tr><td>Deployment</td><td>&#96;deploy/pages.yml&#96;</td><td>same</td><td>unchanged</td></tr></tbody></table>
+<h3>5. Expected causal behavior</h3>
+<pre><code>r- + S-
+    → direct retrieval
+
+r+ + S-
+    → stale path
+    → search
+    → recovery
+    → higher cost
+
+r+ + updated skill
+    → direct retrieval
+
+r+ + oracle S+
+    → direct retrieval</code></pre>
+<p>---</p>
+<h2>Step 17 — State limitations explicitly</h2>
+<p>Include:</p>
+<p>&gt; This package is a design-level prototype. The OSWorld source task supplies the repository-oriented application context, but the paired repository layouts and D3 access/search observations are counterfactual constructions and have not yet been executed. Consequently, stale-skill damage, normalized execution cost, CRR, break-even horizon, and identification budget are intentionally unset.</p>
+<p>---</p>
+<h2>Expected Final Output</h2>
+<pre><code>drift_benchmark/
+└── D1.2/
+    └── repository_navigation/
+        ├── source_task.md
+        ├── regime_r_minus.json
+        ├── regime_r_plus.json
+        ├── skill_r_minus.md
+        ├── skill_r_plus_oracle.md
+        ├── siblings.json
+        ├── d3_evidence.jsonl
+        ├── grader_spec.json
+        └── README.md</code></pre>
+<h2>Conceptual Summary</h2>
+<pre><code>D1.2 — repository navigation drift
+
+                    r-
+Results ───────────────► content/results.md
+Author info ───────────► config/site.yml
+
+                 DRIFT
+         relocate + split
+
+                    r+
+Results ───────────────► sections/experiments/results.md
+Author info ───────────► config/authors.yml
+
+
+Old skill S-
+     │
+     ├─ tries old path
+     │       ↓
+     │    failure
+     │       ↓
+     └─ search → new path → correct answer
+                      ↑
+                     D3
+
+Updated skill
+     │
+     └─ direct new path → correct answer</code></pre>
+<p>This is the D1.2 design analogue of the C1.2 &#96;START → X7&#96; sample and the D2.2 path-permutation sample.</p>

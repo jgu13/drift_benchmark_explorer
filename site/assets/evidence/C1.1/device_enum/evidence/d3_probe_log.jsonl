@@ -1,0 +1,4 @@
+{"probe_id": "D3_001", "probe_index": 1, "obligation": "E02", "action": "setHeadlights", "arguments": {"mode": "auto"}, "outcome": {"error": "Invalid headlight mode."}, "safe": true}
+{"probe_id": "D3_002", "probe_index": 2, "obligation": "E02", "action": "setHeadlights", "arguments": {"mode": "H2"}, "outcome": {"headlightStatus": "off"}, "safe": true}
+{"probe_id": "D3_003", "probe_index": 3, "obligation": "E03", "action": "adjustClimateControl", "arguments": {"temperature": 20, "mode": "defrost"}, "outcome": {"error": "Deprecated climate mode."}, "safe": true}
+{"probe_id": "D3_004", "probe_index": 4, "obligation": "E03", "action": "adjustClimateControl", "arguments": {"temperature": 20, "mode": "C9"}, "outcome": {"currentACTemperature": 20, "climateMode": "defrost", "humidityLevel": 50.0}, "safe": true}

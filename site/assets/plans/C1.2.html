@@ -1,0 +1,520 @@
+<h1>C1.2 — BFCL Device-Enum Drift: Rebuild Execution Plan</h1>
+<h2>Objective</h2>
+<p>Rebuild a **design-level C1.2 drift instance** from BFCL using an existing enum-bearing &#96;VehicleControlAPI&#96; task.</p>
+<p>C1.2 tests whether an agent can migrate a persistent executable skill after a private API enum changes.</p>
+<p>The simplest pilot uses BFCL task:</p>
+<pre><code>multi_turn_base_95</code></pre>
+<p>and the operation:</p>
+<pre><code>VehicleControlAPI.startEngine</code></pre>
+<p>The semantic task remains:</p>
+<pre><code>start the engine</code></pre>
+<p>while the private executable token changes:</p>
+<pre><code>r-: START
+r+: X7</code></pre>
+<p>The final desired environment state remains:</p>
+<pre><code>engineState = &quot;running&quot;</code></pre>
+<p>C1.2 is a **D1-only evidence condition**:</p>
+<pre><code>D1 = 100%
+D2 = 0%
+D3 = 0%</code></pre>
+<p>The learner must update the stale skill from a changelog/declaration rather than from demonstrations or probing.</p>
+<p>This first package is a **minimal design-level proof of concept**, not yet the full 25%-scope C1.2 benchmark family.</p>
+<p>---</p>
+<h2>1. Locate the BFCL source task</h2>
+<p>Use:</p>
+<pre><code>bfcl_eval/data/BFCL_v4_multi_turn_base.json</code></pre>
+<p>Extract:</p>
+<pre><code>multi_turn_base_95</code></pre>
+<p>Use only the first turn for the minimal pilot.</p>
+<p>Create:</p>
+<pre><code>drift_benchmark/C1.2/device_enum/</code></pre>
+<p>with:</p>
+<pre><code>device_enum/
+├── task.json
+├── function_doc.json
+├── regime_r_minus.json
+├── regime_r_plus.json
+├── skill_r_minus.md
+├── skill_r_plus_oracle.md
+├── changelog_D1.md
+├── gold_r_minus.json
+├── gold_r_plus.json
+└── README.md</code></pre>
+<p>---</p>
+<h2>2. Inspect the executable BFCL functions</h2>
+<p>Verify the original function schema:</p>
+<pre><code>bfcl_eval/data/multi_turn_func_doc/vehicle_control.json</code></pre>
+<p>The relevant original parameter is:</p>
+<pre><code>startEngine.ignitionMode</code></pre>
+<p>with current BFCL documentation exposing:</p>
+<pre><code>[&quot;START&quot;, &quot;STOP&quot;]</code></pre>
+<p>Also inspect:</p>
+<pre><code>bfcl_eval/eval_checker/multi_turn_eval/func_source_code/vehicle_control.py</code></pre>
+<p>The relevant &#96;startEngine&#96; behavior is:</p>
+<pre><code>if ignitionMode == &quot;START&quot;:
+    self.engine_state = &quot;running&quot;</code></pre>
+<p>The original &#96;startEngine&#96; also requires:</p>
+<pre><code>all doors locked
+brake pedal pressed
+brake force = 1000.0
+sufficient fuel</code></pre>
+<p>Verify:</p>
+<pre><code>pressBrakePedal(pedalPosition=1.0)</code></pre>
+<p>produces:</p>
+<pre><code>brakePedalStatus = &quot;pressed&quot;
+brakePedalForce = 1000.0</code></pre>
+<p>Therefore the baseline procedural chain is:</p>
+<pre><code>pressBrakePedal(1.0)
+        ↓
+startEngine(&quot;START&quot;)
+        ↓
+engineState = &quot;running&quot;</code></pre>
+<p>---</p>
+<h2>3. Rewrite the user task semantically</h2>
+<p>The user prompt must **not expose the private token**.</p>
+<p>Do not use:</p>
+<pre><code>&quot;start the engine in START mode&quot;</code></pre>
+<p>Use:</p>
+<pre><code>&quot;I&#x27;ve secured all doors and engaged the parking brake.
+Please start the engine.&quot;</code></pre>
+<p>The prompt should specify the semantic goal only.</p>
+<p>Create &#96;task.json&#96; with this semantic wording.</p>
+<p>---</p>
+<h2>4. Hide the private enum from task-level function documentation</h2>
+<p>The persistent skill should carry the private executable mapping.</p>
+<p>Remove:</p>
+<pre><code>[Enum]: [&quot;START&quot;, &quot;STOP&quot;]</code></pre>
+<p>from the learner-visible &#96;startEngine&#96; schema.</p>
+<p>Create:</p>
+<pre><code>function_doc.json</code></pre>
+<p>with conceptually:</p>
+<pre><code>{
+  &quot;name&quot;: &quot;startEngine&quot;,
+  &quot;description&quot;: &quot;Starts the engine of the vehicle.&quot;,
+  &quot;parameters&quot;: {
+    &quot;type&quot;: &quot;dict&quot;,
+    &quot;properties&quot;: {
+      &quot;ignitionMode&quot;: {
+        &quot;type&quot;: &quot;string&quot;,
+        &quot;description&quot;: &quot;The private ignition mode token used by the vehicle control system.&quot;
+      }
+    },
+    &quot;required&quot;: [&quot;ignitionMode&quot;]
+  }
+}</code></pre>
+<p>Do not expose either &#96;START&#96; or &#96;X7&#96; through normal task documentation.</p>
+<p>---</p>
+<h2>5. Define regime &#96;r-&#96;</h2>
+<p>Create:</p>
+<pre><code>regime_r_minus.json</code></pre>
+<p>Example:</p>
+<pre><code>{
+  &quot;regime&quot;: &quot;r_minus&quot;,
+  &quot;source_task&quot;: &quot;BFCL_v4 multi_turn_base_95&quot;,
+  &quot;semantic_goal&quot;: &quot;start_engine&quot;,
+  &quot;private_mapping&quot;: {
+    &quot;start_engine&quot;: &quot;START&quot;
+  },
+  &quot;final_state&quot;: {
+    &quot;engineState&quot;: &quot;running&quot;
+  }
+}</code></pre>
+<p>The executable backend under &#96;r-&#96; should retain:</p>
+<pre><code>if ignitionMode == &quot;START&quot;:
+    self.engine_state = &quot;running&quot;</code></pre>
+<p>---</p>
+<h2>6. Create the stale skill &#96;S-&#96;</h2>
+<p>Create:</p>
+<pre><code>skill_r_minus.md</code></pre>
+<p>Use:</p>
+<pre><code># VehicleControlAPI Skill — Regime r-
+
+To start the vehicle engine:
+
+1. Fully press the brake pedal:
+   `pressBrakePedal(pedalPosition=1.0)`
+
+2. Start the engine using:
+   `startEngine(ignitionMode=&quot;START&quot;)`</code></pre>
+<p>This is the correct persistent skill before drift.</p>
+<p>---</p>
+<h2>7. Define the &#96;r-&#96; gold behavior</h2>
+<p>Create:</p>
+<pre><code>gold_r_minus.json</code></pre>
+<p>Example:</p>
+<pre><code>{
+  &quot;id&quot;: &quot;C1.2_pilot_001&quot;,
+  &quot;ground_truth&quot;: [
+    &quot;pressBrakePedal(pedalPosition=1.0)&quot;,
+    &quot;startEngine(ignitionMode=&#x27;START&#x27;)&quot;
+  ],
+  &quot;expected_final_state&quot;: {
+    &quot;engineState&quot;: &quot;running&quot;
+  }
+}</code></pre>
+<p>---</p>
+<h2>8. Introduce the physical drift</h2>
+<p>Create &#96;r+&#96; by changing **one private executable mapping only**.</p>
+<p>Use an opaque token:</p>
+<pre><code>START → X7</code></pre>
+<p>Do not use a semantically guessable replacement such as &#96;IGNITE&#96;.</p>
+<p>Keep all of the following unchanged:</p>
+<pre><code>user intent
+function name
+parameter name
+brake precondition
+door precondition
+fuel precondition
+desired final state</code></pre>
+<p>Only change the &#96;start_engine&#96; private token.</p>
+<p>---</p>
+<h2>9. Define regime &#96;r+&#96;</h2>
+<p>Create:</p>
+<pre><code>regime_r_plus.json</code></pre>
+<p>Example:</p>
+<pre><code>{
+  &quot;regime&quot;: &quot;r_plus&quot;,
+  &quot;source_task&quot;: &quot;BFCL_v4 multi_turn_base_95&quot;,
+  &quot;semantic_goal&quot;: &quot;start_engine&quot;,
+  &quot;private_mapping&quot;: {
+    &quot;start_engine&quot;: &quot;X7&quot;
+  },
+  &quot;drift&quot;: {
+    &quot;operator&quot;: &quot;enum_remap&quot;,
+    &quot;schedule&quot;: &quot;abrupt&quot;,
+    &quot;changes&quot;: [
+      {
+        &quot;semantic_intent&quot;: &quot;start_engine&quot;,
+        &quot;old_token&quot;: &quot;START&quot;,
+        &quot;new_token&quot;: &quot;X7&quot;
+      }
+    ]
+  },
+  &quot;final_state&quot;: {
+    &quot;engineState&quot;: &quot;running&quot;
+  }
+}</code></pre>
+<p>The executable &#96;r+&#96; backend should use:</p>
+<pre><code>if ignitionMode == &quot;X7&quot;:
+    self.engine_state = &quot;running&quot;</code></pre>
+<p>and reject:</p>
+<pre><code>startEngine(ignitionMode=&quot;START&quot;)</code></pre>
+<p>as invalid.</p>
+<p>---</p>
+<h2>10. Keep the old skill stale after drift</h2>
+<p>After the environment changes to &#96;r+&#96;, the learner should initially still possess:</p>
+<pre><code>skill_r_minus.md</code></pre>
+<p>which says:</p>
+<pre><code>start_engine → START</code></pre>
+<p>Thus:</p>
+<pre><code>Environment = r+
+Persistent skill = S-</code></pre>
+<p>Expected stale behavior:</p>
+<pre><code>skill says START
+        ↓
+agent calls START
+        ↓
+r+ expects X7
+        ↓
+failure</code></pre>
+<p>Do not silently replace &#96;skill_r_minus.md&#96; with the new mapping.</p>
+<p>---</p>
+<h2>11. Create the D1 changelog</h2>
+<p>C1.2 is the declaration-only evidence setting.</p>
+<p>Create:</p>
+<pre><code>changelog_D1.md</code></pre>
+<p>Example:</p>
+<pre><code># VehicleControlAPI v2 Changelog
+
+Effective immediately:
+
+- The private ignition token for starting the engine has changed from
+  `START` to `X7`.
+
+All other engine-starting procedures and preconditions remain unchanged.</code></pre>
+<p>This is the **only source of new-regime information** in the minimal C1.2 pilot.</p>
+<p>Do not provide:</p>
+<pre><code>D2 demonstrations
+D3 probe outcomes
+rich environment error hints</code></pre>
+<p>---</p>
+<h2>12. Prevent accidental D3 leakage</h2>
+<p>If the learner calls:</p>
+<pre><code>startEngine(ignitionMode=&quot;START&quot;)</code></pre>
+<p>under &#96;r+&#96;, avoid returning an error such as:</p>
+<pre><code>&quot;START is invalid. Use X7.&quot;</code></pre>
+<p>That would create D3 evidence.</p>
+<p>Use only a generic result such as:</p>
+<pre><code>{
+  &quot;error&quot;: &quot;Invalid ignition mode.&quot;
+}</code></pre>
+<p>The learner should recover &#96;X7&#96; from the D1 changelog, not from environment feedback.</p>
+<p>---</p>
+<h2>13. Define the oracle skill &#96;S+&#96;</h2>
+<p>Create:</p>
+<pre><code>skill_r_plus_oracle.md</code></pre>
+<p>Use:</p>
+<pre><code># VehicleControlAPI Skill — Regime r+
+
+To start the vehicle engine:
+
+1. Fully press the brake pedal:
+   `pressBrakePedal(pedalPosition=1.0)`
+
+2. Start the engine using:
+   `startEngine(ignitionMode=&quot;X7&quot;)`</code></pre>
+<p>Do not expose this file to the learner.</p>
+<p>---</p>
+<h2>14. Define the &#96;r+&#96; gold behavior</h2>
+<p>Create:</p>
+<pre><code>gold_r_plus.json</code></pre>
+<p>Example:</p>
+<pre><code>{
+  &quot;id&quot;: &quot;C1.2_pilot_001&quot;,
+  &quot;ground_truth&quot;: [
+    &quot;pressBrakePedal(pedalPosition=1.0)&quot;,
+    &quot;startEngine(ignitionMode=&#x27;X7&#x27;)&quot;
+  ],
+  &quot;expected_final_state&quot;: {
+    &quot;engineState&quot;: &quot;running&quot;
+  }
+}</code></pre>
+<p>The important invariant is:</p>
+<pre><code>gold executable call changes
+semantic final state does not</code></pre>
+<p>---</p>
+<h2>15. Define the expected skill update</h2>
+<p>The learner receives:</p>
+<pre><code>S-
++
+D1 changelog</code></pre>
+<p>and should produce a targeted edit:</p>
+<pre><code>- startEngine(ignitionMode=&quot;START&quot;)
++ startEngine(ignitionMode=&quot;X7&quot;)</code></pre>
+<p>The brake-pedal procedure must remain unchanged.</p>
+<p>---</p>
+<h2>16. Define the core conditions</h2>
+<h3>A. Before drift</h3>
+<pre><code>Environment = r-
+Skill = S-
+
+START is correct
+→ PASS</code></pre>
+<h3>B. After drift with stale skill</h3>
+<pre><code>Environment = r+
+Skill = S-
+
+skill calls START
+environment expects X7
+→ FAIL</code></pre>
+<h3>C. After drift + D1 update</h3>
+<pre><code>Environment = r+
+Initial skill = S-
+Evidence = changelog_D1.md
+
+START → X7
+→ update skill
+→ PASS</code></pre>
+<h3>D. Oracle</h3>
+<pre><code>Environment = r+
+Skill = S+ oracle
+
+X7
+→ PASS</code></pre>
+<h3>E. No-skill control</h3>
+<pre><code>Environment = r+
+Skill = none</code></pre>
+<p>Because &#96;X7&#96; is opaque and hidden from prompt/schema, a no-skill agent should not reliably infer it.</p>
+<p>---</p>
+<h2>17. Expand from one task to siblings</h2>
+<p>After approval of the one-entry pilot, construct multiple sibling tasks sharing the same regime.</p>
+<p>Examples:</p>
+<pre><code>Start the engine before beginning navigation.
+Start the engine and then check tire pressure.
+Prepare the car and start the engine.</code></pre>
+<p>All depend on:</p>
+<pre><code>semantic obligation = start_engine</code></pre>
+<p>but should not repeat the D1 changelog.</p>
+<p>Each task should include:</p>
+<pre><code>{
+  &quot;id&quot;: &quot;C1.2-aff-001&quot;,
+  &quot;semantic_goal&quot;: &quot;start_engine&quot;,
+  &quot;obligation_support&quot;: [&quot;start_engine&quot;],
+  &quot;slice&quot;: &quot;affected&quot;
+}</code></pre>
+<p>---</p>
+<h2>18. Add unchanged-retention siblings</h2>
+<p>Once more enum obligations are included, create tasks that use unaffected mappings.</p>
+<p>These test collateral damage.</p>
+<p>The updated skill should preserve unaffected mappings exactly.</p>
+<p>---</p>
+<h2>19. Add boundary/open-set siblings</h2>
+<p>Create semantic requests for unsupported device states.</p>
+<p>Correct behavior should be:</p>
+<pre><code>unsupported / abstain</code></pre>
+<p>rather than guessing a private token.</p>
+<p>---</p>
+<h2>20. Add matched-null siblings</h2>
+<p>Change surface wording while keeping semantic obligation identical.</p>
+<p>Example:</p>
+<pre><code>&quot;Please start the engine.&quot;</code></pre>
+<p>versus:</p>
+<pre><code>&quot;Get the engine running.&quot;</code></pre>
+<p>No persistent skill update should occur merely because wording changes.</p>
+<p>---</p>
+<h2>21. Scale to the full C1.2 physical event</h2>
+<p>The full C1.2 design should eventually include:</p>
+<pre><code>approximately 25% enum remapping
++
+one deprecated old enum</code></pre>
+<p>To scale:</p>
+<ol>
+<li>enumerate 8–12 executable semantic enum obligations from BFCL;</li>
+<li>select approximately 25% to change;</li>
+<li>remap them to opaque tokens;</li>
+<li>explicitly retire one old token;</li>
+<li>keep all semantic outcomes fixed;</li>
+<li>generate paired &#96;r-&#96; and &#96;r+&#96; gold calls automatically.</li>
+</ol>
+<p>C1.2 should remain:</p>
+<pre><code>D1 = 100%
+D2 = 0%
+D3 = 0%</code></pre>
+<p>The changelog must completely identify the changed mappings.</p>
+<p>---</p>
+<h2>22. Generate paired regime files automatically</h2>
+<p>Once multiple obligations exist, use a generator such as:</p>
+<pre><code>generate_c1_2.py</code></pre>
+<p>Inputs:</p>
+<pre><code>enum_inventory.json
+drift_spec.json
+source sibling templates</code></pre>
+<p>Outputs:</p>
+<pre><code>regime_r_minus.json
+regime_r_plus.json
+skill_r_minus.md
+skill_r_plus_oracle.md
+gold_r_minus.jsonl
+gold_r_plus.jsonl
+changelog_D1.md
+siblings.jsonl</code></pre>
+<p>Do not hand-edit multiple gold files independently.</p>
+<p>---</p>
+<h2>23. Validation checks</h2>
+<h3>Oracle correctness</h3>
+<p>&#96;S+&#96; should solve the &#96;r+&#96; affected siblings.</p>
+<h3>Stale-skill gap</h3>
+<p>&#96;S-&#96; should fail or incur invalid actions on &#96;r+&#96; affected siblings.</p>
+<h3>Need gap</h3>
+<p>The no-skill condition should perform materially worse than &#96;S+&#96;.</p>
+<h3>Entry recovery</h3>
+<p>After reading the changelog, the learner should recover all changed enum rows.</p>
+<h3>Invalid-action rate</h3>
+<p>Track calls using stale/invalid enum values.</p>
+<h3>Collateral damage</h3>
+<p>Unchanged mappings should remain correct after update.</p>
+<h3>Open-set behavior</h3>
+<p>Unsupported semantic intents should not cause invented private tokens.</p>
+<p>---</p>
+<h2>24. Do not claim empirical metrics before execution</h2>
+<p>Before running the actual benchmark, leave these unset:</p>
+<pre><code>RR
+IAR
+CD
+stale damage
+identification budget
+recovery latency</code></pre>
+<p>You may define how they will be measured, but do not invent numeric values.</p>
+<p>---</p>
+<h2>25. Recommended final package</h2>
+<pre><code>drift_benchmark/
+└── C1.2/
+    └── device_enum/
+        ├── README.md
+        ├── source_task.json
+        ├── function_doc.json
+        ├── regime_r_minus.json
+        ├── regime_r_plus.json
+        ├── skill_r_minus.md
+        ├── skill_r_plus_oracle.md
+        ├── changelog_D1.md
+        ├── gold_r_minus.json
+        └── gold_r_plus.json</code></pre>
+<p>After scaling:</p>
+<pre><code>drift_benchmark/
+└── C1.2/
+    └── device_enum/
+        ├── enum_inventory.json
+        ├── drift_spec.json
+        ├── generate_c1_2.py
+        ├── regime_r_minus.json
+        ├── regime_r_plus.json
+        ├── skill_r_minus.md
+        ├── skill_r_plus_oracle.md
+        ├── changelog_D1.md
+        ├── siblings.jsonl
+        ├── gold_r_minus.jsonl
+        ├── gold_r_plus.jsonl
+        └── validation/</code></pre>
+<p>---</p>
+<h2>26. Minimal conceptual summary</h2>
+<pre><code>                 same semantic task
+                         |
+                         v
+
+                     start engine
+
+
+r-                                         r+
+private token                              private token
+
+START                 abrupt drift         X7
+  |                                         |
+  v                                         v
+engine running                            engine running
+
+
+persistent skill before drift:
+
+start_engine → START
+        |
+        v
+
+after drift:
+skill is stale
+START → invalid
+
+
+D1 changelog:
+
+&quot;START changed to X7&quot;
+        |
+        v
+
+targeted skill update:
+
+start_engine → X7
+        |
+        v
+
+r+ success</code></pre>
+<p>---</p>
+<h2>27. Agent completion checklist</h2>
+<p>An agent rebuilding C1.2 should finish only when all of the following are true:</p>
+<ul>
+<li>[ ] one BFCL enum-bearing source task has been selected;</li>
+<li>[ ] user wording contains semantic intent only;</li>
+<li>[ ] learner-visible tool docs hide current private enum values;</li>
+<li>[ ] &#96;r-&#96; executable mapping is defined;</li>
+<li>[ ] &#96;skill_r_minus.md&#96; correctly solves &#96;r-&#96;;</li>
+<li>[ ] &#96;r+&#96; changes only the intended private mapping;</li>
+<li>[ ] final semantic state is identical across regimes;</li>
+<li>[ ] stale &#96;S-&#96; is retained after drift;</li>
+<li>[ ] a complete D1 changelog identifies the new mapping;</li>
+<li>[ ] no D2 evidence is provided;</li>
+<li>[ ] no D3 evidence leaks the replacement;</li>
+<li>[ ] &#96;skill_r_plus_oracle.md&#96; is created but hidden from the learner;</li>
+<li>[ ] paired gold calls are defined;</li>
+<li>[ ] the expected update is a local enum-table patch;</li>
+<li>[ ] no empirical metrics are fabricated before execution.</li>
+</ul>

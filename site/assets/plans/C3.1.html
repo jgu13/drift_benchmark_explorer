@@ -1,0 +1,556 @@
+<h1>C3.1 — BFCL CLI-Semantics Drift: Execution Plan</h1>
+<h2>0. Goal and roster contract</h2>
+<p>Build an executable BFCL-derived **C3.1** family for CLI semantics.</p>
+<p>**Roster contract**</p>
+<ul>
+<li>Family: &#96;CLI semantics&#96;</li>
+<li>Origin: BFCL v4 pattern</li>
+<li>Skill store: versioned command grammar, flag semantics, compatibility constraints, recipes</li>
+<li>Application recipe: select current command form, execute, verify output before reuse</li>
+<li>Drift: &#96;flag_remap + deprecate + shortcut_add&#96;</li>
+<li>Topology: replacement / retirement / improvement</li>
+<li>Schedule: abrupt</li>
+<li>Changed-mass target: **two flags plus one new shortcut**</li>
+<li>Invariant: target output remains fixed; command route/cost may change</li>
+<li>Stale failure:</li>
+<li>old recipe may fail;</li>
+<li>repaired conservative recipe may remain correct but suboptimal</li>
+<li>Evidence:</li>
+<li>D1 = 50% changelog</li>
+<li>D2 = 0%</li>
+<li>D3 = 50% help text + probes</li>
+<li>Required update: repair tool model and recipes; promote only after output/cost validation</li>
+<li>Validation: IAR, output correctness, RR/CRR, probes, BE</li>
+<li>Readouts: IAR, RR, CRR, &#96;d*&#96;, BE</li>
+</ul>
+<p>BFCL&#x27;s &#96;GorillaFileSystem&#96; already provides command-like operations (&#96;find&#96;, &#96;cp&#96;, &#96;mv&#96;, &#96;cat&#96;, &#96;wc&#96;, etc.). However, native BFCL exposes them as structured Python-style functions rather than a true command grammar. To make C3.1 genuinely about **CLI flag semantics**, create a thin BFCL-compatible CLI adapter over &#96;GorillaFileSystem&#96;.</p>
+<p>---</p>
+<h2>1. Select the BFCL source tasks</h2>
+<p>Use file-system tasks such as:</p>
+<pre><code>multi_turn_base_19</code></pre>
+<p>which asks the agent to:</p>
+<ol>
+<li>find &#96;test_document.txt&#96;;</li>
+<li>copy it to an archives folder and rename it;</li>
+<li>read the renamed file.</li>
+</ol>
+<p>Also use tasks such as:</p>
+<pre><code>multi_turn_base_25</code></pre>
+<p>which exercise:</p>
+<pre><code>find
+cp
+sort
+wc</code></pre>
+<p>These are useful because the final filesystem/output semantics can be kept fixed while CLI syntax and route cost drift.</p>
+<p>Create:</p>
+<pre><code>git switch -c drift-c3-1
+mkdir -p drift_benchmark/C3.1/cli_semantics</code></pre>
+<p>---</p>
+<h2>2. Keep &#96;GorillaFileSystem&#96; as the execution backend</h2>
+<p>Do not reimplement filesystem semantics.</p>
+<p>Reuse:</p>
+<pre><code>bfcl_eval/eval_checker/multi_turn_eval/func_source_code/gorilla_file_system.py</code></pre>
+<p>as the underlying stateful filesystem.</p>
+<p>The new CLI layer should translate a command string into calls on this existing backend.</p>
+<p>This preserves BFCL state transitions and evaluation behavior.</p>
+<p>---</p>
+<h2>3. Add a new BFCL backend class: &#96;GorillaCLI&#96;</h2>
+<p>Create:</p>
+<pre><code>bfcl_eval/eval_checker/multi_turn_eval/func_source_code/gorilla_cli.py</code></pre>
+<p>Expose one primary function:</p>
+<pre><code>run(command: str) -&gt; dict</code></pre>
+<p>Internally:</p>
+<ol>
+<li>tokenize the command string;</li>
+<li>parse it according to the active CLI regime;</li>
+<li>translate it into one or more &#96;GorillaFileSystem&#96; operations;</li>
+<li>execute them;</li>
+<li>return stdout/error/exit-code metadata.</li>
+</ol>
+<p>Suggested response:</p>
+<pre><code>{
+  &quot;stdout&quot;: &quot;...&quot;,
+  &quot;stderr&quot;: &quot;&quot;,
+  &quot;exit_code&quot;: 0,
+  &quot;operations&quot;: 1
+}</code></pre>
+<p>Do not expose the full private grammar in the standard function schema.</p>
+<p>---</p>
+<h2>4. Add a tool document for the adapter</h2>
+<p>Create:</p>
+<pre><code>bfcl_eval/data/multi_turn_func_doc/gorilla_cli.json</code></pre>
+<p>Minimal schema:</p>
+<pre><code>{
+  &quot;name&quot;: &quot;run&quot;,
+  &quot;description&quot;: &quot;Execute one command under the current private filesystem CLI grammar.&quot;,
+  &quot;parameters&quot;: {
+    &quot;type&quot;: &quot;dict&quot;,
+    &quot;properties&quot;: {
+      &quot;command&quot;: {
+        &quot;type&quot;: &quot;string&quot;,
+        &quot;description&quot;: &quot;A command string using the current CLI version.&quot;
+      }
+    },
+    &quot;required&quot;: [&quot;command&quot;]
+  }
+}</code></pre>
+<p>Also expose a metered help/probe action, either as:</p>
+<pre><code>help(topic)</code></pre>
+<p>or through:</p>
+<pre><code>run(&quot;help find&quot;)</code></pre>
+<p>The exact current flags must not be leaked in the normal tool schema.</p>
+<p>---</p>
+<h2>5. Register &#96;GorillaCLI&#96; in BFCL</h2>
+<p>Extend:</p>
+<pre><code>bfcl_eval/constants/executable_backend_config.py</code></pre>
+<p>with a mapping for:</p>
+<pre><code>GorillaCLI</code></pre>
+<p>to:</p>
+<pre><code>gorilla_cli.json
+gorilla_cli.py</code></pre>
+<p>Keep the change isolated and backwards compatible.</p>
+<p>---</p>
+<h2>6. Define the &#96;r-&#96; command grammar</h2>
+<p>Create:</p>
+<pre><code>grammar_r_minus.json</code></pre>
+<p>Use a small grammar sufficient for the selected tasks.</p>
+<p>Example:</p>
+<pre><code>find --path &lt;directory&gt; --name &lt;name&gt;
+cat &lt;file&gt;
+cp &lt;source&gt; &lt;destination&gt;
+mv &lt;source&gt; &lt;destination&gt;
+wc -l &lt;file&gt;
+sort &lt;file&gt;</code></pre>
+<p>For &#96;multi_turn_base_19&#96;, the baseline route may be:</p>
+<pre><code>find --path . --name test_document.txt
+cp test_document.txt archives
+cd archives
+mv test_document.txt final_document.txt
+cat final_document.txt</code></pre>
+<p>You may instead keep BFCL&#x27;s current-directory restrictions and model &#96;cd&#96; explicitly.</p>
+<p>Define operation cost as the number of underlying filesystem operations, not merely the number of high-level tool calls.</p>
+<p>---</p>
+<h2>7. Define the exact C3.1 physical drift</h2>
+<p>The roster calls for:</p>
+<pre><code>two flags plus one new shortcut</code></pre>
+<p>Use:</p>
+<h3>Flag remap</h3>
+<pre><code>find --path &lt;dir&gt;</code></pre>
+<p>becomes:</p>
+<pre><code>find --root &lt;dir&gt;</code></pre>
+<p>Old &#96;--path&#96; is invalid in &#96;r+&#96;.</p>
+<h3>Flag deprecation</h3>
+<pre><code>wc -l &lt;file&gt;</code></pre>
+<p>is retired.</p>
+<p>The new valid form is:</p>
+<pre><code>wc --lines &lt;file&gt;</code></pre>
+<p>&#96;-l&#96; must return a deprecation/invalid-option error in &#96;r+&#96;.</p>
+<h3>Shortcut addition</h3>
+<p>Add a new command:</p>
+<pre><code>copy-as &lt;source&gt; --to &lt;directory&gt; --name &lt;new_name&gt;</code></pre>
+<p>This performs the same semantic operation as:</p>
+<pre><code>cp + cd/mv</code></pre>
+<p>but at lower cost.</p>
+<p>Example:</p>
+<pre><code>copy-as test_document.txt --to archives --name final_document.txt</code></pre>
+<p>The final filesystem state is identical to the old multi-command route.</p>
+<p>Create:</p>
+<pre><code>drift_spec.json</code></pre>
+<p>with:</p>
+<pre><code>{
+  &quot;operator&quot;: [&quot;flag_remap&quot;, &quot;deprecate&quot;, &quot;shortcut_add&quot;],
+  &quot;schedule&quot;: &quot;abrupt&quot;,
+  &quot;changes&quot;: [
+    {
+      &quot;command&quot;: &quot;find&quot;,
+      &quot;old_flag&quot;: &quot;--path&quot;,
+      &quot;new_flag&quot;: &quot;--root&quot;,
+      &quot;type&quot;: &quot;remap&quot;
+    },
+    {
+      &quot;command&quot;: &quot;wc&quot;,
+      &quot;old_flag&quot;: &quot;-l&quot;,
+      &quot;new_flag&quot;: &quot;--lines&quot;,
+      &quot;type&quot;: &quot;deprecate&quot;
+    },
+    {
+      &quot;command&quot;: &quot;copy-as&quot;,
+      &quot;type&quot;: &quot;shortcut_add&quot;,
+      &quot;replaces_route&quot;: [&quot;cp&quot;, &quot;mv&quot;]
+    }
+  ]
+}</code></pre>
+<p>---</p>
+<h2>8. Implement the &#96;r-&#96; parser</h2>
+<p>Create:</p>
+<pre><code>gorilla_cli_r_minus.py</code></pre>
+<p>Supported examples:</p>
+<pre><code>find --path . --name test_document.txt
+wc -l summary.txt
+cp source destination
+mv source destination
+cat file
+sort file</code></pre>
+<p>Translate into existing BFCL filesystem methods.</p>
+<p>Example:</p>
+<pre><code>find --path . --name x</code></pre>
+<p>maps to:</p>
+<pre><code>filesystem.find(path=&quot;.&quot;, name=&quot;x&quot;)</code></pre>
+<p>---</p>
+<h2>9. Implement the &#96;r+&#96; parser</h2>
+<p>Create:</p>
+<pre><code>gorilla_cli_r_plus.py</code></pre>
+<p>Rules:</p>
+<pre><code>--path    → error
+--root    → valid
+
+-l        → deprecated/error
+--lines   → valid
+
+copy-as   → valid and lower-cost</code></pre>
+<p>Implement &#96;copy-as&#96; by executing the underlying &#96;cp&#96; and &#96;mv&#96;/rename logic internally, but charge it as a deliberately cheaper route according to the benchmark cost model.</p>
+<p>Keep the final filesystem state exactly equivalent.</p>
+<p>---</p>
+<h2>10. Define the cost model explicitly</h2>
+<p>Because C3.1 includes an improvement operator, the cost model must distinguish:</p>
+<pre><code>old correct route
+new shortcut route</code></pre>
+<p>Recommended cost:</p>
+<pre><code>each underlying primitive filesystem operation = 1
+help query = 1
+invalid probe = 1
+copy-as shortcut = 1</code></pre>
+<p>Thus:</p>
+<pre><code>r- copy + rename:
+cp + mv = 2
+
+r+ copy-as:
+copy-as = 1</code></pre>
+<p>Record both:</p>
+<pre><code>semantic correctness
+execution cost</code></pre>
+<p>Never score only the number of LLM tool-call messages if the wrapper expands one command internally.</p>
+<p>---</p>
+<h2>11. Hide current grammar from ordinary task prompts</h2>
+<p>Convert BFCL source prompts to semantic instructions.</p>
+<p>For example:</p>
+<pre><code>&quot;Find test_document.txt, copy it into archives as final_document.txt,
+then show me its contents.&quot;</code></pre>
+<p>Do not write:</p>
+<pre><code>--path
+--root
+-l
+--lines
+copy-as</code></pre>
+<p>in the user request.</p>
+<p>The persistent skill stores the CLI grammar.</p>
+<p>---</p>
+<h2>12. Create stale and oracle CLI skills</h2>
+<p>Create:</p>
+<pre><code>skill_r_minus.md
+skill_r_plus_oracle.md</code></pre>
+<p>&#96;skill_r_minus.md&#96;:</p>
+<pre><code># Gorilla CLI Skill — r-
+
+## Find
+`find --path &lt;directory&gt; --name &lt;name&gt;`
+
+## Count lines
+`wc -l &lt;file&gt;`
+
+## Copy and rename
+1. `cp &lt;source&gt; &lt;destination&gt;`
+2. rename/move the copied file with `mv`</code></pre>
+<p>&#96;skill_r_plus_oracle.md&#96;:</p>
+<pre><code># Gorilla CLI Skill — r+
+
+## Find
+`find --root &lt;directory&gt; --name &lt;name&gt;`
+
+## Count lines
+`wc --lines &lt;file&gt;`
+
+## Copy and rename
+Preferred:
+`copy-as &lt;source&gt; --to &lt;directory&gt; --name &lt;new_name&gt;`
+
+Fallback:
+use compatible primitive commands only if the shortcut is unavailable.</code></pre>
+<p>Do not give the oracle skill to the learner.</p>
+<p>---</p>
+<h2>13. Build C3.1 D1 changelog evidence</h2>
+<p>D1 carries 50% of identification weight.</p>
+<p>Create:</p>
+<pre><code>evidence/d1_changelog.md</code></pre>
+<p>The changelog should **localize the affected commands** but should not provide all exact replacement semantics.</p>
+<p>Example:</p>
+<pre><code># Gorilla CLI v2 Migration Notice
+
+The following command interfaces changed:
+
+- The directory-selection option for `find` has been renamed.
+- The short line-count option for `wc` has been retired.
+- A new optimized copy-and-rename operation is available.
+
+Use current command help to determine the exact replacement syntax and
+validate behavior before updating persistent command recipes.</code></pre>
+<p>This identifies:</p>
+<pre><code>find
+wc
+copy/rename workflow</code></pre>
+<p>but does not tell the learner:</p>
+<pre><code>--root
+--lines
+copy-as syntax</code></pre>
+<p>That leaves meaningful D3 obligations.</p>
+<p>---</p>
+<h2>14. Build C3.1 D3 help and probe evidence</h2>
+<p>D3 carries the remaining 50%.</p>
+<p>Implement metered help:</p>
+<pre><code>help find
+help wc
+help copy-as</code></pre>
+<p>Example response:</p>
+<pre><code>find:
+  --root &lt;directory&gt;
+  --name &lt;name&gt;</code></pre>
+<p>Example:</p>
+<pre><code>wc:
+  --lines &lt;file&gt;</code></pre>
+<p>Example:</p>
+<pre><code>copy-as:
+  copy-as &lt;source&gt; --to &lt;directory&gt; --name &lt;new_name&gt;
+  estimated primitive cost: 1</code></pre>
+<p>Also allow execution probes.</p>
+<p>Probe stale syntax:</p>
+<pre><code>find --path . --name test_document.txt</code></pre>
+<p>returns:</p>
+<pre><code>error: unknown option --path</code></pre>
+<p>Probe:</p>
+<pre><code>wc -l summary.txt</code></pre>
+<p>returns:</p>
+<pre><code>error: option -l is deprecated</code></pre>
+<p>The learner should validate the new syntax before storing it.</p>
+<p>---</p>
+<h2>15. Define evidence obligations</h2>
+<p>Create:</p>
+<pre><code>evidence_allocation.json</code></pre>
+<p>Example obligations:</p>
+<pre><code>O1: identify that find syntax changed
+O2: identify exact replacement flag --root
+O3: identify that wc -l is retired
+O4: identify exact replacement --lines
+O5: identify existence of copy/rename shortcut
+O6: identify exact copy-as syntax
+O7: determine shortcut cost advantage</code></pre>
+<p>Assign:</p>
+<pre><code>D1:
+O1, O3, O5
+
+D3:
+O2, O4, O6, O7</code></pre>
+<p>This gives a natural 50/50 split.</p>
+<p>---</p>
+<h2>16. Build BFCL sibling tasks</h2>
+<p>Create:</p>
+<pre><code>siblings.json</code></pre>
+<p>Use modified siblings based on BFCL file-system tasks.</p>
+<h3>Affected example — flag remap</h3>
+<p>Semantic request:</p>
+<pre><code>Find config.py anywhere under the current project.</code></pre>
+<p>Requires current &#96;find&#96; grammar.</p>
+<h3>Affected example — deprecation</h3>
+<p>Semantic request:</p>
+<pre><code>Count the lines in summary.txt.</code></pre>
+<p>Requires current &#96;wc&#96; grammar.</p>
+<h3>Affected example — shortcut</h3>
+<p>Semantic request:</p>
+<pre><code>Copy test_document.txt to archives and rename the copy
+final_document.txt.</code></pre>
+<p>Both old and new routes can be semantically correct, but the new route is cheaper.</p>
+<h3>Unchanged-retention</h3>
+<p>Examples using:</p>
+<pre><code>cat
+sort
+grep</code></pre>
+<p>whose grammar is unchanged.</p>
+<h3>Boundary/open-set</h3>
+<p>Unsupported option or unsupported command request.</p>
+<p>The learner should use help/abstain rather than invent syntax.</p>
+<h3>Matched null</h3>
+<p>Change filenames/content while keeping grammar and route unchanged.</p>
+<p>---</p>
+<h2>17. Compile paired gold behavior</h2>
+<p>Create:</p>
+<pre><code>possible_answer_r_minus.json
+possible_answer_r_plus.json</code></pre>
+<p>For output-correctness tasks, semantic gold remains fixed.</p>
+<p>Example:</p>
+<pre><code>same final file:
+archives/final_document.txt
+
+same content:
+original test_document content</code></pre>
+<p>But command gold changes.</p>
+<p>&#96;r-&#96;:</p>
+<pre><code>find --path ...
+cp ...
+mv ...
+cat ...</code></pre>
+<p>&#96;r+&#96; oracle:</p>
+<pre><code>find --root ...
+copy-as ...
+cat ...</code></pre>
+<p>For line counts:</p>
+<p>&#96;r-&#96;:</p>
+<pre><code>wc -l summary.txt</code></pre>
+<p>&#96;r+&#96;:</p>
+<pre><code>wc --lines summary.txt</code></pre>
+<p>---</p>
+<h2>18. Define the intended skill update</h2>
+<p>Expected patch:</p>
+<pre><code>- find --path &lt;dir&gt; --name &lt;name&gt;
++ find --root &lt;dir&gt; --name &lt;name&gt;
+
+- wc -l &lt;file&gt;
++ wc --lines &lt;file&gt;
++ tombstone: wc -l
+
++ preferred copy+rename:
++ copy-as &lt;source&gt; --to &lt;dir&gt; --name &lt;new_name&gt;</code></pre>
+<p>The updater should not modify unchanged commands.</p>
+<p>---</p>
+<h2>19. Validate output before promoting a new recipe</h2>
+<p>For each candidate new recipe:</p>
+<ol>
+<li>execute it in &#96;r+&#96;;</li>
+<li>verify the final filesystem/output;</li>
+<li>measure cost;</li>
+<li>only then write it into persistent skill.</li>
+</ol>
+<p>This directly implements the roster requirement:</p>
+<pre><code>repair tool model and recipes,
+then promote only after output and cost validation</code></pre>
+<p>---</p>
+<h2>20. Run the required controls</h2>
+<h3>A. No skill</h3>
+<p>Must rediscover grammar.</p>
+<h3>B. Oracle &#96;S+&#96;</h3>
+<p>Current syntax and optimal routes.</p>
+<h3>C. Stale &#96;S-&#96;</h3>
+<p>Expected:</p>
+<ul>
+<li>invalid &#96;--path&#96;;</li>
+<li>invalid/deprecated &#96;-l&#96;;</li>
+<li>correct but slower copy+rename primitive route.</li>
+</ul>
+<h3>D. Stale &#96;S-&#96; + D1 + D3 + updater</h3>
+<p>Target condition.</p>
+<h3>Ablations</h3>
+<p>Also run:</p>
+<pre><code>D1 only
+D3 only
+D1 + D3</code></pre>
+<p>because the setting is a mixed evidence construction.</p>
+<p>---</p>
+<h2>21. Metrics</h2>
+<h3>IAR</h3>
+<p>Invalid command/flag actions divided by executable attempts.</p>
+<h3>RR</h3>
+<p>Correctness recovery for syntax changes that otherwise cause failure.</p>
+<h3>CRR</h3>
+<p>Cost recovery for the new shortcut at matched final output.</p>
+<h3>&#96;d*&#96;</h3>
+<p>Minimum help/probe budget needed to identify current grammar sufficiently.</p>
+<h3>BE</h3>
+<p>Break-even horizon:</p>
+<pre><code>future saved command cost
+&gt;
+one-time discovery/update cost</code></pre>
+<p>Do not claim BE until repeated post-drift siblings exist.</p>
+<p>---</p>
+<h2>22. Scale toward roster task counts</h2>
+<p>Start with approximately:</p>
+<pre><code>18–24 tasks</code></pre>
+<p>then scale toward:</p>
+<pre><code>60 total
+24 affected
+18 unchanged-retention
+12 boundary/open-set
+6 matched-null</code></pre>
+<p>Ensure at least two decisive siblings per changed obligation before scaling further.</p>
+<p>---</p>
+<h2>23. Acceptance checklist</h2>
+<ul>
+<li>[ ] underlying filesystem semantics are still BFCL &#96;GorillaFileSystem&#96;;</li>
+<li>[ ] CLI adapter is executable and stateful;</li>
+<li>[ ] user prompts state semantic goals, not current flags;</li>
+<li>[ ] normal function docs do not leak the private grammar;</li>
+<li>[ ] exactly two flag changes are implemented;</li>
+<li>[ ] one old flag is explicitly deprecated;</li>
+<li>[ ] one semantically equivalent faster command is added;</li>
+<li>[ ] final output/filesystem state remains invariant;</li>
+<li>[ ] D1 localizes changed commands but leaves exact syntax unresolved;</li>
+<li>[ ] D3 help/probes reveal exact syntax and cost;</li>
+<li>[ ] D2 is withheld;</li>
+<li>[ ] stale skill exhibits both failure and suboptimal-but-correct cases;</li>
+<li>[ ] candidate updates are execution-validated before storage;</li>
+<li>[ ] unchanged commands show negligible collateral edits.</li>
+</ul>
+<p>---</p>
+<h2>24. Expected output package</h2>
+<pre><code>drift_benchmark/C3.1/cli_semantics/
+├── README.md
+├── drift_spec.json
+├── grammar_r_minus.json
+├── grammar_r_plus.json
+├── gorilla_cli_r_minus.py
+├── gorilla_cli_r_plus.py
+├── gorilla_cli.json
+├── skill_r_minus.md
+├── skill_r_plus_oracle.md
+├── siblings.json
+├── possible_answer_r_minus.json
+├── possible_answer_r_plus.json
+├── siblings.json
+├── evidence/
+│   ├── d1_changelog.md
+│   ├── d3_help.jsonl
+│   ├── d3_probe_log.jsonl
+│   └── evidence_allocation.json
+└── validation/
+    ├── cli_replay.py
+    ├── output_checks.py
+    └── construction_report.json</code></pre>
+<h2>Minimal conceptual summary</h2>
+<pre><code>r- CLI grammar
+
+find --path ...
+wc -l ...
+cp ... + mv ...
+
+
+             abrupt drift
+
+
+r+ CLI grammar
+
+find --root ...        # remapped flag
+wc --lines ...         # -l retired
+copy-as ...            # new fast path
+
+
+Evidence
+
+D1 50%:
+&quot;find changed&quot;
+&quot;wc short flag retired&quot;
+&quot;new copy/rename command exists&quot;
+
+D3 50%:
+help/probes reveal --root, --lines,
+copy-as syntax and cost
+
+             |
+             v
+      validated skill update</code></pre>

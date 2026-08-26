@@ -1,0 +1,5 @@
+{"regime":"r+","probe":"find --path . --name test_document.txt","response":{"stdout":"","stderr":"error: unknown option --path","exit_code":1,"operations":1},"obligations":["O1","O2"]}
+{"regime":"r+","probe":"find --root . --name test_document.txt","response":{"stdout":"./test_document.txt","stderr":"","exit_code":0,"operations":1},"obligations":["O2"]}
+{"regime":"r+","probe":"wc -l summary.txt","response":{"stdout":"","stderr":"error: option -l is deprecated","exit_code":1,"operations":1},"obligations":["O3","O4"]}
+{"regime":"r+","probe":"wc --lines summary.txt","response":{"stdout":"1 lines","stderr":"","exit_code":0,"operations":1},"obligations":["O4"]}
+{"regime":"r+","probe":"copy-as test_document.txt --to archives --name final_document.txt","response":{"stdout":"'test_document.txt' copied to 'archives/final_document.txt'","stderr":"","exit_code":0,"operations":1},"obligations":["O6","O7"]}

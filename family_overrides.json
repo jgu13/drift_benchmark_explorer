@@ -1,0 +1,158 @@
+{
+  "C1.1": {
+    "title": "Device Enum",
+    "platform": "BFCL",
+    "mechanism": "Executable private enum remapping",
+    "status_label": "Constructed",
+    "drift_summary": "Selected private device enum values are remapped or deprecated while semantic user intent remains fixed.",
+    "paired_family": null,
+    "evidence_delivery": {
+      "D2": "Successful post-drift transcripts are supplied as demonstration evidence during adaptation.",
+      "D3": "The agent uses safe probes and observes current environment responses to complete executable enum coverage."
+    },
+    "task_descriptions": {
+      "affected": "Private enum token mappings change while the user-facing vehicle-control intent remains fixed.",
+      "unchanged-retention": "Unchanged enum behavior should be retained without unnecessary skill edits.",
+      "boundary-open-set": "The task probes unsupported or open-set device requests without inventing enum mappings.",
+      "matched-null": "Surface wording changes without requiring a persistent enum or recipe update."
+    }
+  },
+  "C1.2": {
+    "title": "Device Enum Changelog",
+    "platform": "BFCL",
+    "mechanism": "Declared private enum migration",
+    "status_label": "Pilot constructed",
+    "drift_summary": "The private ignition token for engine start changes from START to X7 while engine-start semantics remain fixed.",
+    "evidence_delivery": {
+      "D1": "The agent receives the stale skill plus an explicit changelog before adaptation. The changelog declares that the private start-engine token changed from START to X7."
+    },
+    "family_notes": [
+      "C1.2 is D1 100% because it models a declared interface migration.",
+      "During adaptation: stale skill plus changelog produces the updated skill.",
+      "The zero-shot and static controls do not receive this declaration."
+    ],
+    "task_descriptions": {
+      "unspecified": "Engine start must update the private ignition token from START to X7 using the explicit changelog."
+    }
+  },
+  "C2.1": {
+    "title": "Precondition Graph",
+    "platform": "BFCL",
+    "mechanism": "Executable precondition graph",
+    "status_label": "Constructed",
+    "drift_summary": "Engine-start prerequisites change by adding a parking-brake prerequisite and retiring the full-brake prerequisite.",
+    "paired_family": "C2.2",
+    "evidence_delivery": {
+      "D2": "Successful post-drift sibling trajectories are supplied during adaptation as positive evidence of valid action ordering.",
+      "D3": "The agent observes violations and counterexamples from the current environment, including evidence for newly required and retired prerequisites."
+    },
+    "task_descriptions": {
+      "affected-new-edge": "Engine start must recover the newly required parking-brake prerequisite.",
+      "propagated-affected": "The revised engine-start procedure must transfer to downstream cruise-control goals.",
+      "affected-retired-edge": "The stale skill retains a brake-pedal prerequisite that is no longer required.",
+      "affected-retired-edge-cost": "The stale skill retains a redundant brake-pedal action that now creates avoidable cost.",
+      "unchanged-retention": "Retained precondition edges should keep working without collateral recipe damage.",
+      "boundary-open-set": "Open-set vehicle requests should not trigger unsupported graph edits.",
+      "matched-null": "Null perturbations should not produce a persistent precondition-graph rewrite."
+    }
+  },
+  "C2.2": {
+    "title": "Precondition Graph Interaction",
+    "platform": "BFCL",
+    "mechanism": "D3-only precondition graph recovery",
+    "status_label": "Constructed",
+    "drift_summary": "The same precondition-graph change as C2.1 must be discovered through environment interaction alone.",
+    "paired_family": "C2.1",
+    "evidence_delivery": {
+      "D3": "The revised precondition graph is discovered from environment interaction alone; no declaration or successful demonstration channel is provided."
+    },
+    "task_descriptions": {
+      "affected-new-edge": "Engine start must discover the newly required parking-brake prerequisite from interaction.",
+      "propagated-affected": "Downstream cruise-control goals must inherit the recovered engine-start procedure.",
+      "affected-retired-edge": "The interaction evidence should reveal that the old brake-pedal prerequisite is retired.",
+      "affected-retired-edge-cost": "The interaction evidence should reveal redundant retired-edge actions and their avoidable cost.",
+      "unchanged-retention": "Retained graph edges should keep working while the changed engine-start edge is relearned.",
+      "boundary-open-set": "Open-set requests should be handled without inventing graph structure.",
+      "matched-null": "Null perturbations should not create a graph update."
+    }
+  },
+  "C3.1": {
+    "title": "CLI Semantics",
+    "platform": "BFCL",
+    "mechanism": "Executable CLI grammar and cost drift",
+    "status_label": "Constructed",
+    "drift_summary": "CLI command grammar changes through flag replacement/deprecation and a new lower-cost shortcut.",
+    "evidence_delivery": {
+      "D1": "A changelog localizes which CLI actions or flags have changed, without necessarily giving the exact replacement syntax.",
+      "D3": "Help output and safe command probes reveal executable replacement syntax and current command cost."
+    },
+    "task_descriptions": {
+      "affected-flag-remap": "A CLI flag is localized by D1 but the exact replacement syntax must be recovered.",
+      "affected-deprecation": "A retired CLI form must be replaced with the supported current syntax.",
+      "affected-shortcut-add": "A newly available lower-cost shortcut should be discovered and used when appropriate.",
+      "unchanged-retention": "Unchanged CLI recipes should continue to work without collateral edits.",
+      "boundary-open-set": "Unsupported CLI requests should be rejected or handled without hallucinated syntax.",
+      "matched-null": "Null filesystem changes should not cause a persistent CLI grammar update."
+    }
+  },
+  "D1.2": {
+    "title": "Repository Navigation",
+    "platform": "OSWorld design-level",
+    "mechanism": "Repository path relocation",
+    "status_label": "Design-level",
+    "drift_summary": "Semantic repository targets move or split across paths while the requested information remains unchanged.",
+    "evidence_delivery": {
+      "D3": "The agent recovers current repository locations and navigation structure through environment/navigation interaction rather than a declared relocation map."
+    },
+    "task_descriptions": {
+      "affected": "A semantic repository target moved or split and must be found through bounded navigation evidence.",
+      "unchanged-retention": "A repository target remains at the old path and should be retained.",
+      "boundary-open-set": "An absent repository target should be verified by bounded search rather than hallucinated.",
+      "matched-null": "A null repository variation should not trigger a path-map update."
+    }
+  },
+  "D2.1": {
+    "title": "Navigation Graph",
+    "platform": "OSWorld design-level",
+    "mechanism": "TravelHub navigation graph with D1 localization",
+    "status_label": "Design-level",
+    "drift_summary": "TravelHub hotel navigation changes by replacing an old route and adding a shortcut; D1 only localizes the stale navigation region.",
+    "paired_family": "D2.2",
+    "evidence_delivery": {
+      "D1": "The agent receives one TravelHub UI Update Notice during adaptation stating only that hotel-detail navigation has been reorganized and previously stored routes may be stale. D1 does NOT reveal the added intermediate state, the removed graph edge, the replacement route, or the Featured Deluxe shortcut.",
+      "D3": "The agent interacts with TravelHub to discover the removed stale route, the new intermediate navigation transition, the Featured Deluxe shortcut, and their consequences."
+    },
+    "family_notes": [
+      "D1 tells the agent only that hotel-detail navigation may be stale.",
+      "D3 is responsible for discovering the actual changed route, new intermediate state, and shortcut.",
+      "D2.1 and D2.2 use the same TravelHub r- to r+ physical change. D2.1 uses D1 to localize the stale region; D2.2 uses D3 to both localize and reconstruct it."
+    ],
+    "task_descriptions": {
+      "affected": "The TravelHub task depends on the changed hotel-detail route or Featured Deluxe shortcut.",
+      "unchanged-retention": "An unchanged downstream or unrelated TravelHub transition should be preserved.",
+      "boundary-open-set": "Open-set TravelHub requests should be clarified or rejected without hidden-route invention.",
+      "matched-null": "A cosmetic TravelHub change should not cause a persistent graph rewrite."
+    }
+  },
+  "D2.2": {
+    "title": "Navigation Graph",
+    "platform": "OSWorld design-level",
+    "mechanism": "TravelHub D3-only navigation graph recovery",
+    "status_label": "Design-level",
+    "drift_summary": "The same TravelHub navigation drift as D2.1 must be localized and reconstructed through interaction alone.",
+    "paired_family": "D2.1",
+    "evidence_delivery": {
+      "D3": "The same physical TravelHub drift is used as D2.1, but no update notice is provided. The agent must both localize the stale region and reconstruct the changed navigation graph through interaction alone."
+    },
+    "family_notes": [
+      "D2.1 and D2.2 use the same TravelHub r- to r+ physical change.",
+      "D2.2 withholds the localization notice, so D3 must both localize the stale region and reconstruct the graph change."
+    ],
+    "task_descriptions": {
+      "affected": "The TravelHub task depends on recovering the changed hotel-detail route or Featured Deluxe shortcut from D3 interaction.",
+      "unchanged-retention": "An unchanged downstream or unrelated TravelHub transition should be preserved.",
+      "boundary-open-set": "Open-set TravelHub requests should be clarified or rejected without hidden-route invention.",
+      "matched-null": "A cosmetic TravelHub change should not cause a persistent graph rewrite."
+    }
+  }
+}

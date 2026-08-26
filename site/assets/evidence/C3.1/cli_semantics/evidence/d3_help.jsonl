@@ -1,0 +1,3 @@
+{"regime":"r+","command":"help find","response":{"stdout":"find:\n  --root <directory>\n  --name <name>","stderr":"","exit_code":0,"operations":1},"obligations":["O2"]}
+{"regime":"r+","command":"help wc","response":{"stdout":"wc:\n  --lines <file>","stderr":"","exit_code":0,"operations":1},"obligations":["O4"]}
+{"regime":"r+","command":"help copy-as","response":{"stdout":"copy-as:\n  copy-as <source> --to <directory> --name <new_name>\n  estimated primitive cost: 1","stderr":"","exit_code":0,"operations":1},"obligations":["O6","O7"]}

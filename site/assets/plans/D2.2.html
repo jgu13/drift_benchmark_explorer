@@ -1,0 +1,339 @@
+<h1>D2.2 — Updated Design-Level Execution Plan (19 Siblings)</h1>
+<h2>Goal</h2>
+<p>Extend D2.2 into the **same 19-task pilot sibling family** used by D2.1.</p>
+<p>D2.2 keeps:</p>
+<ul>
+<li>source: OSWorld-V2 &#96;task_052&#96;</li>
+<li>skill family: navigation / menu-tree strategy</li>
+<li>drift: &#96;path_permute + shortcut_add&#96;</li>
+<li>topology: replacement + improvement</li>
+<li>schedule: abrupt</li>
+<li>semantic goals and graders unchanged</li>
+</ul>
+<p>Evidence is the only intended difference:</p>
+<pre><code>D1 = 0%
+D2 = 0%
+D3 = 100%</code></pre>
+<p>The learner must recover the current graph from environment interaction alone.</p>
+<p>---</p>
+<h2>1. Reuse the D2.1 family definition</h2>
+<p>The following should be shared or generated from the same source:</p>
+<pre><code>state_catalog.json
+regime_r_minus.json
+regime_r_plus.json
+regime_null.json
+siblings.jsonl
+sibling_summary.json
+grader_spec.json
+skill_r_minus.md
+skill_r_plus_oracle.md</code></pre>
+<p>Do not create a different task pool for D2.2.</p>
+<p>---</p>
+<h2>2. Directory</h2>
+<pre><code>drift_benchmark/D2.2/task_052_family/
+├── README.md
+├── state_catalog.json
+├── regime_r_minus.json
+├── regime_r_plus.json
+├── regime_null.json
+├── skill_r_minus.md
+├── skill_r_plus_oracle.md
+├── d3_evidence.jsonl
+├── evidence_allocation.json
+├── siblings.jsonl
+├── sibling_summary.json
+├── grader_spec.json
+└── validation/
+    ├── validate_siblings.py
+    ├── validate_graph_coupling.py
+    └── construction_report.json</code></pre>
+<p>There must be no learner-visible D1 notice or D2 demonstration file.</p>
+<p>---</p>
+<h2>3. Shared state catalog</h2>
+<pre><code>S0    = entry, ad visible
+S1    = main page
+SH    = Hotels hub
+S2    = Le Meurice details
+S2A   = amenities
+S2R   = room list
+S3D   = Deluxe selected
+S3P   = Prestige selected
+S4    = checkout/personal information
+SFAV  = saved hotel
+SHELP = help
+SACCT = account/preferences</code></pre>
+<p>---</p>
+<h2>4. Shared &#96;r-&#96; graph</h2>
+<pre><code>S0  --close_ad---------------&gt; S1
+S1  --open_Le_Meurice--------&gt; S2
+S1  --open_help--------------&gt; SHELP
+S1  --open_account-----------&gt; SACCT
+S2  --view_amenities---------&gt; S2A
+S2  --open_rooms-------------&gt; S2R
+S2  --save_hotel-------------&gt; SFAV
+S2R --select_Deluxe_Suite----&gt; S3D
+S2R --select_Prestige_Room---&gt; S3P
+S3D --continue_checkout------&gt; S4
+S3P --continue_checkout------&gt; S4</code></pre>
+<p>---</p>
+<h2>5. Shared &#96;r+&#96; drift</h2>
+<p>Remove:</p>
+<pre><code>S1 --open_Le_Meurice--&gt; S2</code></pre>
+<p>Add:</p>
+<pre><code>S1 --open_Hotels--&gt; SH
+SH --open_Le_Meurice--&gt; S2</code></pre>
+<p>Add shortcut:</p>
+<pre><code>S1 --featured_Deluxe_Suite--&gt; S3D</code></pre>
+<p>Everything downstream stays unchanged.</p>
+<p>---</p>
+<h2>6. Same 19 sibling tasks</h2>
+<p>Use the exact same logical IDs:</p>
+<pre><code>8 affected
+D2-aff-001 ... D2-aff-008
+
+5 unchanged-retention
+D2-ret-001 ... D2-ret-005
+
+4 boundary/open-set
+D2-open-001 ... D2-open-004
+
+2 matched-null
+D2-null-001 ... D2-null-002</code></pre>
+<p>---</p>
+<h2>7. Affected siblings</h2>
+<h3>D2-aff-001</h3>
+<ul>
+<li>initial &#96;S0&#96;</li>
+<li>reserve Le Meurice Deluxe</li>
+<li>goal &#96;S4&#96;</li>
+<li>tests replacement + shortcut</li>
+</ul>
+<h3>D2-aff-002</h3>
+<ul>
+<li>initial &#96;S1&#96;</li>
+<li>reserve Le Meurice Deluxe</li>
+<li>goal &#96;S4&#96;</li>
+<li>directly tests shortcut</li>
+</ul>
+<h3>D2-aff-003</h3>
+<ul>
+<li>initial &#96;S1&#96;</li>
+<li>open Le Meurice details</li>
+<li>goal &#96;S2&#96;</li>
+</ul>
+<h3>D2-aff-004</h3>
+<ul>
+<li>initial &#96;S1&#96;</li>
+<li>view Le Meurice amenities</li>
+<li>goal &#96;S2A&#96;</li>
+</ul>
+<h3>D2-aff-005</h3>
+<ul>
+<li>initial &#96;S1&#96;</li>
+<li>open Le Meurice room list</li>
+<li>goal &#96;S2R&#96;</li>
+</ul>
+<h3>D2-aff-006</h3>
+<ul>
+<li>initial &#96;S1&#96;</li>
+<li>reserve Prestige Room</li>
+<li>goal &#96;S4&#96;</li>
+<li>no shortcut applies</li>
+<li>correct route &#96;S1 → SH → S2 → S2R → S3P → S4&#96;</li>
+</ul>
+<h3>D2-aff-007</h3>
+<ul>
+<li>initial &#96;S1&#96;</li>
+<li>save Le Meurice</li>
+<li>goal &#96;SFAV&#96;</li>
+</ul>
+<h3>D2-aff-008</h3>
+<ul>
+<li>initial &#96;S1&#96;</li>
+<li>reserve Deluxe</li>
+<li>goal &#96;S4&#96;</li>
+<li>step cap &#96;2&#96;</li>
+<li>only shortcut route fits</li>
+</ul>
+<p>---</p>
+<h2>8. Unchanged-retention siblings</h2>
+<pre><code>D2-ret-001: S2 → amenities → S2A
+D2-ret-002: S2 → rooms → S2R
+D2-ret-003: S2R → Deluxe → checkout → S4
+D2-ret-004: S2R → Prestige → checkout → S4
+D2-ret-005: S1 → help → SHELP</code></pre>
+<p>These measure collateral damage and unnecessary exploration.</p>
+<p>---</p>
+<h2>9. Boundary/open-set siblings</h2>
+<h3>D2-open-001</h3>
+<p>Unknown hotel (&#96;Hotel Imaginaire Paris&#96;) → not found / abstain.</p>
+<h3>D2-open-002</h3>
+<p>Unavailable room (&#96;Presidential Penthouse&#96;) → unavailable / abstain.</p>
+<h3>D2-open-003</h3>
+<p>Ambiguous &#96;Reserve a Deluxe Suite&#96; → clarify hotel / abstain.</p>
+<h3>D2-open-004</h3>
+<p>Request to jump through hidden checkout route → do not use prohibited hidden/direct navigation.</p>
+<p>---</p>
+<h2>10. Matched-null siblings</h2>
+<h3>D2-null-001</h3>
+<p>Visible &#96;Hotels&#96; label changes to &#96;Stays&#96;, transition graph unchanged.</p>
+<p>Expected: no structural graph rewrite.</p>
+<h3>D2-null-002</h3>
+<p>Featured card is visually reordered, transition/cost unchanged.</p>
+<p>Expected: no graph or policy rewrite.</p>
+<p>---</p>
+<h2>11. Shared obligations</h2>
+<pre><code>O1 = old S1 → Le Meurice edge invalid
+O2 = S1 → Hotels valid
+O3 = Hotels → Le Meurice valid
+O4 = Featured Deluxe → S3D valid
+O5 = shortcut is target-specific
+O6 = shortcut is cheaper</code></pre>
+<p>Support:</p>
+<pre><code>aff-001: O1,O2,O3,O4,O6
+aff-002: O4,O6
+aff-003: O1,O2,O3
+aff-004: O1,O2,O3
+aff-005: O1,O2,O3
+aff-006: O1,O2,O3,O5
+aff-007: O1,O2,O3
+aff-008: O4,O6</code></pre>
+<p>---</p>
+<h2>12. D2.2 evidence constraints</h2>
+<p>Do **not** provide:</p>
+<pre><code>D1 changelog
+D1 localization notice
+D2 successful demonstrations
+solved post-drift trajectories</code></pre>
+<p>All new-regime information must come from D3 interaction.</p>
+<p>---</p>
+<h2>13. D3 interaction interface</h2>
+<p>Expose observations of:</p>
+<pre><code>state
+action
+next_state or failure
+cost</code></pre>
+<p>Examples:</p>
+<pre><code>{&quot;state&quot;:&quot;S1&quot;,&quot;action&quot;:&quot;open_Le_Meurice&quot;,&quot;next_state&quot;:null,&quot;cost&quot;:1,&quot;outcome&quot;:&quot;action_unavailable&quot;}</code></pre>
+<pre><code>{&quot;state&quot;:&quot;S1&quot;,&quot;action&quot;:&quot;open_Hotels&quot;,&quot;next_state&quot;:&quot;SH&quot;,&quot;cost&quot;:1,&quot;outcome&quot;:&quot;valid_transition&quot;}</code></pre>
+<pre><code>{&quot;state&quot;:&quot;SH&quot;,&quot;action&quot;:&quot;open_Le_Meurice&quot;,&quot;next_state&quot;:&quot;S2&quot;,&quot;cost&quot;:1,&quot;outcome&quot;:&quot;valid_transition&quot;}</code></pre>
+<pre><code>{&quot;state&quot;:&quot;S1&quot;,&quot;action&quot;:&quot;featured_Deluxe_Suite&quot;,&quot;next_state&quot;:&quot;S3D&quot;,&quot;cost&quot;:1,&quot;outcome&quot;:&quot;valid_transition&quot;}</code></pre>
+<p>Every interaction is safe, bounded, and metered.</p>
+<p>---</p>
+<h2>14. Do not leak the full graph via static D3</h2>
+<p>Preferred setup:</p>
+<pre><code>probe/environment interface
++
+adaptation budget</code></pre>
+<p>If early baseline code requires static evidence, expose sequential evidence atoms and count each as one discovery unit.</p>
+<p>Do not hand the learner the full &#96;r+&#96; graph as one file.</p>
+<p>---</p>
+<h2>15. Evidence/evaluation separation</h2>
+<p>The 19 evaluation siblings must never be given as solved interaction traces.</p>
+<p>Evidence scenarios may share obligations but should use different wording or downstream goals.</p>
+<p>Example:</p>
+<pre><code>evidence: discover Hotels → Le Meurice while attempting a detail lookup
+evaluation: later solve amenities or save-hotel sibling</code></pre>
+<p>This tests transfer of the learned graph.</p>
+<p>---</p>
+<h2>16. Grading</h2>
+<p>Use the same semantic/state graders as D2.1.</p>
+<p>Primary score: semantic task success.</p>
+<p>Diagnostic scores:</p>
+<pre><code>invalid actions
+task execution cost
+adaptation cost
+step-cap failure
+spurious update</code></pre>
+<p>Exact path match is not the primary metric.</p>
+<p>---</p>
+<h2>17. Stale failure expectations</h2>
+<p>Affected tasks may show:</p>
+<pre><code>removed-edge failure
+extra recovery actions
+missed shortcut
+step-cap failure</code></pre>
+<p>Retention tasks should remain valid.</p>
+<p>Open-set tasks should expose shortcut overgeneralization.</p>
+<p>Null tasks should expose spurious structural updates.</p>
+<p>---</p>
+<h2>18. Result schema</h2>
+<pre><code>{
+  &quot;family&quot;: &quot;D2.2&quot;,
+  &quot;task_id&quot;: &quot;D2-aff-008&quot;,
+  &quot;method&quot;: &quot;SkillEvolver&quot;,
+  &quot;slice&quot;: &quot;affected&quot;,
+  &quot;success&quot;: true,
+  &quot;semantic_score&quot;: 1.0,
+  &quot;actions&quot;: [],
+  &quot;task_cost&quot;: 2,
+  &quot;invalid_actions&quot;: 0,
+  &quot;adaptation_cost&quot;: 5,
+  &quot;updated_skill&quot;: null
+}</code></pre>
+<p>Use the same schema for D2.1.</p>
+<p>---</p>
+<h2>19. Acceptance checks</h2>
+<p>Before expensive baseline runs:</p>
+<ul>
+<li>all 19 task definitions match D2.1;</li>
+<li>all graders match D2.1;</li>
+<li>&#96;r-&#96;/&#96;r+&#96; graphs match D2.1;</li>
+<li>no D1 reaches the learner;</li>
+<li>no D2 demonstrations reach the learner;</li>
+<li>all changed obligations are discoverable through D3;</li>
+<li>D3 is bounded and metered;</li>
+<li>at least one stale correctness failure exists;</li>
+<li>at least one stale correct-but-costly case exists;</li>
+<li>D2-aff-008 distinguishes shortcut discovery under a cap;</li>
+<li>boundary tasks detect shortcut overgeneralization;</li>
+<li>null tasks detect spurious graph rewriting.</li>
+</ul>
+<p>---</p>
+<h2>20. Paired D2.1 vs D2.2 analysis</h2>
+<p>Because the task pool is identical, compute paired differences such as:</p>
+<pre><code>Q(D2.1) - Q(D2.2)
+adaptation_cost(D2.1) - adaptation_cost(D2.2)
+invalid_actions(D2.1) - invalid_actions(D2.2)</code></pre>
+<p>Scientific question:</p>
+<pre><code>Does partial declaration/localization reduce the interaction
+needed to recover the same underlying navigation drift?</code></pre>
+<p>---</p>
+<h2>21. Scaling rule</h2>
+<p>After the 19-task pilot works, expand both D2.1 and D2.2 together to:</p>
+<pre><code>48 total
+19 affected
+14 unchanged-retention
+10 boundary/open-set
+5 matched-null</code></pre>
+<p>Vary:</p>
+<pre><code>initial state
+downstream goal
+room target
+shortcut applicability
+step cap
+surface wording
+null perturbation</code></pre>
+<p>Keep physical drift fixed.</p>
+<p>---</p>
+<h2>22. Conceptual summary</h2>
+<pre><code>same 19 tasks
+    |
+    +-- 8 affected
+    +-- 5 retention
+    +-- 4 open-set
+    +-- 2 matched-null
+    |
+same r- → r+
+path_permute + shortcut_add
+    |
+D2.2:
+D1 0
+D2 0
+D3 100%
+    |
+interaction-only graph reconstruction
+    |
+update navigation graph + preferred route
+    |
+held-out sibling evaluation</code></pre>

@@ -1,0 +1,473 @@
+<h1>D2.1 — Updated Design-Level Execution Plan (19 Siblings)</h1>
+<h2>Goal</h2>
+<p>Extend the existing OSWorld-V2 &#96;task_052&#96; prototype into a **19-task pilot family** while preserving the original D2.1 construction:</p>
+<ul>
+<li>skill family: navigation / menu-tree strategy</li>
+<li>physical drift: &#96;path_permute + shortcut_add&#96;</li>
+<li>topology: replacement + improvement</li>
+<li>schedule: abrupt</li>
+<li>evidence: **D1 = 30%, D2 = 0%, D3 = 70%**</li>
+<li>substrate: TravelHub / OSWorld-V2 &#96;task_052&#96;</li>
+<li>semantic invariant: same hotel/room goal and same terminal task meaning</li>
+</ul>
+<p>D2.1 and D2.2 must share the same task pool, &#96;r-&#96; graph, &#96;r+&#96; graph, graders, and cost model. Only evidence exposure differs.</p>
+<h3>Strict D1/D3 boundary</h3>
+<p>D1 is **coarse declaration/localization only**. It may tell the learner that the hotel-detail navigation portion of its stored skill may be stale, but it must reveal **no executable graph structure**.</p>
+<pre><code>D1 may answer:    Which broad skill region may be stale?
+D1 may NOT answer: Which edge changed? Which node was added?
+                   What route replaces the old one?
+                   What shortcut exists? What route is optimal?</code></pre>
+<p>All exact structural recovery belongs to D3. Thus:</p>
+<pre><code>D2.1: D1 tells WHERE to investigate; D3 tells WHAT changed.
+D2.2: D3 must reveal both WHERE and WHAT changed.</code></pre>
+<p>---</p>
+<h2>1. Create the family directory</h2>
+<pre><code>drift_benchmark/D2.1/task_052_family/
+├── README.md
+├── state_catalog.json
+├── regime_r_minus.json
+├── regime_r_plus.json
+├── regime_null.json
+├── skill_r_minus.md
+├── skill_r_plus_oracle.md
+├── d1_notice.md
+├── d3_evidence.jsonl
+├── evidence_allocation.json
+├── siblings.jsonl
+├── sibling_summary.json
+├── grader_spec.json
+└── validation/
+    ├── validate_siblings.py
+    ├── validate_graph_coupling.py
+    ├── validate_d1_nonleakage.py
+    └── construction_report.json</code></pre>
+<p>---</p>
+<h2>2. Define the abstract state catalog</h2>
+<p>Use design-level states:</p>
+<pre><code>S0    = TravelHub entry, ad visible
+S1    = main page, ad closed
+SH    = Hotels hub
+S2    = Le Meurice detail page
+S2A   = amenities view
+S2R   = room-selection view
+S3D   = Deluxe Suite selected
+S3P   = Prestige Room selected
+S4    = checkout / personal-information page
+SFAV  = hotel saved/favorited
+SHELP = TravelHub help
+SACCT = account/preferences</code></pre>
+<p>These are benchmark abstractions, not claims about execution-observed OSWorld screens.</p>
+<p>---</p>
+<h2>3. Define &#96;r-&#96;</h2>
+<pre><code>S0  --close_ad---------------&gt; S1
+S1  --open_Le_Meurice--------&gt; S2
+S1  --open_help--------------&gt; SHELP
+S1  --open_account-----------&gt; SACCT
+S2  --view_amenities---------&gt; S2A
+S2  --open_rooms-------------&gt; S2R
+S2  --save_hotel-------------&gt; SFAV
+S2R --select_Deluxe_Suite----&gt; S3D
+S2R --select_Prestige_Room---&gt; S3P
+S3D --continue_checkout------&gt; S4
+S3P --continue_checkout------&gt; S4</code></pre>
+<p>Unit proxy cost: &#96;1&#96; per visible UI transition.</p>
+<p>---</p>
+<h2>4. Define the shared &#96;r+&#96; drift</h2>
+<p>Remove:</p>
+<pre><code>S1 --open_Le_Meurice--&gt; S2</code></pre>
+<p>Add:</p>
+<pre><code>S1 --open_Hotels--&gt; SH
+SH --open_Le_Meurice--&gt; S2</code></pre>
+<p>Add shortcut:</p>
+<pre><code>S1 --featured_Deluxe_Suite--&gt; S3D</code></pre>
+<p>Everything downstream from &#96;S2&#96; stays unchanged.</p>
+<p>This gives:</p>
+<pre><code>replacement: direct hotel route is replaced
+improvement: Deluxe shortcut lowers route cost</code></pre>
+<p>---</p>
+<h2>5. Define stale and oracle skills</h2>
+<h3>&#96;skill_r_minus.md&#96;</h3>
+<pre><code>Main → Le Meurice → Rooms → requested room → Checkout</code></pre>
+<h3>&#96;skill_r_plus_oracle.md&#96;</h3>
+<p>For Deluxe:</p>
+<pre><code>Main → Featured Deluxe → Checkout</code></pre>
+<p>Fallback / non-Deluxe:</p>
+<pre><code>Main → Hotels → Le Meurice → Rooms → requested room → Checkout</code></pre>
+<p>Keep the stale skill unchanged at the start of &#96;r+&#96;.</p>
+<p>---</p>
+<h2>6. Build a 19-task pilot pool</h2>
+<p>Use:</p>
+<pre><code>8 affected
+5 unchanged-retention
+4 boundary/open-set
+2 matched-null
+= 19 total</code></pre>
+<p>Later scale to:</p>
+<pre><code>48 total
+19 affected
+14 unchanged-retention
+10 boundary/open-set
+5 matched-null</code></pre>
+<p>---</p>
+<h2>7. Shared sibling schema</h2>
+<p>Each task in &#96;siblings.jsonl&#96; should include:</p>
+<pre><code>{
+  &quot;id&quot;: &quot;D2-aff-001&quot;,
+  &quot;slice&quot;: &quot;affected&quot;,
+  &quot;source_task&quot;: &quot;OSWorld-V2 task_052&quot;,
+  &quot;initial_state&quot;: &quot;S0&quot;,
+  &quot;instruction&quot;: &quot;...&quot;,
+  &quot;semantic_goal&quot;: {&quot;target_state&quot;: &quot;S4&quot;},
+  &quot;obligation_support&quot;: [&quot;O1&quot;, &quot;O4&quot;],
+  &quot;grader&quot;: {&quot;type&quot;: &quot;semantic_state&quot;}
+}</code></pre>
+<p>Use the same logical IDs in D2.1 and D2.2.</p>
+<p>---</p>
+<h2>8. Affected siblings (8)</h2>
+<h3>D2-aff-001 — original full reservation</h3>
+<ul>
+<li>initial: &#96;S0&#96;</li>
+<li>instruction: reserve the Deluxe Suite at Le Meurice and stop at personal information</li>
+<li>goal: &#96;S4&#96;</li>
+<li>tests: replacement + shortcut</li>
+</ul>
+<h3>D2-aff-002 — Deluxe reservation from main page</h3>
+<ul>
+<li>initial: &#96;S1&#96;</li>
+<li>same semantic reservation goal</li>
+<li>goal: &#96;S4&#96;</li>
+<li>tests shortcut directly</li>
+</ul>
+<h3>D2-aff-003 — open hotel details</h3>
+<ul>
+<li>initial: &#96;S1&#96;</li>
+<li>instruction: open Le Meurice details</li>
+<li>goal: &#96;S2&#96;</li>
+<li>tests replacement only</li>
+</ul>
+<h3>D2-aff-004 — view amenities</h3>
+<ul>
+<li>initial: &#96;S1&#96;</li>
+<li>instruction: show Le Meurice amenities</li>
+<li>goal: &#96;S2A&#96;</li>
+<li>tests repaired prefix + unchanged downstream edge</li>
+</ul>
+<h3>D2-aff-005 — open room list</h3>
+<ul>
+<li>initial: &#96;S1&#96;</li>
+<li>instruction: show available rooms at Le Meurice</li>
+<li>goal: &#96;S2R&#96;</li>
+</ul>
+<h3>D2-aff-006 — reserve Prestige Room</h3>
+<ul>
+<li>initial: &#96;S1&#96;</li>
+<li>instruction: reserve Prestige Room and stop at personal information</li>
+<li>goal: &#96;S4&#96;</li>
+<li>no shortcut applies</li>
+<li>correct &#96;r+&#96;: &#96;S1 → SH → S2 → S2R → S3P → S4&#96;</li>
+</ul>
+<h3>D2-aff-007 — save Le Meurice</h3>
+<ul>
+<li>initial: &#96;S1&#96;</li>
+<li>instruction: save Le Meurice to favorites</li>
+<li>goal: &#96;SFAV&#96;</li>
+</ul>
+<h3>D2-aff-008 — step-capped Deluxe reservation</h3>
+<ul>
+<li>initial: &#96;S1&#96;</li>
+<li>instruction: reserve Deluxe Suite</li>
+<li>goal: &#96;S4&#96;</li>
+<li>step cap: &#96;2&#96;</li>
+<li>only &#96;S1 → S3D → S4&#96; satisfies the cap</li>
+<li>use for capped correctness / cost recovery</li>
+</ul>
+<p>---</p>
+<h2>9. Unchanged-retention siblings (5)</h2>
+<h3>D2-ret-001</h3>
+<ul>
+<li>initial &#96;S2&#96;</li>
+<li>show amenities</li>
+<li>route &#96;S2 → S2A&#96;</li>
+</ul>
+<h3>D2-ret-002</h3>
+<ul>
+<li>initial &#96;S2&#96;</li>
+<li>open rooms</li>
+<li>route &#96;S2 → S2R&#96;</li>
+</ul>
+<h3>D2-ret-003</h3>
+<ul>
+<li>initial &#96;S2R&#96;</li>
+<li>select Deluxe and checkout</li>
+<li>route &#96;S2R → S3D → S4&#96;</li>
+</ul>
+<h3>D2-ret-004</h3>
+<ul>
+<li>initial &#96;S2R&#96;</li>
+<li>select Prestige and checkout</li>
+<li>route &#96;S2R → S3P → S4&#96;</li>
+</ul>
+<h3>D2-ret-005</h3>
+<ul>
+<li>initial &#96;S1&#96;</li>
+<li>open TravelHub help</li>
+<li>route &#96;S1 → SHELP&#96;</li>
+</ul>
+<p>These tasks should remain valid without any graph repair.</p>
+<p>---</p>
+<h2>10. Boundary/open-set siblings (4)</h2>
+<h3>D2-open-001 — unknown hotel</h3>
+<p>Instruction: open &#96;Hotel Imaginaire Paris&#96;. Expected: not-found / abstain.</p>
+<h3>D2-open-002 — unavailable room</h3>
+<p>Initial: &#96;S2R&#96;. Instruction: select &#96;Presidential Penthouse&#96;. Expected: unavailable / abstain.</p>
+<h3>D2-open-003 — ambiguous Deluxe</h3>
+<p>Initial: &#96;S1&#96;. Instruction: reserve a Deluxe Suite. Expected: request hotel clarification / abstain. Do not assume Le Meurice because a Featured Deluxe shortcut exists.</p>
+<h3>D2-open-004 — prohibited hidden route</h3>
+<p>Instruction: jump directly to hidden checkout. Expected: do not use hidden/direct navigation; preserve visible-interface restriction.</p>
+<p>---</p>
+<h2>11. Matched-null siblings (2)</h2>
+<h3>D2-null-001 — cosmetic label change</h3>
+<p>Visible label changes &#96;Hotels → Stays&#96;, but the underlying action/transition is unchanged.</p>
+<p>Expected: no persistent structural graph update.</p>
+<h3>D2-null-002 — visual reorder</h3>
+<p>Featured card moves visually, but the state/action/next-state relation is unchanged.</p>
+<p>Expected: no graph or cost-model rewrite.</p>
+<p>---</p>
+<h2>12. Define drift obligations with localization separated from structure</h2>
+<p>Use:</p>
+<pre><code>O1 = detect/localize that hotel-detail navigation may be stale
+O2 = discover that the old direct hotel-detail action is invalid
+O3 = discover the new intermediate navigation action/state
+O4 = discover the transition from that intermediate state to Le Meurice
+O5 = discover the Deluxe shortcut
+O6 = determine shortcut specificity
+O7 = determine shortcut cost advantage</code></pre>
+<p>Evidence responsibility is intentionally separated:</p>
+<pre><code>D1: O1 only
+D3: O2,O3,O4,O5,O6,O7</code></pre>
+<p>Suggested evaluation-sibling support:</p>
+<pre><code>aff-001: O2,O3,O4,O5,O7
+aff-002: O5,O7
+aff-003: O2,O3,O4
+aff-004: O2,O3,O4
+aff-005: O2,O3,O4
+aff-006: O2,O3,O4,O6
+aff-007: O2,O3,O4
+aff-008: O5,O7</code></pre>
+<p>&#96;O1&#96; belongs to the adaptation episode rather than to a particular held-out task path.</p>
+<p>---</p>
+<h2>13. D2.1 D1 notice — strict non-leaking version</h2>
+<p>Create &#96;d1_notice.md&#96; with exactly this level of specificity:</p>
+<pre><code># TravelHub UI Update Notice
+
+Hotel-detail navigation has recently been reorganized.
+
+Existing hotel listings, room availability, and booking goals remain unchanged.
+
+Previously stored navigation routes to hotel details may no longer be current.</code></pre>
+<p>This notice is visible to the learner **once per drift/adaptation episode**, not repeated inside every sibling prompt.</p>
+<p>It tells the learner only:</p>
+<pre><code>broad stale region = hotel-detail navigation</code></pre>
+<p>It must not reveal or strongly imply any changed graph structure.</p>
+<h3>Forbidden D1 content</h3>
+<p>Do not mention:</p>
+<pre><code>Hotels
+Stays
+Featured
+Featured Deluxe
+new section
+intermediate page
+shortcut
+direct link removed
+open Hotels
+Hotels → Le Meurice
+Main → Hotels
+Main → Featured Deluxe
+replacement route
+faster route
+cheaper route</code></pre>
+<p>Also avoid semantic equivalents such as:</p>
+<pre><code>&quot;hotel details are now under another section&quot;
+&quot;there is a new top-level hotel menu&quot;
+&quot;some rooms can now be accessed directly&quot;</code></pre>
+<p>The rule is:</p>
+<pre><code>D1 may localize.
+D1 may not identify.</code></pre>
+<p>---</p>
+<h2>14. Add a D1 non-leakage validator</h2>
+<p>Create:</p>
+<pre><code>validation/validate_d1_nonleakage.py</code></pre>
+<p>At minimum, reject obvious forbidden strings:</p>
+<pre><code>from pathlib import Path
+
+FORBIDDEN = [
+    &quot;hotels&quot;,
+    &quot;featured&quot;,
+    &quot;shortcut&quot;,
+    &quot;open hotels&quot;,
+    &quot;new section&quot;,
+    &quot;direct link removed&quot;,
+    &quot;faster route&quot;,
+    &quot;cheaper route&quot;,
+]
+
+text = Path(&quot;d1_notice.md&quot;).read_text().lower()
+
+for term in FORBIDDEN:
+    assert term not in text, f&quot;D1 leakage: {term}&quot;</code></pre>
+<p>String matching is only a first check. Manually inspect semantic leakage as well.</p>
+<p>Acceptance condition:</p>
+<pre><code>D1 identifies the broad stale skill region
+but exposes zero executable graph edges/nodes/shortcuts.</code></pre>
+<p>---</p>
+<h2>15. D2.1 D3 evidence</h2>
+<p>All exact executable structure must now come from D3.</p>
+<p>Examples:</p>
+<pre><code>{&quot;state&quot;:&quot;S1&quot;,&quot;action&quot;:&quot;open_Le_Meurice&quot;,&quot;next_state&quot;:null,&quot;cost&quot;:1,&quot;outcome&quot;:&quot;action_unavailable&quot;}</code></pre>
+<p>This identifies that the stale direct edge is invalid.</p>
+<p>Then:</p>
+<pre><code>{&quot;state&quot;:&quot;S1&quot;,&quot;action&quot;:&quot;open_Hotels&quot;,&quot;next_state&quot;:&quot;SH&quot;,&quot;cost&quot;:1,&quot;outcome&quot;:&quot;valid_transition&quot;}</code></pre>
+<pre><code>{&quot;state&quot;:&quot;SH&quot;,&quot;action&quot;:&quot;open_Le_Meurice&quot;,&quot;next_state&quot;:&quot;S2&quot;,&quot;cost&quot;:1,&quot;outcome&quot;:&quot;valid_transition&quot;}</code></pre>
+<pre><code>{&quot;state&quot;:&quot;S1&quot;,&quot;action&quot;:&quot;featured_Deluxe_Suite&quot;,&quot;next_state&quot;:&quot;S3D&quot;,&quot;cost&quot;:1,&quot;outcome&quot;:&quot;valid_transition&quot;}</code></pre>
+<p>D3 must also establish:</p>
+<pre><code>shortcut specificity
+route-cost advantage</code></pre>
+<p>Evidence-only scenarios must be disjoint from evaluation sibling IDs.</p>
+<p>---</p>
+<h2>16. Evidence allocation</h2>
+<pre><code>{
+  &quot;D1&quot;: 30,
+  &quot;D2&quot;: 0,
+  &quot;D3&quot;: 70,
+  &quot;obligations&quot;: {
+    &quot;O1&quot;: &quot;D1&quot;,
+    &quot;O2&quot;: &quot;D3&quot;,
+    &quot;O3&quot;: &quot;D3&quot;,
+    &quot;O4&quot;: &quot;D3&quot;,
+    &quot;O5&quot;: &quot;D3&quot;,
+    &quot;O6&quot;: &quot;D3&quot;,
+    &quot;O7&quot;: &quot;D3&quot;
+  }
+}</code></pre>
+<p>Treat 30/70 as the construction contract, not a measured information-theoretic quantity.</p>
+<p>The key interpretation is:</p>
+<pre><code>D2.1: D1 tells WHERE; D3 tells WHAT.
+D2.2: D3 tells both WHERE and WHAT.</code></pre>
+<p>---</p>
+<h2>17. Grading</h2>
+<p>Primary correctness should be semantic/state based.</p>
+<p>Do not make exact path match the primary metric.</p>
+<p>Examples:</p>
+<ul>
+<li>reservation tasks: correct hotel + room + checkout/personal-info state</li>
+<li>details: &#96;S2&#96;</li>
+<li>amenities: &#96;S2A&#96;</li>
+<li>rooms: &#96;S2R&#96;</li>
+<li>favorite: &#96;SFAV&#96;</li>
+<li>open-set: correct abstain/not-found/clarification</li>
+<li>matched-null: no spurious persistent update</li>
+</ul>
+<p>---</p>
+<h2>18. Baseline result schema</h2>
+<p>Save at least:</p>
+<pre><code>{
+  &quot;family&quot;: &quot;D2.1&quot;,
+  &quot;task_id&quot;: &quot;D2-aff-001&quot;,
+  &quot;method&quot;: &quot;static_r_minus&quot;,
+  &quot;slice&quot;: &quot;affected&quot;,
+  &quot;success&quot;: false,
+  &quot;semantic_score&quot;: 0.0,
+  &quot;actions&quot;: [],
+  &quot;task_cost&quot;: 0,
+  &quot;invalid_actions&quot;: 0,
+  &quot;adaptation_cost&quot;: 0,
+  &quot;updated_skill&quot;: null
+}</code></pre>
+<p>Raw quantities:</p>
+<pre><code>Q
+task cost
+invalid actions
+adaptation cost
+slice</code></pre>
+<p>---</p>
+<h2>19. Acceptance checks</h2>
+<p>Before scaling:</p>
+<ul>
+<li>all 19 siblings compile;</li>
+<li>affected tasks touch at least one changed obligation;</li>
+<li>retention tasks avoid changed prefix edges by construction;</li>
+<li>open-set tasks have no accidental valid shortcut;</li>
+<li>null variants have unchanged semantic transition graphs;</li>
+<li>oracle succeeds;</li>
+<li>stale skill has at least one correctness failure;</li>
+<li>stale skill has at least one correct-but-more-expensive case;</li>
+<li>D1 contains no changed node names;</li>
+<li>D1 contains no changed action names;</li>
+<li>D1 contains no removed-edge description;</li>
+<li>D1 contains no shortcut hint;</li>
+<li>D1 contains no route-cost hint;</li>
+<li>D1 only identifies hotel-detail navigation as potentially stale;</li>
+<li>all exact structural recovery comes from D3;</li>
+<li>D3 evidence IDs are disjoint from evaluation IDs.</li>
+</ul>
+<p>---</p>
+<h2>20. Scaling rule</h2>
+<p>Scale both D2.1 and D2.2 together to:</p>
+<pre><code>48 total
+19 affected
+14 unchanged-retention
+10 boundary/open-set
+5 matched-null</code></pre>
+<p>Vary:</p>
+<pre><code>initial state
+downstream goal
+room target
+shortcut applicability
+step cap
+surface wording
+null perturbation</code></pre>
+<p>Do not create 48 near-duplicate paraphrases.</p>
+<p>---</p>
+<h2>21. Conceptual summary</h2>
+<pre><code>             SAME HIDDEN PHYSICAL DRIFT
+
+r-                                      r+
+old direct route                       replacement route
+                                       + hidden shortcut
+
+
+                    D2.1
+
+D1 notice:
+&quot;hotel-detail navigation may be stale&quot;
+              |
+              |  reveals NO graph edge
+              |  reveals NO new node
+              |  reveals NO shortcut
+              |  reveals NO optimal route
+              v
+      localize investigation
+              |
+              v
+          D3 interaction
+              |
+              +-- stale edge fails
+              +-- discover new intermediate action
+              +-- discover next transition
+              +-- discover shortcut
+              +-- measure route cost
+              |
+              v
+       reconstruct current graph
+              |
+              v
+        update persistent skill
+              |
+              v
+      evaluate on 19 siblings
+
+
+Comparison:
+
+D2.1 = D1 tells WHERE + D3 tells WHAT
+D2.2 = D3 tells WHERE + WHAT</code></pre>

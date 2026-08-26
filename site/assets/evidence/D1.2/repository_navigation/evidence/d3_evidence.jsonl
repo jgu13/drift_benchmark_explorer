@@ -1,0 +1,9 @@
+{"status":"design_only_not_execution_validated","target":"results_content","observation_type":"file_access","action":"open(content/results.md)","outcome":"path_not_found"}
+{"status":"design_only_not_execution_validated","target":"results_content","observation_type":"search","action":"search(repository, \"results experiments accuracy\")","outcome":["sections/experiments/results.md"]}
+{"status":"design_only_not_execution_validated","target":"results_content","observation_type":"file_access","action":"open(sections/experiments/results.md)","outcome":"verified_target_content"}
+{"status":"design_only_not_execution_validated","target":"author_information","observation_type":"file_access","action":"open(config/site.yml)","outcome":"paper metadata present; author information absent"}
+{"status":"design_only_not_execution_validated","target":"author_information","observation_type":"search","action":"search(repository, \"authors affiliation\")","outcome":["config/authors.yml"]}
+{"status":"design_only_not_execution_validated","target":"author_information","observation_type":"file_access","action":"open(config/authors.yml)","outcome":"verified_target_content"}
+{"status":"design_only_not_execution_validated","target":"method_content","observation_type":"file_access","action":"open(content/method.md)","outcome":"verified_target_content"}
+{"status":"design_only_not_execution_validated","target":"supplementary_video","observation_type":"search","action":"search(repository, \"supplementary video demo media\")","outcome":[]}
+{"status":"design_only_not_execution_validated","target":"supplementary_video","observation_type":"verification","action":"verify_absence(supplementary_video)","outcome":"target_absent_abstain"}

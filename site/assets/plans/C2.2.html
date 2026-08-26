@@ -1,0 +1,447 @@
+<h1>C2.2 — BFCL Precondition-Graph Drift: Execution Plan</h1>
+<h2>0. Goal and roster contract</h2>
+<p>Build an executable BFCL-derived **C2.2** task family.</p>
+<p>**Roster contract**</p>
+<ul>
+<li>Family: &#96;precondition graph&#96;</li>
+<li>Origin: BFCL pattern</li>
+<li>Skill store: directed action-precondition graph + planner template</li>
+<li>Application recipe: topologically order required actions and avoid redundant calls</li>
+<li>Drift: &#96;edge_add + edge_drop&#96;</li>
+<li>Topology: expansion / retirement</li>
+<li>Schedule: abrupt</li>
+<li>Physical event: **same event as C2.1**</li>
+<li>C2.1 scope sweep: 10%, 25%, 40% of performance-relevant edges</li>
+<li>C2.2 evidence:</li>
+<li>D1 = 0%</li>
+<li>D2 = 0%</li>
+<li>D3 = 100%</li>
+<li>C2.2 construction rule: hide successful traces; revised graph is discoverable only from interaction outcomes</li>
+<li>Required update: add/tombstone edges, replan, simulator-replay candidate sequences</li>
+<li>Validation: edge precision/recall, invalid-action rate, redundant calls, discovery cost</li>
+<li>Readouts: edge RPrec/RRec, IAR, &#96;d*&#96;, CRR</li>
+</ul>
+<p>The cleanest BFCL substrate is &#96;VehicleControlAPI&#96;, because its executable backend already has hidden procedural preconditions. For example, engine start currently depends on door state and a fully pressed brake pedal, and cruise control depends on the engine being running.</p>
+<p>---</p>
+<h2>1. Create an isolated branch and package</h2>
+<pre><code>git switch -c drift-c2-2
+mkdir -p drift_benchmark/C2.2/precondition_graph</code></pre>
+<p>Back up:</p>
+<pre><code>bfcl_eval/eval_checker/multi_turn_eval/func_source_code/vehicle_control.py
+bfcl_eval/data/multi_turn_func_doc/vehicle_control.json</code></pre>
+<p>Do not modify standard BFCL in-place until the paired regime implementation is ready.</p>
+<p>---</p>
+<h2>2. Extract the baseline procedural graph from BFCL</h2>
+<p>Inspect:</p>
+<pre><code>rg -n &quot;def startEngine|def setCruiseControl|def activateParkingBrake|def pressBrakePedal|def lockDoors|def fillFuelTank&quot; \
+  bfcl_eval/eval_checker/multi_turn_eval/func_source_code/vehicle_control.py</code></pre>
+<p>Define action nodes such as:</p>
+<pre><code>A_lock       = lock required doors
+A_brake      = pressBrakePedal(pedalPosition=1.0)
+A_park       = activateParkingBrake(mode=&quot;engage&quot;)
+A_fuel       = add fuel when necessary
+A_start      = startEngine(...)
+A_cruise     = setCruiseControl(...)</code></pre>
+<p>Define state predicates separately:</p>
+<pre><code>P_doors_locked
+P_brake_full
+P_parking_brake_engaged
+P_fuel_available
+P_engine_running</code></pre>
+<p>Create:</p>
+<pre><code>precondition_graph_r_minus.json</code></pre>
+<p>For the pilot, use an explicit graph with enough performance-relevant edges to support a 25% edit.</p>
+<p>Example 8-edge pilot graph:</p>
+<pre><code>{
+  &quot;edges&quot;: [
+    [&quot;P_doors_locked&quot;, &quot;A_start&quot;],
+    [&quot;P_brake_full&quot;, &quot;A_start&quot;],
+    [&quot;P_fuel_available&quot;, &quot;A_start&quot;],
+    [&quot;A_lock&quot;, &quot;P_doors_locked&quot;],
+    [&quot;A_brake&quot;, &quot;P_brake_full&quot;],
+    [&quot;A_fuel&quot;, &quot;P_fuel_available&quot;],
+    [&quot;A_start&quot;, &quot;P_engine_running&quot;],
+    [&quot;P_engine_running&quot;, &quot;A_cruise&quot;]
+  ]
+}</code></pre>
+<p>This graph is the persistent competence, not necessarily a literal internal BFCL data structure.</p>
+<p>---</p>
+<h2>3. Select the paired C2.1/C2.2 physical event</h2>
+<p>C2.2 must use the **same physical edge change as C2.1**.</p>
+<p>Use a simple 25% pilot:</p>
+<pre><code>8 performance-relevant edges
+2 changed edges = 25%</code></pre>
+<p>Recommended change:</p>
+<h3>Edge add</h3>
+<p>Add:</p>
+<pre><code>P_parking_brake_engaged → A_start</code></pre>
+<p>The new regime requires the parking brake to be engaged before engine start.</p>
+<h3>Edge drop</h3>
+<p>Remove:</p>
+<pre><code>P_brake_full → A_start</code></pre>
+<p>The fully pressed brake pedal is no longer required for starting the engine.</p>
+<p>This gives both:</p>
+<pre><code>expansion: new parking-brake prerequisite
+retirement: old full-brake prerequisite removed</code></pre>
+<p>The semantic goal remains:</p>
+<pre><code>engine running</code></pre>
+<p>For cruise-control siblings, the semantic goal remains:</p>
+<pre><code>cruise active at requested speed</code></pre>
+<p>but the valid minimal plan changes upstream.</p>
+<p>Create:</p>
+<pre><code>drift_spec.json</code></pre>
+<p>with:</p>
+<pre><code>{
+  &quot;operator&quot;: [&quot;edge_add&quot;, &quot;edge_drop&quot;],
+  &quot;schedule&quot;: &quot;abrupt&quot;,
+  &quot;scope&quot;: 0.25,
+  &quot;added_edges&quot;: [
+    [&quot;P_parking_brake_engaged&quot;, &quot;A_start&quot;]
+  ],
+  &quot;dropped_edges&quot;: [
+    [&quot;P_brake_full&quot;, &quot;A_start&quot;]
+  ]
+}</code></pre>
+<p>Later generate 10% and 40% variants by changing the number of edited edges while preserving the same construction logic.</p>
+<p>---</p>
+<h2>4. Build executable &#96;r-&#96;</h2>
+<p>Create:</p>
+<pre><code>vehicle_control_c2_r_minus.py</code></pre>
+<p>Use current BFCL &#96;startEngine&#96; behavior.</p>
+<p>Conceptually:</p>
+<pre><code>if self.remainingUnlockedDoors &gt; 0:
+    return error
+
+if self.brakePedalStatus != &quot;pressed&quot;:
+    return error
+
+if self._brakePedalForce != 1000.0:
+    return error
+
+if fuel_invalid:
+    return error</code></pre>
+<p>No parking-brake prerequisite is required in &#96;r-&#96;.</p>
+<p>---</p>
+<h2>5. Build executable &#96;r+&#96;</h2>
+<p>Create:</p>
+<pre><code>vehicle_control_c2_r_plus.py</code></pre>
+<p>Modify only the targeted prerequisites.</p>
+<h3>Remove the obsolete prerequisite</h3>
+<p>Delete or disable the full brake-pedal checks:</p>
+<pre><code># no longer required in r+</code></pre>
+<h3>Add the new prerequisite</h3>
+<p>Add:</p>
+<pre><code>if self.parkingBrakeStatus != &quot;engaged&quot;:
+    return {
+        &quot;error&quot;: &quot;Parking brake must be engaged before starting the engine.&quot;
+    }</code></pre>
+<p>Keep:</p>
+<pre><code>doors locked
+fuel condition
+engine outcome</code></pre>
+<p>unchanged.</p>
+<p>This makes the physical drift executable rather than transcript-only.</p>
+<p>---</p>
+<h2>6. Keep public tool schemas stable</h2>
+<p>Do not announce the changed prerequisite graph in the normal function documentation.</p>
+<p>The API schema should still describe:</p>
+<pre><code>startEngine(...)
+activateParkingBrake(...)
+pressBrakePedal(...)</code></pre>
+<p>without saying:</p>
+<pre><code>&quot;startEngine now requires parking brake&quot;</code></pre>
+<p>because C2.2 has:</p>
+<pre><code>D1 = 0
+D2 = 0
+D3 = 100</code></pre>
+<p>The learner must discover the graph only through interaction outcomes.</p>
+<p>---</p>
+<h2>7. Build stale and oracle skills</h2>
+<p>Create:</p>
+<pre><code>skill_r_minus.md
+skill_r_plus_oracle.md</code></pre>
+<p>&#96;skill_r_minus.md&#96;:</p>
+<pre><code># Vehicle Procedure Skill — r-
+
+To start the engine:
+
+1. Lock all doors if needed.
+2. Fully press the brake pedal.
+3. Ensure fuel is available.
+4. Start the engine.
+
+To activate cruise control:
+
+1. Complete the engine-start procedure.
+2. Set cruise control.</code></pre>
+<p>&#96;skill_r_plus_oracle.md&#96;:</p>
+<pre><code># Vehicle Procedure Skill — r+
+
+To start the engine:
+
+1. Lock all doors if needed.
+2. Engage the parking brake.
+3. Ensure fuel is available.
+4. Start the engine.
+
+The brake pedal is not required for engine start in this regime.
+
+To activate cruise control:
+
+1. Complete the current engine-start procedure.
+2. Set cruise control.</code></pre>
+<p>Do not expose &#96;skill_r_plus_oracle.md&#96; to the learner.</p>
+<p>---</p>
+<h2>8. Generate sibling tasks from varied initial states</h2>
+<p>Create:</p>
+<pre><code>siblings.json</code></pre>
+<p>Vary the initial state so the changed graph is causally testable.</p>
+<h3>Affected sibling example — new edge required</h3>
+<p>Initial state:</p>
+<pre><code>doors locked
+parking brake released
+brake pedal fully pressed
+fuel available
+engine stopped</code></pre>
+<p>User:</p>
+<pre><code>&quot;Start the engine.&quot;</code></pre>
+<p>Stale skill tries:</p>
+<pre><code>press brake
+start engine</code></pre>
+<p>&#96;r+&#96; returns a parking-brake violation.</p>
+<p>Correct &#96;r+&#96; plan:</p>
+<pre><code>activateParkingBrake(&quot;engage&quot;)
+startEngine(...)</code></pre>
+<h3>Affected sibling example — dropped edge creates redundancy</h3>
+<p>Initial state:</p>
+<pre><code>doors locked
+parking brake engaged
+brake pedal released
+fuel available
+engine stopped</code></pre>
+<p>The stale skill unnecessarily presses the brake before starting.</p>
+<p>It may remain correct but has higher cost.</p>
+<p>This is necessary for CRR.</p>
+<h3>Propagated affected sibling</h3>
+<p>User:</p>
+<pre><code>&quot;Activate cruise control at 60.&quot;</code></pre>
+<p>The plan traverses:</p>
+<pre><code>startEngine → setCruiseControl</code></pre>
+<p>so the upstream changed prerequisite affects this sibling too.</p>
+<p>---</p>
+<h2>9. Compile sibling labels by obligation support</h2>
+<p>Each task should include:</p>
+<pre><code>{
+  &quot;obligation_support&quot;: [
+    &quot;P_parking_brake_engaged-&gt;A_start&quot;,
+    &quot;P_engine_running-&gt;A_cruise&quot;
+  ]
+}</code></pre>
+<p>Mark affected iff the valid/minimal plan depends on an edited edge.</p>
+<p>Otherwise mark:</p>
+<pre><code>unchanged-retention</code></pre>
+<p>Create boundary/open-set tasks that test ambiguous or unsupported states.</p>
+<p>Create matched-null tasks that vary wording or irrelevant state while preserving the graph.</p>
+<h3>Initial pilot</h3>
+<p>Use approximately:</p>
+<pre><code>20–24 total siblings</code></pre>
+<p>Then scale toward the roster target:</p>
+<pre><code>72 total
+32 affected
+18 unchanged-retention
+14 boundary/open-set
+8 matched-null</code></pre>
+<p>---</p>
+<h2>10. Hide all D1 and D2 evidence</h2>
+<p>C2.2 must not receive:</p>
+<pre><code>changelog
+updated policy note
+successful post-drift traces
+accepted demonstrations</code></pre>
+<p>Specifically, do not provide a trace such as:</p>
+<pre><code>activateParkingBrake → startEngine → success</code></pre>
+<p>as learner-visible evidence.</p>
+<p>The only source of new-edge information is D3 interaction.</p>
+<p>---</p>
+<h2>11. Build the D3 interaction interface</h2>
+<p>Create:</p>
+<pre><code>d3_interaction.py</code></pre>
+<p>It should expose safe execution of actions against &#96;r+&#96; and return normal BFCL responses/errors.</p>
+<p>Example:</p>
+<pre><code>execute(&quot;startEngine&quot;, {&quot;ignitionMode&quot;: &quot;START&quot;})</code></pre>
+<p>may yield:</p>
+<pre><code>{
+  &quot;error&quot;: &quot;Parking brake must be engaged before starting the engine.&quot;
+}</code></pre>
+<p>This observation identifies a missing prerequisite.</p>
+<p>Then:</p>
+<pre><code>execute(&quot;activateParkingBrake&quot;, {&quot;mode&quot;: &quot;engage&quot;})</code></pre>
+<p>followed by:</p>
+<pre><code>execute(&quot;startEngine&quot;, {&quot;ignitionMode&quot;: &quot;START&quot;})</code></pre>
+<p>succeeds.</p>
+<p>For the retired brake edge, the learner must discover redundancy by comparing:</p>
+<pre><code>with pressBrakePedal
+vs.
+without pressBrakePedal</code></pre>
+<p>at matched correctness.</p>
+<p>Every interaction must log:</p>
+<pre><code>task_id
+state_before
+action
+arguments
+response
+state_after
+cost</code></pre>
+<p>---</p>
+<h2>12. Define the intended graph-learning update</h2>
+<p>Expected learner transformation:</p>
+<pre><code>+ P_parking_brake_engaged → A_start
+- P_brake_full → A_start</code></pre>
+<p>Then replan.</p>
+<p>For engine start:</p>
+<pre><code>- lock → brake → start
++ lock → parking_brake → start</code></pre>
+<p>For tasks where parking brake is already engaged:</p>
+<pre><code>- brake → start
++ start</code></pre>
+<p>if all other prerequisites already hold.</p>
+<p>The method should tombstone the obsolete edge rather than retaining both forever.</p>
+<p>---</p>
+<h2>13. Add simulator replay validation</h2>
+<p>For every candidate learned graph:</p>
+<ol>
+<li>synthesize a plan;</li>
+<li>execute it against the &#96;r+&#96; simulator;</li>
+<li>reject the graph update if the plan violates the environment;</li>
+<li>compare with the oracle minimal plan for redundant-call analysis.</li>
+</ol>
+<p>Create:</p>
+<pre><code>validation/replay_graph.py</code></pre>
+<p>---</p>
+<h2>14. Compute graph truth from the regime object</h2>
+<p>The benchmark must know the exact current graph.</p>
+<p>Create:</p>
+<pre><code>graph_truth_r_minus.json
+graph_truth_r_plus.json</code></pre>
+<p>Then compute:</p>
+<h3>Edge precision</h3>
+<pre><code>recovered true edges / recovered edges</code></pre>
+<h3>Edge recall</h3>
+<pre><code>recovered true changed edges / true changed edges</code></pre>
+<p>Handle retired edges explicitly:</p>
+<pre><code>a learner that keeps an obsolete edge is not fully correct</code></pre>
+<p>---</p>
+<h2>15. Measure IAR and discovery cost</h2>
+<h3>Invalid-action rate</h3>
+<p>Count failed calls caused by wrong precondition assumptions.</p>
+<h3>Discovery cost</h3>
+<p>Count all D3 actions used to identify the changed graph.</p>
+<h3>&#96;d*&#96;</h3>
+<p>Sweep the allowed D3 budget:</p>
+<pre><code>1, 2, 4, 8, ...</code></pre>
+<p>and find the smallest budget after which held-out affected siblings can be solved reliably.</p>
+<p>Do not define &#96;d*&#96; from a single trace.</p>
+<p>---</p>
+<h2>16. Measure CRR on efficiency-sensitive siblings</h2>
+<p>Use siblings where the stale skill remains correct but redundant.</p>
+<p>For example:</p>
+<pre><code>r+ initial state:
+parking brake already engaged
+doors locked
+fuel available
+brake released</code></pre>
+<p>Stale plan:</p>
+<pre><code>pressBrakePedal
+startEngine</code></pre>
+<p>Oracle plan:</p>
+<pre><code>startEngine</code></pre>
+<p>This creates a nonzero cost gap at matched correctness.</p>
+<p>Compute CRR only when:</p>
+<pre><code>C_stale != C_oracle</code></pre>
+<p>---</p>
+<h2>17. Required controls</h2>
+<p>Run:</p>
+<h3>A. No skill</h3>
+<p>Agent discovers procedure from scratch.</p>
+<h3>B. &#96;r+&#96; oracle skill</h3>
+<p>Upper bound.</p>
+<h3>C. Frozen &#96;r-&#96; stale skill</h3>
+<p>Tests stale damage.</p>
+<h3>D. &#96;r-&#96; skill + D3 graph learner</h3>
+<p>Target method condition.</p>
+<p>No condition should receive successful post-drift traces.</p>
+<p>---</p>
+<h2>18. Scale to the 10% / 25% / 40% scope sweep</h2>
+<p>After the 25% pilot works:</p>
+<ul>
+<li>add more independent precondition-bearing actions;</li>
+<li>construct a larger graph;</li>
+<li>edit 10%, 25%, and 40% of performance-relevant edges;</li>
+<li>keep semantic goals and unrelated edges fixed.</li>
+</ul>
+<p>Do not fake percentages by editing decorative edges that never affect a valid/minimal sibling plan.</p>
+<p>---</p>
+<h2>19. Acceptance checklist</h2>
+<ul>
+<li>[ ] &#96;r-&#96; and &#96;r+&#96; are executable BFCL backends;</li>
+<li>[ ] the same semantic goals are valid in both regimes;</li>
+<li>[ ] the physical event contains at least one edge addition and one edge retirement;</li>
+<li>[ ] C2.2 exposes no D1;</li>
+<li>[ ] C2.2 exposes no D2 successful traces;</li>
+<li>[ ] all changed edges are discoverable through D3 outcomes;</li>
+<li>[ ] affected siblings exercise edited edges;</li>
+<li>[ ] unchanged siblings exercise retained edges;</li>
+<li>[ ] at least one sibling exposes invalid-action stale damage;</li>
+<li>[ ] at least one sibling exposes redundant-call/cost stale damage;</li>
+<li>[ ] oracle plans replay successfully;</li>
+<li>[ ] recovered graph is scored against exact generator truth;</li>
+<li>[ ] probe/action discovery cost is metered.</li>
+</ul>
+<p>---</p>
+<h2>20. Expected output package</h2>
+<pre><code>drift_benchmark/C2.2/precondition_graph/
+├── README.md
+├── drift_spec.json
+├── precondition_graph_r_minus.json
+├── precondition_graph_r_plus.json
+├── graph_truth_r_minus.json
+├── graph_truth_r_plus.json
+├── vehicle_control_c2_r_minus.py
+├── vehicle_control_c2_r_plus.py
+├── skill_r_minus.md
+├── skill_r_plus_oracle.md
+├── siblings.json
+├── possible_answer_r_minus.json
+├── possible_answer_r_plus.json
+├── siblings.json
+├── d3/
+│   ├── d3_interaction.py
+│   └── interaction_log.jsonl
+└── validation/
+    ├── replay_graph.py
+    ├── edge_metrics.py
+    └── construction_report.json</code></pre>
+<h2>Minimal conceptual summary</h2>
+<pre><code>r- graph:
+
+doors_locked ─┐
+brake_full ───┼──&gt; start_engine ──&gt; engine_running ──&gt; cruise
+fuel_ok ──────┘
+
+
+                 abrupt edge drift
+
+
+r+ graph:
+
+doors_locked ───────┐
+parking_brake ──────┼──&gt; start_engine ──&gt; engine_running ──&gt; cruise
+fuel_ok ────────────┘
+
+brake_full → start_engine   RETIRED
+
+
+Evidence:
+D1 = 0
+D2 = 0
+D3 = interaction errors + state transitions only</code></pre>

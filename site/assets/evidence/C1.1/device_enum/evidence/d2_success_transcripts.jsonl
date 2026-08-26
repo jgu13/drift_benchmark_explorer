@@ -1,0 +1,1 @@
+{"evidence_id": "D2_001", "obligation": "E01", "weight": 0.5, "source": "held-out-success-transcript", "user_intent": "start the engine", "accepted_calls": ["pressBrakePedal(pedalPosition=1.0)", "startEngine(ignitionMode='X7')"], "observed_outcome": {"engineState": "running"}, "learner_extractable_mapping": {"start_engine": "X7"}}

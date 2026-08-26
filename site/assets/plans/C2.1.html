@@ -1,0 +1,1016 @@
+<h1>C2.1 — BFCL Precondition-Graph Drift: Agent Execution Plan</h1>
+<h2>Objective</h2>
+<p>Build an executable, BFCL-derived **C2.1 precondition-graph drift family**.</p>
+<p>The family tests whether an agent can update a persistent procedural skill when hidden action prerequisites change.</p>
+<p>The persistent skill stores:</p>
+<pre><code>directed action-precondition graph
++
+planner / execution recipe</code></pre>
+<p>The learner uses this graph to:</p>
+<pre><code>topologically order required actions
++
+avoid redundant calls</code></pre>
+<p>The physical drift is:</p>
+<pre><code>edge_add + edge_drop</code></pre>
+<p>with:</p>
+<pre><code>topology = expansion + retirement
+schedule = abrupt</code></pre>
+<p>The C2.1 evidence contract is:</p>
+<pre><code>D1 = 0%
+D2 = 40%
+D3 = 60%</code></pre>
+<p>where:</p>
+<pre><code>D2 = successful post-drift sibling traces
+D3 = violation / counterexample interaction feedback</code></pre>
+<p>The full family should support a drift-scope sweep over:</p>
+<pre><code>10%
+25%
+40%</code></pre>
+<p>of **performance-relevant precondition edges**.</p>
+<p>The initial construction target is:</p>
+<pre><code>72 total siblings
+
+32 affected
+18 unchanged-retention
+14 boundary/open-set
+8 matched-null</code></pre>
+<p>For the first pilot, implement only a small subset, but preserve the same construction logic.</p>
+<p>---</p>
+<h1>1. Reuse the same physical event as C2.2</h1>
+<p>C2.1 and C2.2 use the **same &#96;r- → r+&#96; environment change**.</p>
+<p>Their difference is:</p>
+<pre><code>C2.1:
+D2 = 40%
+D3 = 60%
+
+C2.2:
+D2 = 0%
+D3 = 100%</code></pre>
+<p>Therefore do not invent a different graph event for C2.1.</p>
+<p>Use the same BFCL &#96;VehicleControlAPI&#96; substrate and the same pilot physical event:</p>
+<pre><code>ADD:
+parking brake engaged → start engine
+
+DROP:
+full brake pedal → start engine</code></pre>
+<p>This makes C2.1 and C2.2 directly comparable.</p>
+<p>---</p>
+<h1>2. Create an isolated implementation package</h1>
+<p>From the BFCL repository root:</p>
+<pre><code>mkdir -p drift_benchmark/C2.1/precondition_graph</code></pre>
+<p>Create:</p>
+<pre><code>drift_benchmark/C2.1/precondition_graph/
+├── README.md
+├── drift_spec.json
+├── precondition_graph_r_minus.json
+├── precondition_graph_r_plus.json
+├── graph_truth_r_minus.json
+├── graph_truth_r_plus.json
+├── vehicle_control_c2_r_minus.py
+├── vehicle_control_c2_r_plus.py
+├── skill_r_minus.md
+├── skill_r_plus_oracle.md
+├── siblings.json
+├── siblings.json
+├── possible_answer_r_minus.json
+├── possible_answer_r_plus.json
+├── evidence/
+│   ├── d2_success_traces.jsonl
+│   ├── d3_counterexamples.jsonl
+│   └── evidence_allocation.json
+└── validation/
+    ├── replay_graph.py
+    ├── edge_metrics.py
+    ├── validate_evidence_partition.py
+    └── construction_report.json</code></pre>
+<p>Do not overwrite the standard BFCL files.</p>
+<p>---</p>
+<h1>3. Inspect the BFCL procedural backend</h1>
+<p>Inspect:</p>
+<pre><code>bfcl_eval/eval_checker/multi_turn_eval/func_source_code/vehicle_control.py</code></pre>
+<p>Run:</p>
+<pre><code>rg -n \
+&quot;def startEngine|def pressBrakePedal|def activateParkingBrake|def lockDoors|def fillFuelTank|def setCruiseControl&quot; \
+bfcl_eval/eval_checker/multi_turn_eval/func_source_code/vehicle_control.py</code></pre>
+<p>Also inspect:</p>
+<pre><code>bfcl_eval/data/multi_turn_func_doc/vehicle_control.json</code></pre>
+<p>The relevant baseline behavior should include hidden constraints such as:</p>
+<pre><code>all doors locked
+fully pressed brake pedal
+sufficient fuel</code></pre>
+<p>before:</p>
+<pre><code>startEngine(...)</code></pre>
+<p>and:</p>
+<pre><code>engine running</code></pre>
+<p>before:</p>
+<pre><code>setCruiseControl(...)</code></pre>
+<p>Do not assume graph edges from function names alone.</p>
+<p>Extract them from executable checks in the BFCL backend.</p>
+<p>---</p>
+<h1>4. Define the graph representation</h1>
+<p>Represent the skill as a directed graph over:</p>
+<pre><code>action nodes
++
+state-predicate nodes</code></pre>
+<p>Recommended action nodes:</p>
+<pre><code>A_lock
+A_brake
+A_park
+A_fuel
+A_start
+A_cruise</code></pre>
+<p>Recommended predicate nodes:</p>
+<pre><code>P_doors_locked
+P_brake_full
+P_parking_brake_engaged
+P_fuel_available
+P_engine_running</code></pre>
+<p>An edge:</p>
+<pre><code>P_brake_full → A_start</code></pre>
+<p>means:</p>
+<p>&gt; the full-brake predicate must hold before &#96;startEngine&#96; is valid.</p>
+<p>An edge:</p>
+<pre><code>A_start → P_engine_running</code></pre>
+<p>means:</p>
+<p>&gt; successful engine start establishes the engine-running predicate.</p>
+<p>---</p>
+<h1>5. Build the baseline graph &#96;G-&#96;</h1>
+<p>Create:</p>
+<pre><code>precondition_graph_r_minus.json</code></pre>
+<p>For a simple pilot, use an 8-edge graph:</p>
+<pre><code>{
+  &quot;regime&quot;: &quot;r_minus&quot;,
+  &quot;edges&quot;: [
+    [&quot;P_doors_locked&quot;, &quot;A_start&quot;],
+    [&quot;P_brake_full&quot;, &quot;A_start&quot;],
+    [&quot;P_fuel_available&quot;, &quot;A_start&quot;],
+    [&quot;A_lock&quot;, &quot;P_doors_locked&quot;],
+    [&quot;A_brake&quot;, &quot;P_brake_full&quot;],
+    [&quot;A_fuel&quot;, &quot;P_fuel_available&quot;],
+    [&quot;A_start&quot;, &quot;P_engine_running&quot;],
+    [&quot;P_engine_running&quot;, &quot;A_cruise&quot;]
+  ]
+}</code></pre>
+<p>Also create:</p>
+<pre><code>graph_truth_r_minus.json</code></pre>
+<p>containing the same executable truth.</p>
+<p>For this 8-edge pilot:</p>
+<pre><code>2 edited edges = 25% changed mass</code></pre>
+<p>This is the recommended first construction.</p>
+<p>---</p>
+<h1>6. Define the exact 25% pilot drift</h1>
+<p>Use:</p>
+<h2>Edge addition</h2>
+<p>Add:</p>
+<pre><code>P_parking_brake_engaged → A_start</code></pre>
+<p>Meaning:</p>
+<p>&gt; Under &#96;r+&#96;, the parking brake must be engaged before engine start.</p>
+<h2>Edge retirement</h2>
+<p>Drop:</p>
+<pre><code>P_brake_full → A_start</code></pre>
+<p>Meaning:</p>
+<p>&gt; Under &#96;r+&#96;, a fully pressed brake pedal is no longer necessary for engine start.</p>
+<p>The semantic action remains:</p>
+<pre><code>start engine</code></pre>
+<p>The target final state remains:</p>
+<pre><code>engineState = &quot;running&quot;</code></pre>
+<p>Create:</p>
+<pre><code>drift_spec.json</code></pre>
+<p>with:</p>
+<pre><code>{
+  &quot;family&quot;: &quot;C2.1&quot;,
+  &quot;operator&quot;: [
+    &quot;edge_add&quot;,
+    &quot;edge_drop&quot;
+  ],
+  &quot;topology&quot;: [
+    &quot;expansion&quot;,
+    &quot;retirement&quot;
+  ],
+  &quot;schedule&quot;: &quot;abrupt&quot;,
+  &quot;scope&quot;: 0.25,
+  &quot;added_edges&quot;: [
+    [&quot;P_parking_brake_engaged&quot;, &quot;A_start&quot;]
+  ],
+  &quot;dropped_edges&quot;: [
+    [&quot;P_brake_full&quot;, &quot;A_start&quot;]
+  ]
+}</code></pre>
+<p>---</p>
+<h1>7. Build executable regime &#96;r-&#96;</h1>
+<p>Copy the existing BFCL vehicle backend:</p>
+<pre><code>cp \
+bfcl_eval/eval_checker/multi_turn_eval/func_source_code/vehicle_control.py \
+drift_benchmark/C2.1/precondition_graph/vehicle_control_c2_r_minus.py</code></pre>
+<p>Preserve the original &#96;startEngine&#96; checks.</p>
+<p>Conceptually:</p>
+<pre><code>if self.remainingUnlockedDoors &gt; 0:
+    return error
+
+if self.brakePedalStatus != &quot;pressed&quot;:
+    return error
+
+if self._brakePedalForce != 1000.0:
+    return error
+
+if self.fuelLevel &lt; MIN_FUEL_LEVEL:
+    return error</code></pre>
+<p>No parking-brake prerequisite should be added to &#96;r-&#96;.</p>
+<p>---</p>
+<h1>8. Build executable regime &#96;r+&#96;</h1>
+<p>Copy:</p>
+<pre><code>vehicle_control_c2_r_minus.py</code></pre>
+<p>to:</p>
+<pre><code>vehicle_control_c2_r_plus.py</code></pre>
+<p>Modify only the chosen prerequisite edges.</p>
+<h2>Remove the retired edge</h2>
+<p>Disable the brake-pedal prerequisite for engine start.</p>
+<p>For example, remove:</p>
+<pre><code>if self.brakePedalStatus != &quot;pressed&quot;:
+    return {&quot;error&quot;: ...}
+
+if self._brakePedalForce != 1000.0:
+    return {&quot;error&quot;: ...}</code></pre>
+<p>from the &#96;r+&#96; start procedure.</p>
+<h2>Add the new edge</h2>
+<p>Add:</p>
+<pre><code>if self.parkingBrakeStatus != &quot;engaged&quot;:
+    return {
+        &quot;error&quot;: &quot;Parking brake must be engaged before starting the engine.&quot;
+    }</code></pre>
+<p>Keep unchanged:</p>
+<pre><code>door requirement
+fuel requirement
+engine-start effect
+cruise-control semantics
+unrelated vehicle actions</code></pre>
+<p>---</p>
+<h1>9. Compile the new graph truth</h1>
+<p>Create:</p>
+<pre><code>precondition_graph_r_plus.json
+graph_truth_r_plus.json</code></pre>
+<p>Example:</p>
+<pre><code>{
+  &quot;regime&quot;: &quot;r_plus&quot;,
+  &quot;edges&quot;: [
+    [&quot;P_doors_locked&quot;, &quot;A_start&quot;],
+    [&quot;P_parking_brake_engaged&quot;, &quot;A_start&quot;],
+    [&quot;P_fuel_available&quot;, &quot;A_start&quot;],
+    [&quot;A_lock&quot;, &quot;P_doors_locked&quot;],
+    [&quot;A_brake&quot;, &quot;P_brake_full&quot;],
+    [&quot;A_park&quot;, &quot;P_parking_brake_engaged&quot;],
+    [&quot;A_fuel&quot;, &quot;P_fuel_available&quot;],
+    [&quot;A_start&quot;, &quot;P_engine_running&quot;],
+    [&quot;P_engine_running&quot;, &quot;A_cruise&quot;]
+  ],
+  &quot;retired_edges&quot;: [
+    [&quot;P_brake_full&quot;, &quot;A_start&quot;]
+  ]
+}</code></pre>
+<p>The generator must know exactly which edges were:</p>
+<pre><code>added
+retired
+retained</code></pre>
+<p>---</p>
+<h1>10. Keep public tool schemas stable</h1>
+<p>Do not encode the new prerequisite graph in the normal tool description.</p>
+<p>The learner-visible API may continue to expose:</p>
+<pre><code>startEngine(...)
+pressBrakePedal(...)
+activateParkingBrake(...)
+setCruiseControl(...)</code></pre>
+<p>but should not say:</p>
+<pre><code>&quot;startEngine now requires the parking brake&quot;</code></pre>
+<p>C2.1 has:</p>
+<pre><code>D1 = 0</code></pre>
+<p>so no direct declaration should reveal the graph change.</p>
+<p>---</p>
+<h1>11. Build the stale skill &#96;S-&#96;</h1>
+<p>Create:</p>
+<pre><code>skill_r_minus.md</code></pre>
+<p>Example:</p>
+<pre><code># Vehicle Procedure Skill — r-
+
+## Start engine
+
+1. Lock all doors if necessary.
+2. Fully press the brake pedal.
+3. Ensure fuel is available.
+4. Start the engine.
+
+## Cruise control
+
+1. Complete the engine-start procedure.
+2. Activate cruise control at the requested speed.</code></pre>
+<p>This skill is correct under &#96;r-&#96;.</p>
+<p>After drift, keep this exact skill unchanged initially.</p>
+<p>---</p>
+<h1>12. Build the oracle skill &#96;S+&#96;</h1>
+<p>Create:</p>
+<pre><code>skill_r_plus_oracle.md</code></pre>
+<p>Example:</p>
+<pre><code># Vehicle Procedure Skill — r+
+
+## Start engine
+
+1. Lock all doors if necessary.
+2. Engage the parking brake.
+3. Ensure fuel is available.
+4. Start the engine.
+
+The brake pedal is not required for engine start in this regime.
+
+## Cruise control
+
+1. Complete the current engine-start procedure.
+2. Activate cruise control at the requested speed.</code></pre>
+<p>Do not expose this file to the learner.</p>
+<p>---</p>
+<h1>13. Create BFCL sibling templates</h1>
+<p>Create:</p>
+<pre><code>siblings.json</code></pre>
+<p>Generate sibling tasks from varied initial states.</p>
+<p>Each sibling should explicitly record:</p>
+<pre><code>semantic goal
+initial state
+obligation support
+slice
+gold r-
+gold r+</code></pre>
+<p>Recommended task classes:</p>
+<pre><code>engine start
+cruise control
+compound vehicle preparation
+unrelated vehicle operation
+boundary / invalid state
+matched-null phrasing/state variation</code></pre>
+<p>---</p>
+<h1>14. Build affected sibling A: new edge required</h1>
+<p>Use an initial state such as:</p>
+<pre><code>doors locked
+parking brake released
+brake fully pressed
+fuel available
+engine stopped</code></pre>
+<p>User request:</p>
+<pre><code>&quot;Start the engine.&quot;</code></pre>
+<p>Under &#96;r-&#96;, the stale skill is valid.</p>
+<p>Under &#96;r+&#96;, the stale plan:</p>
+<pre><code>press brake
+start engine</code></pre>
+<p>fails because:</p>
+<pre><code>P_parking_brake_engaged</code></pre>
+<p>is missing.</p>
+<p>The correct &#96;r+&#96; plan is:</p>
+<pre><code>activateParkingBrake(mode=&quot;engage&quot;)
+startEngine(...)</code></pre>
+<p>This sibling detects the **added edge**.</p>
+<p>---</p>
+<h1>15. Build affected sibling B: retired edge creates redundant work</h1>
+<p>Use:</p>
+<pre><code>doors locked
+parking brake engaged
+brake released
+fuel available
+engine stopped</code></pre>
+<p>User:</p>
+<pre><code>&quot;Start the engine.&quot;</code></pre>
+<p>Under &#96;r+&#96;, the oracle minimal plan is:</p>
+<pre><code>startEngine(...)</code></pre>
+<p>if all remaining prerequisites already hold.</p>
+<p>The stale skill may do:</p>
+<pre><code>pressBrakePedal(1.0)
+startEngine(...)</code></pre>
+<p>and still succeed.</p>
+<p>This sibling is important because it creates:</p>
+<pre><code>same correctness
+higher stale cost</code></pre>
+<p>which is required for CRR.</p>
+<p>---</p>
+<h1>16. Build propagated affected siblings</h1>
+<p>Create tasks where the changed start-engine procedure is upstream of another goal.</p>
+<p>Example:</p>
+<pre><code>&quot;Activate cruise control at 60.&quot;</code></pre>
+<p>The dependency path is:</p>
+<pre><code>current engine-start plan
+        ↓
+engine running
+        ↓
+setCruiseControl(...)</code></pre>
+<p>Thus changing an engine-start prerequisite also affects cruise-control planning.</p>
+<p>These tasks test whether the learned graph update transfers structurally rather than being memorized as a single engine-start answer.</p>
+<p>---</p>
+<h1>17. Label sibling obligation support</h1>
+<p>For every sibling, store something like:</p>
+<pre><code>{
+  &quot;id&quot;: &quot;C2.1-aff-001&quot;,
+  &quot;semantic_goal&quot;: &quot;start_engine&quot;,
+  &quot;slice&quot;: &quot;affected&quot;,
+  &quot;obligation_support&quot;: [
+    &quot;P_parking_brake_engaged-&gt;A_start&quot;,
+    &quot;P_brake_full-&gt;A_start&quot;
+  ]
+}</code></pre>
+<p>A task is affected iff:</p>
+<pre><code>obligation_support ∩ edited_edges ≠ ∅</code></pre>
+<p>If the valid and minimal plan does not touch an edited edge, the task belongs in:</p>
+<pre><code>unchanged-retention</code></pre>
+<p>---</p>
+<h1>18. Create unchanged-retention siblings</h1>
+<p>Construct tasks that rely only on retained vehicle behavior.</p>
+<p>Examples may include:</p>
+<pre><code>check tire pressure
+adjust climate control
+lock doors
+turn headlights on</code></pre>
+<p>provided those procedures do not traverse the edited start-engine edges.</p>
+<p>These siblings test collateral damage.</p>
+<p>The updated skill should not modify unrelated procedures.</p>
+<p>---</p>
+<h1>19. Create boundary/open-set siblings</h1>
+<p>Create states or requests where:</p>
+<pre><code>precondition evidence is ambiguous
+action is unsupported
+multiple candidate prerequisites are plausible</code></pre>
+<p>The learner should not invent graph edges without evidence.</p>
+<p>Expected behavior may be:</p>
+<pre><code>probe safely
+retain uncertainty
+abstain from persistent update</code></pre>
+<p>when evidence is insufficient.</p>
+<p>---</p>
+<h1>20. Create matched-null siblings</h1>
+<p>Change irrelevant aspects while leaving the graph unchanged.</p>
+<p>Examples:</p>
+<pre><code>paraphrase the user request
+change a non-causal vehicle field
+alter an unrelated state variable</code></pre>
+<p>Expected behavior:</p>
+<pre><code>no persistent graph rewrite</code></pre>
+<p>---</p>
+<h1>21. Start with a small pilot sibling pool</h1>
+<p>Do not build all 72 tasks initially.</p>
+<p>Recommended first pilot:</p>
+<pre><code>12–16 tasks</code></pre>
+<p>for example:</p>
+<pre><code>6 affected
+3 unchanged-retention
+2 boundary/open-set
+1–2 matched-null</code></pre>
+<p>Require at least:</p>
+<pre><code>2 decisive siblings per changed edge obligation</code></pre>
+<p>before scaling.</p>
+<p>After the pilot works, scale toward:</p>
+<pre><code>72 total
+32 affected
+18 unchanged-retention
+14 boundary/open-set
+8 matched-null</code></pre>
+<p>---</p>
+<h1>22. Compile paired gold plans automatically</h1>
+<p>Create a small compiler:</p>
+<pre><code>compile_c2_1.py</code></pre>
+<p>Inputs:</p>
+<pre><code>initial state
+semantic goal
+regime graph</code></pre>
+<p>Outputs:</p>
+<pre><code>valid plan
+minimal plan
+expected final state
+expected action cost</code></pre>
+<p>Compile every sibling under both:</p>
+<pre><code>G-
+G+</code></pre>
+<p>Do not hand-author paired gold sequences independently.</p>
+<p>Example:</p>
+<pre><code>r-:
+press brake
+start engine
+
+r+:
+engage parking brake
+start engine</code></pre>
+<p>for a task whose initial state requires those actions.</p>
+<p>---</p>
+<h1>23. Define the C2.1 evidence obligations</h1>
+<p>The evidence mix is:</p>
+<pre><code>D2 = 40%
+D3 = 60%</code></pre>
+<p>The split must be over **changed edge obligation weight**, not arbitrary file count.</p>
+<p>For the 25% pilot, define edge obligations such as:</p>
+<pre><code>O1 = parking brake is newly required before start
+O2 = full brake is no longer required before start
+O3 = revised start procedure transfers to downstream cruise planning
+O4 = obsolete brake call creates avoidable execution cost
+O5 = candidate graph update must preserve retained prerequisites</code></pre>
+<p>Assign approximate evidence responsibility:</p>
+<pre><code>D2:
+valid paths and successful consequences
+≈ 40%
+
+D3:
+violations, failed assumptions, retirement counterexamples,
+and causal edge confirmation
+≈ 60%</code></pre>
+<p>---</p>
+<h1>24. Create &#96;evidence_allocation.json&#96;</h1>
+<p>Example:</p>
+<pre><code>{
+  &quot;setting&quot;: &quot;C2.1&quot;,
+  &quot;allocation&quot;: {
+    &quot;D1&quot;: 0,
+    &quot;D2&quot;: 40,
+    &quot;D3&quot;: 60
+  },
+  &quot;obligations&quot;: {
+    &quot;O1&quot;: {
+      &quot;description&quot;: &quot;Parking brake is required before engine start.&quot;,
+      &quot;primary_sources&quot;: [&quot;D2&quot;, &quot;D3&quot;]
+    },
+    &quot;O2&quot;: {
+      &quot;description&quot;: &quot;Full brake is no longer necessary for engine start.&quot;,
+      &quot;primary_sources&quot;: [&quot;D3&quot;]
+    },
+    &quot;O3&quot;: {
+      &quot;description&quot;: &quot;The revised start procedure transfers to downstream goals.&quot;,
+      &quot;primary_sources&quot;: [&quot;D2&quot;]
+    },
+    &quot;O4&quot;: {
+      &quot;description&quot;: &quot;The retired brake edge creates avoidable cost.&quot;,
+      &quot;primary_sources&quot;: [&quot;D3&quot;]
+    },
+    &quot;O5&quot;: {
+      &quot;description&quot;: &quot;Retained prerequisites remain valid.&quot;,
+      &quot;primary_sources&quot;: [&quot;D2&quot;, &quot;D3&quot;]
+    }
+  }
+}</code></pre>
+<p>The exact numerical obligation weighting can be refined later.</p>
+<p>Do not pretend the 40/60 split has been empirically calibrated before pilot tests.</p>
+<p>---</p>
+<h1>25. Construct D2 successful-trace evidence</h1>
+<p>Create:</p>
+<pre><code>evidence/d2_success_traces.jsonl</code></pre>
+<p>D2 should contain **successful post-drift sibling trajectories**.</p>
+<p>Do not use evaluation siblings.</p>
+<p>Example:</p>
+<pre><code>{
+  &quot;evidence_id&quot;: &quot;D2_001&quot;,
+  &quot;source_sibling&quot;: &quot;C2.1_evidence_001&quot;,
+  &quot;initial_state&quot;: {
+    &quot;doors_locked&quot;: true,
+    &quot;parking_brake_engaged&quot;: false,
+    &quot;brake_full&quot;: false,
+    &quot;fuel_available&quot;: true,
+    &quot;engine_running&quot;: false
+  },
+  &quot;semantic_goal&quot;: &quot;start_engine&quot;,
+  &quot;accepted_trace&quot;: [
+    &quot;activateParkingBrake(mode=&#x27;engage&#x27;)&quot;,
+    &quot;startEngine(ignitionMode=&#x27;START&#x27;)&quot;
+  ],
+  &quot;final_state&quot;: {
+    &quot;engine_running&quot;: true
+  }
+}</code></pre>
+<p>This provides positive evidence that:</p>
+<pre><code>parking brake
+        ↓
+start engine</code></pre>
+<p>is a valid path in &#96;r+&#96;.</p>
+<p>---</p>
+<h1>26. Add D2 transfer evidence</h1>
+<p>Include at least one successful sibling whose target is downstream.</p>
+<p>Example:</p>
+<pre><code>{
+  &quot;evidence_id&quot;: &quot;D2_002&quot;,
+  &quot;semantic_goal&quot;: &quot;activate_cruise_control&quot;,
+  &quot;accepted_trace&quot;: [
+    &quot;activateParkingBrake(mode=&#x27;engage&#x27;)&quot;,
+    &quot;startEngine(ignitionMode=&#x27;START&#x27;)&quot;,
+    &quot;setCruiseControl(speed=60)&quot;
+  ],
+  &quot;final_state&quot;: {
+    &quot;engine_running&quot;: true,
+    &quot;cruise_control&quot;: &quot;active&quot;
+  }
+}</code></pre>
+<p>The purpose is to show that the changed prerequisite is part of a reusable procedural graph rather than a one-task recipe.</p>
+<p>---</p>
+<h1>27. Prevent D2 from identifying the entire graph</h1>
+<p>D2 should cover only its assigned 40% edge weight.</p>
+<p>Do not provide successful traces for every edited configuration.</p>
+<p>In particular, successful traces alone may not prove that:</p>
+<pre><code>P_brake_full → A_start</code></pre>
+<p>was retired.</p>
+<p>A trace that omits a brake action is evidence, but retirement should be made causally decisive through D3 counterexamples or controlled comparisons.</p>
+<p>This preserves meaningful D3 responsibility.</p>
+<p>---</p>
+<h1>28. Construct D3 violation evidence</h1>
+<p>Create:</p>
+<pre><code>evidence/d3_counterexamples.jsonl</code></pre>
+<p>Example interaction:</p>
+<pre><code>state:
+doors locked
+parking brake released
+brake fully pressed
+fuel available</code></pre>
+<p>Action:</p>
+<pre><code>startEngine(...)</code></pre>
+<p>Result:</p>
+<pre><code>{
+  &quot;error&quot;: &quot;Parking brake must be engaged before starting the engine.&quot;
+}</code></pre>
+<p>This provides causal evidence for the newly added edge:</p>
+<pre><code>P_parking_brake_engaged → A_start</code></pre>
+<p>Meter this interaction.</p>
+<p>---</p>
+<h1>29. Construct D3 retirement counterexamples</h1>
+<p>To identify the dropped brake edge, expose a controlled successful counterexample.</p>
+<p>Initial state:</p>
+<pre><code>doors locked
+parking brake engaged
+brake released
+fuel available
+engine stopped</code></pre>
+<p>Execute:</p>
+<pre><code>startEngine(...)</code></pre>
+<p>and observe:</p>
+<pre><code>success</code></pre>
+<p>This is evidence against the stale edge:</p>
+<pre><code>P_brake_full → A_start</code></pre>
+<p>The learner should infer:</p>
+<pre><code>brake_full is no longer necessary</code></pre>
+<p>rather than keeping the old edge forever.</p>
+<p>---</p>
+<h1>30. Meter every D3 interaction</h1>
+<p>For every probe or natural interaction, record:</p>
+<pre><code>task_id
+state_before
+action
+arguments
+response
+state_after
+cost
+timestamp/order</code></pre>
+<p>Example:</p>
+<pre><code>{
+  &quot;evidence_id&quot;: &quot;D3_003&quot;,
+  &quot;task_id&quot;: &quot;evidence_probe_003&quot;,
+  &quot;state_before&quot;: {
+    &quot;doors_locked&quot;: true,
+    &quot;parking_brake_engaged&quot;: true,
+    &quot;brake_full&quot;: false,
+    &quot;fuel_available&quot;: true
+  },
+  &quot;action&quot;: &quot;startEngine&quot;,
+  &quot;arguments&quot;: {
+    &quot;ignitionMode&quot;: &quot;START&quot;
+  },
+  &quot;response&quot;: {
+    &quot;engineState&quot;: &quot;running&quot;
+  },
+  &quot;cost&quot;: 1
+}</code></pre>
+<p>D3 access must be:</p>
+<pre><code>safe
+bounded
+metered</code></pre>
+<p>---</p>
+<h1>31. Keep D1 completely absent</h1>
+<p>C2.1 has:</p>
+<pre><code>D1 = 0%</code></pre>
+<p>Do not provide:</p>
+<pre><code>changelog
+migration notice
+new prerequisite documentation
+explicit graph diff</code></pre>
+<p>The agent must learn from:</p>
+<pre><code>successful sibling trajectories
++
+interaction outcomes</code></pre>
+<p>only.</p>
+<p>---</p>
+<h1>32. Define the intended graph update</h1>
+<p>The stale graph contains:</p>
+<pre><code>P_brake_full → A_start</code></pre>
+<p>The current graph contains:</p>
+<pre><code>P_parking_brake_engaged → A_start</code></pre>
+<p>Expected update:</p>
+<pre><code>- P_brake_full → A_start
++ P_parking_brake_engaged → A_start</code></pre>
+<p>The updater should:</p>
+<pre><code>add the new edge
+tombstone the retired edge
+retain unaffected edges
+recompute execution plans</code></pre>
+<p>---</p>
+<h1>33. Require candidate-plan replay before skill promotion</h1>
+<p>After the learner proposes a graph update:</p>
+<ol>
+<li>generate a candidate plan from the updated graph;</li>
+<li>execute it in the &#96;r+&#96; simulator;</li>
+<li>verify final state;</li>
+<li>verify no invalid actions;</li>
+<li>compare its cost against the oracle minimal plan;</li>
+<li>only then promote the new graph into persistent skill.</li>
+</ol>
+<p>Do not accept a text-only graph edit without executable replay.</p>
+<p>---</p>
+<h1>34. Build the replay validator</h1>
+<p>Create:</p>
+<pre><code>validation/replay_graph.py</code></pre>
+<p>It should accept:</p>
+<pre><code>candidate graph
+task initial state
+semantic goal</code></pre>
+<p>and produce:</p>
+<pre><code>candidate plan
+execution trace
+final-state correctness
+invalid-action count
+action cost</code></pre>
+<p>Reject candidate graphs whose plans do not replay successfully.</p>
+<p>---</p>
+<h1>35. Score edge precision and recall</h1>
+<p>Create:</p>
+<pre><code>validation/edge_metrics.py</code></pre>
+<p>Against exact &#96;G+&#96; truth, compute:</p>
+<h2>Edge precision</h2>
+<pre><code>correct recovered current edges
+/
+all recovered current edges</code></pre>
+<h2>Edge recall</h2>
+<pre><code>correct recovered changed edges
+/
+all true changed edges</code></pre>
+<p>Also score retirements.</p>
+<p>A learner that adds the new edge but fails to remove:</p>
+<pre><code>P_brake_full → A_start</code></pre>
+<p>has not fully recovered the current graph.</p>
+<p>---</p>
+<h1>36. Measure invalid-action rate</h1>
+<p>Define:</p>
+<pre><code>IAR =
+invalid executable calls
+/
+total executable calls</code></pre>
+<p>Important stale-error example:</p>
+<pre><code>start engine without parking brake</code></pre>
+<p>under &#96;r+&#96;.</p>
+<p>The updated method should reduce IAR relative to the frozen stale skill.</p>
+<p>---</p>
+<h1>37. Measure redundant-call cost</h1>
+<p>Use tasks where stale and oracle both succeed.</p>
+<p>Example:</p>
+<pre><code>parking brake already engaged
+doors locked
+fuel available
+brake released</code></pre>
+<p>Stale skill:</p>
+<pre><code>pressBrakePedal
+startEngine</code></pre>
+<p>Oracle skill:</p>
+<pre><code>startEngine</code></pre>
+<p>Both reach:</p>
+<pre><code>engine running</code></pre>
+<p>but stale execution costs more.</p>
+<p>This supports CRR.</p>
+<p>---</p>
+<h1>38. Measure discovery budget &#96;d*&#96;</h1>
+<p>Do not assign &#96;d*&#96; from the design.</p>
+<p>During execution, sweep evidence/probe budgets:</p>
+<pre><code>1
+2
+4
+8
+...</code></pre>
+<p>At each budget, train/update the skill using only evidence available within that budget.</p>
+<p>Evaluate on held-out affected siblings.</p>
+<p>Define &#96;d*&#96; as the smallest interaction/evidence budget that reaches the predeclared recovery criterion.</p>
+<p>---</p>
+<h1>39. Run core controls</h1>
+<p>For each regime and sibling pool, run:</p>
+<h2>A. No skill</h2>
+<pre><code>A + no persistent graph</code></pre>
+<h2>B. Oracle skill</h2>
+<pre><code>A + S+</code></pre>
+<h2>C. Frozen stale skill</h2>
+<pre><code>A + S-
+under r+</code></pre>
+<h2>D. C2.1 learner</h2>
+<pre><code>A + S-
++ D2 successful traces
++ D3 counterexamples
++ updater</code></pre>
+<p>---</p>
+<h1>40. Run evidence ablations</h1>
+<p>Because C2.1 mixes D2 and D3, also run:</p>
+<pre><code>D2 only
+D3 only
+D2 + D3</code></pre>
+<p>Interpretation:</p>
+<h2>D2 only</h2>
+<p>Can successful trajectories induce enough of the revised graph?</p>
+<h2>D3 only</h2>
+<p>Can active interaction/counterexamples recover the graph without positive demonstrations?</p>
+<p>This approaches C2.2.</p>
+<h2>D2 + D3</h2>
+<p>Does fusion improve recovery efficiency or reduce probing?</p>
+<p>---</p>
+<h1>41. Compare C2.1 directly against C2.2</h1>
+<p>Keep fixed:</p>
+<pre><code>BFCL substrate
+G-
+G+
+physical edge event
+task sibling pool
+semantic goals
+grader
+cost model</code></pre>
+<p>Change only evidence:</p>
+<table><thead><tr><th>Property</th><th>C2.1</th><th>C2.2</th></tr></thead><tbody><tr><td>D1</td><td>0%</td><td>0%</td></tr><tr><td>D2</td><td>40%</td><td>0%</td></tr><tr><td>D3</td><td>60%</td><td>100%</td></tr><tr><td>Successful post-drift traces</td><td>exposed</td><td>hidden</td></tr><tr><td>Counterexample interactions</td><td>exposed</td><td>exposed</td></tr><tr><td>Main question</td><td>Do demonstrations reduce executable graph search?</td><td>Can interaction alone recover the graph?</td></tr></tbody></table>
+<p>This pairing is central to the design.</p>
+<p>---</p>
+<h1>42. Scale the edge-scope sweep</h1>
+<p>After the 25% pilot works, enlarge the graph.</p>
+<p>Construct three physical-drift variants:</p>
+<pre><code>10%
+25%
+40%</code></pre>
+<p>of performance-relevant edges.</p>
+<p>For each scope:</p>
+<pre><code>add at least one real prerequisite edge
+retire at least one real prerequisite edge</code></pre>
+<p>when possible.</p>
+<p>Do not count decorative edges that never affect:</p>
+<pre><code>validity
+minimality
+downstream task plans</code></pre>
+<p>as changed mass.</p>
+<p>---</p>
+<h1>43. Preserve goals and action effects across regimes</h1>
+<p>For every sibling, keep fixed:</p>
+<pre><code>user semantic goal
+action meaning
+desired end state
+unrelated state transitions</code></pre>
+<p>Only the hidden prerequisite structure changes.</p>
+<p>For example:</p>
+<pre><code>&quot;start the engine&quot;</code></pre>
+<p>must mean the same thing in both regimes.</p>
+<p>Only the valid/minimal procedure changes.</p>
+<p>---</p>
+<h1>44. Compile sibling affectedness automatically</h1>
+<p>For each task:</p>
+<pre><code>affected = bool(
+    set(task.obligation_support)
+    &amp; set(drift.edited_edges)
+)</code></pre>
+<p>If affected:</p>
+<pre><code>compile new valid/minimal plan under G+</code></pre>
+<p>If unaffected:</p>
+<pre><code>gold semantic result and expected minimal cost should remain unchanged</code></pre>
+<p>Do not manually relabel tasks based on intuition.</p>
+<p>---</p>
+<h1>45. Add at least two decisive siblings per changed edge</h1>
+<p>Before accepting a graph event, require:</p>
+<pre><code>&gt;= 2 decisive siblings</code></pre>
+<p>for each changed obligation.</p>
+<p>For the new parking-brake edge:</p>
+<pre><code>one direct engine-start task
+one downstream cruise-control task</code></pre>
+<p>For the retired brake edge:</p>
+<pre><code>one direct minimality task
+one compound task where removing the redundant call saves cost</code></pre>
+<p>This reduces dependence on a single template.</p>
+<p>---</p>
+<h1>46. Final validation report</h1>
+<p>Create:</p>
+<pre><code>validation/construction_report.json</code></pre>
+<p>It should report, at minimum:</p>
+<pre><code>{
+  &quot;family&quot;: &quot;C2.1&quot;,
+  &quot;regime_pair_valid&quot;: true,
+  &quot;semantic_goal_invariant&quot;: true,
+  &quot;edited_edges&quot;: 2,
+  &quot;scope&quot;: 0.25,
+  &quot;d1_weight&quot;: 0.0,
+  &quot;d2_weight&quot;: 0.4,
+  &quot;d3_weight&quot;: 0.6,
+  &quot;successful_trace_evidence_present&quot;: true,
+  &quot;counterexample_evidence_present&quot;: true,
+  &quot;oracle_replay_passed&quot;: null,
+  &quot;stale_gap_measured&quot;: null,
+  &quot;metrics_measured&quot;: false
+}</code></pre>
+<p>Use &#96;null&#96; for empirical quantities not yet executed.</p>
+<p>---</p>
+<h1>47. Do not fabricate empirical metrics</h1>
+<p>Until the benchmark actually runs, leave unset:</p>
+<pre><code>edge RPrec
+edge RRec
+IAR
+d*
+CRR
+stale damage
+probe count
+recovery latency</code></pre>
+<p>The design-level package may define these metrics, but should not assign synthetic performance values.</p>
+<p>---</p>
+<h1>48. Acceptance checklist</h1>
+<p>An agent rebuilding C2.1 should finish only when:</p>
+<ul>
+<li>[ ] BFCL &#96;VehicleControlAPI&#96; is used as the procedural substrate;</li>
+<li>[ ] &#96;G-&#96; is extracted from executable precondition checks;</li>
+<li>[ ] &#96;G+&#96; changes at least one prerequisite edge and retires at least one edge;</li>
+<li>[ ] the 25% pilot edits exactly 2 of 8 performance-relevant edges;</li>
+<li>[ ] the same physical event can be reused by C2.2;</li>
+<li>[ ] user goals and action effects remain fixed;</li>
+<li>[ ] public tool docs do not reveal the graph delta;</li>
+<li>[ ] stale &#96;S-&#96; is retained after drift;</li>
+<li>[ ] oracle &#96;S+&#96; is created but hidden;</li>
+<li>[ ] D1 is completely withheld;</li>
+<li>[ ] D2 successful traces cover approximately 40% of changed obligation weight;</li>
+<li>[ ] D3 violation/counterexample evidence covers approximately 60%;</li>
+<li>[ ] D2 evidence siblings are disjoint from evaluation siblings;</li>
+<li>[ ] D3 interactions are safe and metered;</li>
+<li>[ ] candidate graph updates are simulator-replayed before promotion;</li>
+<li>[ ] affected siblings touch edited edges;</li>
+<li>[ ] unchanged siblings touch only retained edges;</li>
+<li>[ ] there is at least one invalid-action stale case;</li>
+<li>[ ] there is at least one correct-but-redundant stale case;</li>
+<li>[ ] no empirical metric is fabricated before execution.</li>
+</ul>
+<p>---</p>
+<h1>Expected final output</h1>
+<pre><code>drift_benchmark/
+└── C2.1/
+    └── precondition_graph/
+        ├── README.md
+        ├── drift_spec.json
+        ├── precondition_graph_r_minus.json
+        ├── precondition_graph_r_plus.json
+        ├── graph_truth_r_minus.json
+        ├── graph_truth_r_plus.json
+        ├── vehicle_control_c2_r_minus.py
+        ├── vehicle_control_c2_r_plus.py
+        ├── skill_r_minus.md
+        ├── skill_r_plus_oracle.md
+        ├── siblings.json
+        ├── siblings.json
+        ├── possible_answer_r_minus.json
+        ├── possible_answer_r_plus.json
+        ├── evidence/
+        │   ├── d2_success_traces.jsonl
+        │   ├── d3_counterexamples.jsonl
+        │   └── evidence_allocation.json
+        └── validation/
+            ├── replay_graph.py
+            ├── edge_metrics.py
+            ├── validate_evidence_partition.py
+            └── construction_report.json</code></pre>
+<p>---</p>
+<h1>Minimal conceptual summary</h1>
+<pre><code>r- graph
+
+doors_locked ─┐
+brake_full ───┼──&gt; start_engine ──&gt; engine_running ──&gt; cruise
+fuel_ok ──────┘
+
+
+                abrupt drift
+              edge add + drop
+
+
+r+ graph
+
+doors_locked ───────┐
+parking_brake ──────┼──&gt; start_engine ──&gt; engine_running ──&gt; cruise
+fuel_ok ────────────┘
+
+brake_full → start_engine    RETIRED
+
+
+Evidence in C2.1
+
+D2 = 40%
+successful post-drift traces
+        ↓
+show valid paths
+
+D3 = 60%
+violations + retirement counterexamples
+        ↓
+identify causal prerequisite changes
+
+        D2 + D3
+            ↓
+add/tombstone graph edges
+            ↓
+replan
+            ↓
+simulator replay
+            ↓
+persistent current skill</code></pre>

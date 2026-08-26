@@ -1,0 +1,441 @@
+<h1>C1.1 — BFCL Device-Enum Codebook Drift: Execution Plan</h1>
+<h2>0. Goal and roster contract</h2>
+<p>Build an executable BFCL-derived **C1.1** task family.</p>
+<p>**Roster contract**</p>
+<ul>
+<li>Family: &#96;device-enum codebook&#96;</li>
+<li>Origin: BFCL pattern</li>
+<li>Skill store: versioned enum table, action schema, execution templates</li>
+<li>Application recipe: semantic intent → current private enum → validated call</li>
+<li>Drift: &#96;enum_remap + enum_deprecate&#96;</li>
+<li>Topology: replacement / retirement</li>
+<li>Schedule: abrupt</li>
+<li>Changed-mass target: approximately **25% of performance-relevant enum obligations**, with **one old value explicitly deprecated**</li>
+<li>Invariant: natural-language intents and device outcomes remain fixed</li>
+<li>Stale failure: old skill invokes a wrong state or invalid enum</li>
+<li>Evidence:</li>
+<li>D1 = 0%</li>
+<li>D2 = 50% successful transcripts</li>
+<li>D3 = 50% safe probes</li>
+<li>Required update: patch enum rows, version-bind templates, replay affected states</li>
+<li>Validation: entry recovery, invalid-action rate, state replay, probe count</li>
+<li>Readouts: entry RR, IAR, &#96;d*&#96;, CD</li>
+</ul>
+<p>The cleanest BFCL substrate is &#96;VehicleControlAPI&#96;, whose current executable backend and tool docs already contain enum-bearing actions such as engine ignition, headlights, parking brake, and climate mode.</p>
+<p>---</p>
+<h2>1. Work on a separate branch</h2>
+<p>Copy:</p>
+<pre><code>cp bfcl_eval/data/multi_turn_func_doc/vehicle_control.json \
+   drift_benchmark/C1.1/device_enum/vehicle_control_original.json
+
+cp bfcl_eval/eval_checker/multi_turn_eval/func_source_code/vehicle_control.py \
+   drift_benchmark/C1.1/device_enum/vehicle_control_original.py</code></pre>
+<p>---</p>
+<h2>2. Inspect and enumerate the private enum obligations</h2>
+<p>Extract enum-bearing calls from:</p>
+<pre><code>bfcl_eval/data/multi_turn_func_doc/vehicle_control.json</code></pre>
+<p>Focus on executable input enums, for example:</p>
+<pre><code>startEngine.ignitionMode:
+  START
+  STOP
+
+setHeadlights.mode:
+  on
+  off
+  auto
+
+activateParkingBrake.mode:
+  engage
+  release
+
+adjustClimateControl.mode:
+  auto
+  cool
+  heat
+  defrost
+
+adjustClimateControl.unit:
+  celsius
+  fahrenheit</code></pre>
+<p>Create:</p>
+<pre><code>drift_benchmark/C1.1/device_enum/enum_inventory.json</code></pre>
+<p>with one row per semantic obligation:</p>
+<pre><code>[
+  {
+    &quot;obligation_id&quot;: &quot;E01&quot;,
+    &quot;function&quot;: &quot;startEngine&quot;,
+    &quot;semantic_intent&quot;: &quot;start_engine&quot;,
+    &quot;parameter&quot;: &quot;ignitionMode&quot;,
+    &quot;r_minus_token&quot;: &quot;START&quot;
+  }
+]</code></pre>
+<p>For the pilot, choose **12 performance-relevant semantic enum obligations** so that 3 edited obligations correspond exactly to 25%.</p>
+<p>Do not count response enums unless they are needed to execute an action.</p>
+<p>---</p>
+<h2>3. Select the exact physical drift</h2>
+<p>Use three changed obligations.</p>
+<p>Recommended pilot:</p>
+<pre><code>E01: start_engine
+START → X7
+
+E02: headlights_auto
+auto → H2
+
+E03: climate_defrost
+defrost → C9</code></pre>
+<p>Explicitly tombstone one old value:</p>
+<pre><code>deprecated token: defrost</code></pre>
+<p>That means in &#96;r+&#96;:</p>
+<pre><code>adjustClimateControl(mode=&quot;defrost&quot;)</code></pre>
+<p>must return an invalid/deprecated-mode error rather than acting as an alias for &#96;C9&#96;.</p>
+<p>Keep the semantic effects unchanged:</p>
+<pre><code>X7 → engine running
+H2 → automatic headlight behavior
+C9 → defrost climate behavior</code></pre>
+<p>Create:</p>
+<pre><code>drift_benchmark/C1.1/device_enum/drift_spec.json</code></pre>
+<p>Example:</p>
+<pre><code>{
+  &quot;operator&quot;: [&quot;enum_remap&quot;, &quot;enum_deprecate&quot;],
+  &quot;schedule&quot;: &quot;abrupt&quot;,
+  &quot;topology&quot;: [&quot;replacement&quot;, &quot;retirement&quot;],
+  &quot;changed_mass&quot;: 0.25,
+  &quot;changes&quot;: [
+    {
+      &quot;obligation&quot;: &quot;E01&quot;,
+      &quot;old&quot;: &quot;START&quot;,
+      &quot;new&quot;: &quot;X7&quot;,
+      &quot;deprecated_old&quot;: false
+    },
+    {
+      &quot;obligation&quot;: &quot;E02&quot;,
+      &quot;old&quot;: &quot;auto&quot;,
+      &quot;new&quot;: &quot;H2&quot;,
+      &quot;deprecated_old&quot;: false
+    },
+    {
+      &quot;obligation&quot;: &quot;E03&quot;,
+      &quot;old&quot;: &quot;defrost&quot;,
+      &quot;new&quot;: &quot;C9&quot;,
+      &quot;deprecated_old&quot;: true
+    }
+  ]
+}</code></pre>
+<p>If C1.2 has already been built, reuse the same physical &#96;r- → r+&#96; event for shared obligations whenever possible. C1.1 and C1.2 should differ in evidence, not unnecessarily in the drift itself.</p>
+<p>---</p>
+<h2>4. Hide the private enum mapping from the task-level tool docs</h2>
+<p>The original BFCL docs leak values such as:</p>
+<pre><code>[Enum]: [&quot;START&quot;, &quot;STOP&quot;]</code></pre>
+<p>For this drift family, the current token mapping must live in the persistent skill or be acquired from evidence.</p>
+<p>Create version-neutral docs:</p>
+<pre><code>drift_benchmark/C1.1/device_enum/vehicle_control_private_doc.json</code></pre>
+<p>For changed parameters, replace explicit enum listings with wording such as:</p>
+<pre><code>&quot;The private ignition token used by the current vehicle-control interface.&quot;</code></pre>
+<p>Similarly:</p>
+<pre><code>&quot;The private token for the requested headlight mode.&quot;
+&quot;The private token for the requested climate mode.&quot;</code></pre>
+<p>Keep function names and parameter names unchanged.</p>
+<p>Do not expose &#96;X7&#96;, &#96;H2&#96;, or &#96;C9&#96; in normal task documentation.</p>
+<p>---</p>
+<h2>5. Build executable regime &#96;r-&#96;</h2>
+<p>Create:</p>
+<pre><code>drift_benchmark/C1.1/device_enum/vehicle_control_r_minus.py</code></pre>
+<p>Use the original BFCL behavior.</p>
+<p>Relevant examples:</p>
+<pre><code>if ignitionMode == &quot;START&quot;:
+    self.engine_state = &quot;running&quot;</code></pre>
+<pre><code>if mode == &quot;auto&quot;:
+    # original automatic headlight behavior</code></pre>
+<pre><code>self.acMode = mode  # defrost is valid under r-</code></pre>
+<p>Create:</p>
+<pre><code>regime_r_minus.json</code></pre>
+<p>containing the exact semantic-to-token map.</p>
+<p>---</p>
+<h2>6. Build executable regime &#96;r+&#96;</h2>
+<p>Copy &#96;vehicle_control_r_minus.py&#96; to:</p>
+<pre><code>vehicle_control_r_plus.py</code></pre>
+<p>Modify only the selected private semantics.</p>
+<p>Example:</p>
+<pre><code>if ignitionMode == &quot;X7&quot;:
+    self.engine_state = &quot;running&quot;</code></pre>
+<p>For headlights, replace the current executable &#96;auto&#96; token with &#96;H2&#96;.</p>
+<p>For climate defrost:</p>
+<pre><code>if mode == &quot;defrost&quot;:
+    return {&quot;error&quot;: &quot;Deprecated climate mode.&quot;}</code></pre>
+<p>and make:</p>
+<pre><code>mode == &quot;C9&quot;</code></pre>
+<p>execute the same semantic defrost behavior.</p>
+<p>Do not change unrelated vehicle behavior.</p>
+<p>---</p>
+<h2>7. Generate the stale and oracle skills</h2>
+<p>Create:</p>
+<pre><code>skill_r_minus.md
+skill_r_plus_oracle.md</code></pre>
+<p>&#96;skill_r_minus.md&#96; should contain the old mapping:</p>
+<pre><code># VehicleControlAPI Skill — r-
+
+- Start engine → `startEngine(ignitionMode=&quot;START&quot;)`
+- Automatic headlights → `setHeadlights(mode=&quot;auto&quot;)`
+- Defrost climate → `adjustClimateControl(..., mode=&quot;defrost&quot;)`</code></pre>
+<p>&#96;skill_r_plus_oracle.md&#96; should contain:</p>
+<pre><code># VehicleControlAPI Skill — r+
+
+- Start engine → `startEngine(ignitionMode=&quot;X7&quot;)`
+- Automatic headlights → `setHeadlights(mode=&quot;H2&quot;)`
+- Defrost climate → `adjustClimateControl(..., mode=&quot;C9&quot;)`</code></pre>
+<p>Never give the oracle skill to the learner.</p>
+<p>---</p>
+<h2>8. Construct BFCL sibling tasks</h2>
+<p>Create a custom JSONL file:</p>
+<pre><code>siblings.json</code></pre>
+<p>Each task should contain:</p>
+<pre><code>{
+  &quot;id&quot;: &quot;C1.1_aff_001&quot;,
+  &quot;question&quot;: [[
+    {
+      &quot;role&quot;: &quot;user&quot;,
+      &quot;content&quot;: &quot;Please start the engine.&quot;
+    }
+  ]],
+  &quot;initial_config&quot;: {
+    &quot;VehicleControlAPI&quot;: {}
+  },
+  &quot;path&quot;: [
+    &quot;VehicleControlAPI.pressBrakePedal&quot;,
+    &quot;VehicleControlAPI.startEngine&quot;
+  ],
+  &quot;involved_classes&quot;: [&quot;VehicleControlAPI&quot;],
+  &quot;obligation_support&quot;: [&quot;E01&quot;],
+  &quot;slice&quot;: &quot;affected&quot;
+}</code></pre>
+<p>The user prompt must state the semantic intent only.</p>
+<p>Never write:</p>
+<pre><code>START
+X7
+H2
+C9</code></pre>
+<p>in the user request.</p>
+<h3>Pilot sibling composition</h3>
+<p>Start with approximately 16–20 tasks:</p>
+<ul>
+<li>affected: 8</li>
+<li>unchanged-retention: 5</li>
+<li>boundary/open-set: 4</li>
+<li>matched-null: 2</li>
+</ul>
+<p>Scale later toward the roster target:</p>
+<pre><code>64 total
+26 affected
+19 unchanged-retention
+13 boundary/open-set
+6 matched-null</code></pre>
+<p>---</p>
+<h2>9. Compile gold answers under both regimes</h2>
+<p>Write:</p>
+<pre><code>compile_c1_1.py</code></pre>
+<p>For each sibling:</p>
+<pre><code>gold_minus = compile_task(task, regime_minus)
+gold_plus = compile_task(task, regime_plus)</code></pre>
+<p>Example:</p>
+<pre><code>semantic goal:
+start engine</code></pre>
+<p>produces:</p>
+<pre><code>r-:
+pressBrakePedal(pedalPosition=1.0)
+startEngine(ignitionMode=&quot;START&quot;)
+
+r+:
+pressBrakePedal(pedalPosition=1.0)
+startEngine(ignitionMode=&quot;X7&quot;)</code></pre>
+<p>Final state is unchanged:</p>
+<pre><code>engineState == &quot;running&quot;</code></pre>
+<p>Mark a sibling affected iff:</p>
+<pre><code>obligation_support ∩ changed_obligations != ∅</code></pre>
+<p>---</p>
+<h2>10. Construct D2 evidence for 50% of changed obligation weight</h2>
+<p>C1.1 has no D1.</p>
+<p>Create:</p>
+<pre><code>evidence/d2_success_transcripts.jsonl
+evidence/evidence_allocation.json</code></pre>
+<p>Assign 50% of the changed-obligation weight to D2.</p>
+<p>A simple weighting:</p>
+<pre><code>E01 start_engine: weight 0.50
+E02 headlights_auto: weight 0.25
+E03 climate_defrost: weight 0.25</code></pre>
+<p>Expose a successful post-drift transcript for E01 only:</p>
+<pre><code>{
+  &quot;evidence_id&quot;: &quot;D2_001&quot;,
+  &quot;obligation&quot;: &quot;E01&quot;,
+  &quot;user_intent&quot;: &quot;start the engine&quot;,
+  &quot;accepted_calls&quot;: [
+    &quot;pressBrakePedal(pedalPosition=1.0)&quot;,
+    &quot;startEngine(ignitionMode=&#x27;X7&#x27;)&quot;
+  ],
+  &quot;observed_outcome&quot;: {
+    &quot;engineState&quot;: &quot;running&quot;
+  }
+}</code></pre>
+<p>The transcript must come from a sibling not used for evaluation.</p>
+<p>The learner should extract:</p>
+<pre><code>start_engine → X7</code></pre>
+<p>from the accepted trajectory.</p>
+<p>Do not expose E02/E03 mappings through D2.</p>
+<p>---</p>
+<h2>11. Construct D3 safe probes for the remaining 50%</h2>
+<p>Create:</p>
+<pre><code>evidence/d3_probe_interface.py
+evidence/d3_probe_log.jsonl</code></pre>
+<p>Allow only a bounded safe probe surface.</p>
+<p>Example probe:</p>
+<pre><code>probe(&quot;setHeadlights&quot;, {&quot;mode&quot;: &quot;auto&quot;})</code></pre>
+<p>might return:</p>
+<pre><code>{&quot;error&quot;: &quot;Invalid headlight mode.&quot;}</code></pre>
+<p>Probe:</p>
+<pre><code>probe(&quot;setHeadlights&quot;, {&quot;mode&quot;: &quot;H2&quot;})</code></pre>
+<p>returns the correct automatic-light outcome.</p>
+<p>For the deprecated climate token:</p>
+<pre><code>probe(&quot;adjustClimateControl&quot;, {&quot;temperature&quot;: 20, &quot;mode&quot;: &quot;defrost&quot;})</code></pre>
+<p>returns:</p>
+<pre><code>{&quot;error&quot;: &quot;Deprecated climate mode.&quot;}</code></pre>
+<p>and:</p>
+<pre><code>probe(&quot;adjustClimateControl&quot;, {&quot;temperature&quot;: 20, &quot;mode&quot;: &quot;C9&quot;})</code></pre>
+<p>returns the semantic defrost state.</p>
+<p>Every probe must:</p>
+<ul>
+<li>be safe;</li>
+<li>be metered;</li>
+<li>record action and outcome;</li>
+<li>not leak held-out evaluation tasks.</li>
+</ul>
+<p>---</p>
+<h2>12. Define the intended skill transformation</h2>
+<p>The learner starts with:</p>
+<pre><code>S-</code></pre>
+<p>and receives:</p>
+<pre><code>D2 successful transcript for E01
++
+D3 probe outcomes for E02/E03</code></pre>
+<p>Expected patch:</p>
+<pre><code>- start_engine → START
++ start_engine → X7
+
+- headlights_auto → auto
++ headlights_auto → H2
+
+- climate_defrost → defrost
++ climate_defrost → C9
++ tombstone defrost</code></pre>
+<p>All unaffected rows must remain unchanged.</p>
+<p>---</p>
+<h2>13. Add BFCL backend registration</h2>
+<p>For a clean implementation, create versioned backend modules rather than repeatedly editing the original source.</p>
+<p>Suggested structure:</p>
+<pre><code>bfcl_eval/eval_checker/multi_turn_eval/func_source_code/
+├── vehicle_control.py
+├── vehicle_control_drift_c1_rminus.py
+└── vehicle_control_drift_c1_rplus.py</code></pre>
+<p>Then extend the backend registry or add a small drift-regime loader that chooses the class from task metadata:</p>
+<pre><code>&quot;drift_regime&quot;: &quot;r_plus&quot;</code></pre>
+<p>Do the same for function documentation.</p>
+<p>Keep the change isolated so standard BFCL remains reproducible.</p>
+<p>---</p>
+<h2>14. Generate possible-answer files</h2>
+<p>Create:</p>
+<pre><code>bfcl_eval/data/possible_answer/BFCL_drift_C1_1_r_minus.json
+bfcl_eval/data/possible_answer/BFCL_drift_C1_1_r_plus.json</code></pre>
+<p>Gold calls change only where the enum obligation changed.</p>
+<p>Final semantic states stay invariant.</p>
+<p>---</p>
+<h2>15. Run four construction controls</h2>
+<p>For each sibling set:</p>
+<h3>A. No skill</h3>
+<pre><code>A + no persistent enum map</code></pre>
+<h3>B. Correct oracle skill</h3>
+<pre><code>A + S+</code></pre>
+<h3>C. Frozen stale skill</h3>
+<pre><code>A + S-
+in r+</code></pre>
+<h3>D. Stale skill + C1.1 evidence + updater</h3>
+<pre><code>A + S- + D2/D3 evidence + update</code></pre>
+<p>The construction should demonstrate:</p>
+<pre><code>oracle &gt; no-skill
+oracle &gt; stale on affected siblings
+updated approaches oracle
+unchanged siblings remain intact</code></pre>
+<p>---</p>
+<h2>16. Validation checks</h2>
+<h3>Entry recovery</h3>
+<p>Check whether each changed semantic intent maps to the correct current token.</p>
+<h3>Invalid-action rate (IAR)</h3>
+<pre><code>invalid enum calls / total executable calls</code></pre>
+<h3>State replay</h3>
+<p>Execute the candidate updated call and verify final simulator state.</p>
+<h3>Probe count / &#96;d*&#96;</h3>
+<p>Count metered D3 probes required to identify the missing mappings.</p>
+<h3>Collateral damage (CD)</h3>
+<p>On unchanged enum obligations:</p>
+<pre><code>updated skill should produce the same calls/outcomes as S-</code></pre>
+<h3>Boundary/open-set</h3>
+<p>Unsupported semantic requests should abstain rather than guess a private token.</p>
+<p>---</p>
+<h2>17. Acceptance checklist</h2>
+<p>The C1.1 pilot is construction-ready only if:</p>
+<ul>
+<li>[ ] user prompts do not reveal private tokens;</li>
+<li>[ ] normal function docs do not reveal current changed tokens;</li>
+<li>[ ] &#96;r-&#96; and &#96;r+&#96; preserve semantic device outcomes;</li>
+<li>[ ] approximately 25% of selected enum obligations are changed;</li>
+<li>[ ] one old token is explicitly tombstoned;</li>
+<li>[ ] D2 covers 50% of changed obligation weight;</li>
+<li>[ ] D3 covers the remaining 50%;</li>
+<li>[ ] no D1 evidence is exposed;</li>
+<li>[ ] stale skill fails or incurs invalid actions on affected siblings;</li>
+<li>[ ] oracle skill succeeds;</li>
+<li>[ ] updated skill is replay-validated;</li>
+<li>[ ] unchanged siblings show negligible collateral edits.</li>
+</ul>
+<p>---</p>
+<h2>18. Expected output package</h2>
+<pre><code>drift_benchmark/C1.1/device_enum/
+├── README.md
+├── enum_inventory.json
+├── drift_spec.json
+├── regime_r_minus.json
+├── regime_r_plus.json
+├── vehicle_control_original.py
+├── vehicle_control_r_minus.py
+├── vehicle_control_r_plus.py
+├── vehicle_control_private_doc.json
+├── skill_r_minus.md
+├── skill_r_plus_oracle.md
+├── siblings.json
+├── possible_answer_r_minus.json
+├── possible_answer_r_plus.json
+├── siblings.json
+├── evidence/
+│   ├── d2_success_transcripts.jsonl
+│   ├── d3_probe_interface.py
+│   └── d3_probe_log.jsonl
+└── validation/
+    ├── replay_checks.py
+    └── construction_report.json</code></pre>
+<h2>Minimal conceptual summary</h2>
+<pre><code>same semantic task
+        |
+        v
+
+r- private map                 r+ private map
+start → START                  start → X7
+auto lights → auto     ---&gt;    auto lights → H2
+defrost → defrost              defrost → C9
+                               defrost = retired
+
+                 evidence
+        D2 50%           D3 50%
+ successful cases       safe probes
+            \             /
+             \           /
+              skill update
+                   |
+                   v
+          current enum table</code></pre>

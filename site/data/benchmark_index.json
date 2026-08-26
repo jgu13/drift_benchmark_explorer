@@ -1,0 +1,4542 @@
+{
+  "generated_at": "2026-08-26T19:05:06+00:00",
+  "roots": [
+    "/home/jiayao/Metaskill-library/data/C_drift_benchmark",
+    "/home/jiayao/Metaskill-library/data/D_drift_benchmark"
+  ],
+  "families": [
+    {
+      "id": "C1.1",
+      "title": "Device Enum",
+      "platform": "BFCL",
+      "mechanism": "Executable private enum remapping",
+      "status_label": "Constructed",
+      "drift_summary": "Selected private device enum values are remapped or deprecated while semantic user intent remains fixed.",
+      "task_count": 19,
+      "source_path": "/home/jiayao/Metaskill-library/data/C_drift_benchmark/C1.1",
+      "task_source": {
+        "path": "device_enum/siblings.json",
+        "format": "json"
+      },
+      "plan": {
+        "filename": "C1_1_BFCL_execution_plan.md",
+        "asset_path": "assets/plans/C1.1.md",
+        "html_asset_path": "assets/plans/C1.1.html"
+      },
+      "evidence": {
+        "D1": {
+          "percentage": 0,
+          "present": false,
+          "delivery": null,
+          "files": []
+        },
+        "D2": {
+          "percentage": 50,
+          "present": true,
+          "delivery": "Successful post-drift transcripts are supplied as demonstration evidence during adaptation.",
+          "files": [
+            "device_enum/evidence/d2_success_transcripts.jsonl"
+          ]
+        },
+        "D3": {
+          "percentage": 50,
+          "present": true,
+          "delivery": "The agent uses safe probes and observes current environment responses to complete executable enum coverage.",
+          "files": [
+            "device_enum/evidence/d3_probe_interface.py",
+            "device_enum/evidence/d3_probe_log.jsonl"
+          ]
+        }
+      },
+      "tasks": [
+        {
+          "id": "C1.1_aff_001",
+          "slice": "affected",
+          "description": "Private enum token mappings change while the user-facing vehicle-control intent remains fixed.",
+          "instruction": "Please start the engine.",
+          "source_file": "device_enum/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Please start the engine."
+                }
+              ]
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "remainingUnlockedDoors": 0,
+                "fuelLevel": 15.5,
+                "batteryVoltage": 12.8,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                }
+              }
+            },
+            "obligation_support": [
+              "E01"
+            ]
+          }
+        },
+        {
+          "id": "C1.1_aff_002",
+          "slice": "affected",
+          "description": "Private enum token mappings change while the user-facing vehicle-control intent remains fixed.",
+          "instruction": "Set the headlights to automatic behavior.",
+          "source_file": "device_enum/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Set the headlights to automatic behavior."
+                }
+              ]
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "remainingUnlockedDoors": 0,
+                "fuelLevel": 15.5,
+                "batteryVoltage": 12.8,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                }
+              }
+            },
+            "obligation_support": [
+              "E02"
+            ]
+          }
+        },
+        {
+          "id": "C1.1_aff_003",
+          "slice": "affected",
+          "description": "Private enum token mappings change while the user-facing vehicle-control intent remains fixed.",
+          "instruction": "Defrost the windshield and set the cabin to 22 degrees.",
+          "source_file": "device_enum/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Defrost the windshield and set the cabin to 22 degrees."
+                }
+              ]
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "remainingUnlockedDoors": 0,
+                "fuelLevel": 15.5,
+                "batteryVoltage": 12.8,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                }
+              }
+            },
+            "obligation_support": [
+              "E03"
+            ]
+          }
+        },
+        {
+          "id": "C1.1_aff_004",
+          "slice": "affected",
+          "description": "Private enum token mappings change while the user-facing vehicle-control intent remains fixed.",
+          "instruction": "Start the engine, then set the headlights to automatic behavior.",
+          "source_file": "device_enum/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Start the engine, then set the headlights to automatic behavior."
+                }
+              ]
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "remainingUnlockedDoors": 0,
+                "fuelLevel": 15.5,
+                "batteryVoltage": 12.8,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                }
+              }
+            },
+            "obligation_support": [
+              "E01",
+              "E02"
+            ]
+          }
+        },
+        {
+          "id": "C1.1_aff_005",
+          "slice": "affected",
+          "description": "Private enum token mappings change while the user-facing vehicle-control intent remains fixed.",
+          "instruction": "Start the engine and defrost the windshield at 21 degrees.",
+          "source_file": "device_enum/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Start the engine and defrost the windshield at 21 degrees."
+                }
+              ]
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "remainingUnlockedDoors": 0,
+                "fuelLevel": 15.5,
+                "batteryVoltage": 12.8,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                }
+              }
+            },
+            "obligation_support": [
+              "E01",
+              "E03"
+            ]
+          }
+        },
+        {
+          "id": "C1.1_aff_006",
+          "slice": "affected",
+          "description": "Private enum token mappings change while the user-facing vehicle-control intent remains fixed.",
+          "instruction": "Prepare for fog by using automatic headlights and windshield defrost at 20 degrees.",
+          "source_file": "device_enum/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Prepare for fog by using automatic headlights and windshield defrost at 20 degrees."
+                }
+              ]
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "remainingUnlockedDoors": 0,
+                "fuelLevel": 15.5,
+                "batteryVoltage": 12.8,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                }
+              }
+            },
+            "obligation_support": [
+              "E02",
+              "E03"
+            ]
+          }
+        },
+        {
+          "id": "C1.1_aff_007",
+          "slice": "affected",
+          "description": "Private enum token mappings change while the user-facing vehicle-control intent remains fixed.",
+          "instruction": "Defrost the windshield at 19 degrees, then start the engine.",
+          "source_file": "device_enum/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Defrost the windshield at 19 degrees, then start the engine."
+                }
+              ]
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "remainingUnlockedDoors": 0,
+                "fuelLevel": 15.5,
+                "batteryVoltage": 12.8,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                }
+              }
+            },
+            "obligation_support": [
+              "E03",
+              "E01"
+            ]
+          }
+        },
+        {
+          "id": "C1.1_aff_008",
+          "slice": "affected",
+          "description": "Private enum token mappings change while the user-facing vehicle-control intent remains fixed.",
+          "instruction": "Set the headlights to automatic behavior, then start the engine.",
+          "source_file": "device_enum/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Set the headlights to automatic behavior, then start the engine."
+                }
+              ]
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "remainingUnlockedDoors": 0,
+                "fuelLevel": 15.5,
+                "batteryVoltage": 12.8,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                }
+              }
+            },
+            "obligation_support": [
+              "E02",
+              "E01"
+            ]
+          }
+        },
+        {
+          "id": "C1.1_ret_001",
+          "slice": "unchanged-retention",
+          "description": "Unchanged enum behavior should be retained without unnecessary skill edits.",
+          "instruction": "Turn the headlights on.",
+          "source_file": "device_enum/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Turn the headlights on."
+                }
+              ]
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "remainingUnlockedDoors": 0,
+                "fuelLevel": 15.5,
+                "batteryVoltage": 12.8,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                }
+              }
+            },
+            "obligation_support": [
+              "E04"
+            ]
+          }
+        },
+        {
+          "id": "C1.1_ret_002",
+          "slice": "unchanged-retention",
+          "description": "Unchanged enum behavior should be retained without unnecessary skill edits.",
+          "instruction": "Turn the headlights off.",
+          "source_file": "device_enum/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Turn the headlights off."
+                }
+              ]
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "remainingUnlockedDoors": 0,
+                "fuelLevel": 15.5,
+                "batteryVoltage": 12.8,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                }
+              }
+            },
+            "obligation_support": [
+              "E05"
+            ]
+          }
+        },
+        {
+          "id": "C1.1_ret_003",
+          "slice": "unchanged-retention",
+          "description": "Unchanged enum behavior should be retained without unnecessary skill edits.",
+          "instruction": "Engage the parking brake.",
+          "source_file": "device_enum/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Engage the parking brake."
+                }
+              ]
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "remainingUnlockedDoors": 0,
+                "fuelLevel": 15.5,
+                "batteryVoltage": 12.8,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                }
+              }
+            },
+            "obligation_support": [
+              "E06"
+            ]
+          }
+        },
+        {
+          "id": "C1.1_ret_004",
+          "slice": "unchanged-retention",
+          "description": "Unchanged enum behavior should be retained without unnecessary skill edits.",
+          "instruction": "Release the parking brake.",
+          "source_file": "device_enum/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Release the parking brake."
+                }
+              ]
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "remainingUnlockedDoors": 0,
+                "fuelLevel": 15.5,
+                "batteryVoltage": 12.8,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                },
+                "parkingBrakeStatus": "engaged",
+                "parkingBrakeForce": 500.0
+              }
+            },
+            "obligation_support": [
+              "E07"
+            ]
+          }
+        },
+        {
+          "id": "C1.1_ret_005",
+          "slice": "unchanged-retention",
+          "description": "Unchanged enum behavior should be retained without unnecessary skill edits.",
+          "instruction": "Set the cabin climate to cooling at 18 degrees.",
+          "source_file": "device_enum/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Set the cabin climate to cooling at 18 degrees."
+                }
+              ]
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "remainingUnlockedDoors": 0,
+                "fuelLevel": 15.5,
+                "batteryVoltage": 12.8,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                }
+              }
+            },
+            "obligation_support": [
+              "E09"
+            ]
+          }
+        },
+        {
+          "id": "C1.1_bound_001",
+          "slice": "boundary-open-set",
+          "description": "The task probes unsupported or open-set device requests without inventing enum mappings.",
+          "instruction": "Set the headlights to a celebration flash pattern.",
+          "source_file": "device_enum/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Set the headlights to a celebration flash pattern."
+                }
+              ]
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "remainingUnlockedDoors": 0,
+                "fuelLevel": 15.5,
+                "batteryVoltage": 12.8,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                }
+              }
+            },
+            "obligation_support": []
+          }
+        },
+        {
+          "id": "C1.1_bound_002",
+          "slice": "boundary-open-set",
+          "description": "The task probes unsupported or open-set device requests without inventing enum mappings.",
+          "instruction": "Set the cabin climate to air-purifying mode.",
+          "source_file": "device_enum/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Set the cabin climate to air-purifying mode."
+                }
+              ]
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "remainingUnlockedDoors": 0,
+                "fuelLevel": 15.5,
+                "batteryVoltage": 12.8,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                }
+              }
+            },
+            "obligation_support": []
+          }
+        },
+        {
+          "id": "C1.1_bound_003",
+          "slice": "boundary-open-set",
+          "description": "The task probes unsupported or open-set device requests without inventing enum mappings.",
+          "instruction": "Start the engine using an emergency override mode.",
+          "source_file": "device_enum/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Start the engine using an emergency override mode."
+                }
+              ]
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "remainingUnlockedDoors": 0,
+                "fuelLevel": 15.5,
+                "batteryVoltage": 12.8,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                }
+              }
+            },
+            "obligation_support": []
+          }
+        },
+        {
+          "id": "C1.1_bound_004",
+          "slice": "boundary-open-set",
+          "description": "The task probes unsupported or open-set device requests without inventing enum mappings.",
+          "instruction": "Enable winter drive mode for the vehicle.",
+          "source_file": "device_enum/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Enable winter drive mode for the vehicle."
+                }
+              ]
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "remainingUnlockedDoors": 0,
+                "fuelLevel": 15.5,
+                "batteryVoltage": 12.8,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                }
+              }
+            },
+            "obligation_support": []
+          }
+        },
+        {
+          "id": "C1.1_null_001",
+          "slice": "matched-null",
+          "description": "Surface wording changes without requiring a persistent enum or recipe update.",
+          "instruction": "No vehicle-control change is needed; leave the car as it is.",
+          "source_file": "device_enum/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "No vehicle-control change is needed; leave the car as it is."
+                }
+              ]
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "remainingUnlockedDoors": 0,
+                "fuelLevel": 15.5,
+                "batteryVoltage": 12.8,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                }
+              }
+            },
+            "obligation_support": []
+          }
+        },
+        {
+          "id": "C1.1_null_002",
+          "slice": "matched-null",
+          "description": "Surface wording changes without requiring a persistent enum or recipe update.",
+          "instruction": "I only wanted to confirm that no action should be taken.",
+          "source_file": "device_enum/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "I only wanted to confirm that no action should be taken."
+                }
+              ]
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "remainingUnlockedDoors": 0,
+                "fuelLevel": 15.5,
+                "batteryVoltage": 12.8,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                }
+              }
+            },
+            "obligation_support": []
+          }
+        }
+      ],
+      "paired_family": null,
+      "family_notes": [],
+      "files_manifest": [
+        {
+          "path": "device_enum/README.md",
+          "kind": "md"
+        },
+        {
+          "path": "device_enum/drift_spec.json",
+          "kind": "json"
+        },
+        {
+          "path": "device_enum/evidence/d2_success_transcripts.jsonl",
+          "kind": "jsonl"
+        },
+        {
+          "path": "device_enum/evidence/d3_probe_interface.py",
+          "kind": "py"
+        },
+        {
+          "path": "device_enum/evidence/d3_probe_log.jsonl",
+          "kind": "jsonl"
+        },
+        {
+          "path": "device_enum/evidence/evidence_allocation.json",
+          "kind": "json"
+        },
+        {
+          "path": "device_enum/sibling_summary.json",
+          "kind": "json"
+        },
+        {
+          "path": "device_enum/siblings.json",
+          "kind": "json"
+        },
+        {
+          "path": "device_enum/skill_r_minus.md",
+          "kind": "md"
+        },
+        {
+          "path": "device_enum/validation/construction_report.json",
+          "kind": "json"
+        },
+        {
+          "path": "device_enum/validation/replay_checks.py",
+          "kind": "py"
+        }
+      ]
+    },
+    {
+      "id": "C1.2",
+      "title": "Device Enum Changelog",
+      "platform": "BFCL",
+      "mechanism": "Declared private enum migration",
+      "status_label": "Pilot constructed",
+      "drift_summary": "The private ignition token for engine start changes from START to X7 while engine-start semantics remain fixed.",
+      "task_count": 1,
+      "source_path": "/home/jiayao/Metaskill-library/data/C_drift_benchmark/C1.2",
+      "task_source": {
+        "path": "device_enum/task.json",
+        "format": "json"
+      },
+      "plan": {
+        "filename": "C1_2_BFCL_execution_plan.md",
+        "asset_path": "assets/plans/C1.2.md",
+        "html_asset_path": "assets/plans/C1.2.html"
+      },
+      "evidence": {
+        "D1": {
+          "percentage": 100,
+          "present": true,
+          "delivery": "The agent receives the stale skill plus an explicit changelog before adaptation. The changelog declares that the private start-engine token changed from START to X7.",
+          "files": [
+            "device_enum/evidence/d1_changelog.md"
+          ]
+        },
+        "D2": {
+          "percentage": 0,
+          "present": false,
+          "delivery": null,
+          "files": []
+        },
+        "D3": {
+          "percentage": 0,
+          "present": false,
+          "delivery": null,
+          "files": []
+        }
+      },
+      "tasks": [
+        {
+          "id": "C1.2_pilot_001",
+          "slice": "unspecified",
+          "description": "Engine start must update the private ignition token from START to X7 using the explicit changelog.",
+          "instruction": "I've secured all doors and engaged the parking brake. Please start the engine.",
+          "source_file": "device_enum/task.json",
+          "details": {
+            "question": [
+              {
+                "role": "user",
+                "content": "I've secured all doors and engaged the parking brake. Please start the engine."
+              }
+            ],
+            "source": "BFCL_v4_multi_turn_base_95"
+          }
+        }
+      ],
+      "paired_family": null,
+      "family_notes": [
+        "C1.2 is D1 100% because it models a declared interface migration.",
+        "During adaptation: stale skill plus changelog produces the updated skill.",
+        "The zero-shot and static controls do not receive this declaration."
+      ],
+      "files_manifest": [
+        {
+          "path": "device_enum/evidence/d1_changelog.md",
+          "kind": "md"
+        },
+        {
+          "path": "device_enum/evidence/evidence_allocation.json",
+          "kind": "json"
+        },
+        {
+          "path": "device_enum/skill_r_minus.md",
+          "kind": "md"
+        },
+        {
+          "path": "device_enum/task.json",
+          "kind": "json"
+        }
+      ]
+    },
+    {
+      "id": "C2.1",
+      "title": "Precondition Graph",
+      "platform": "BFCL",
+      "mechanism": "Executable precondition graph",
+      "status_label": "Constructed",
+      "drift_summary": "Engine-start prerequisites change by adding a parking-brake prerequisite and retiring the full-brake prerequisite.",
+      "task_count": 16,
+      "source_path": "/home/jiayao/Metaskill-library/data/C_drift_benchmark/C2.1",
+      "task_source": {
+        "path": "precondition_graph/siblings.json",
+        "format": "json"
+      },
+      "plan": {
+        "filename": "C2_1_BFCL_execution_plan.md",
+        "asset_path": "assets/plans/C2.1.md",
+        "html_asset_path": "assets/plans/C2.1.html"
+      },
+      "evidence": {
+        "D1": {
+          "percentage": 0,
+          "present": false,
+          "delivery": null,
+          "files": []
+        },
+        "D2": {
+          "percentage": 40,
+          "present": true,
+          "delivery": "Successful post-drift sibling trajectories are supplied during adaptation as positive evidence of valid action ordering.",
+          "files": [
+            "precondition_graph/evidence/d2_success_traces.jsonl"
+          ]
+        },
+        "D3": {
+          "percentage": 60,
+          "present": true,
+          "delivery": "The agent observes violations and counterexamples from the current environment, including evidence for newly required and retired prerequisites.",
+          "files": [
+            "precondition_graph/evidence/d3_counterexamples.jsonl"
+          ]
+        }
+      },
+      "tasks": [
+        {
+          "id": "C2.1_vehicle_001",
+          "slice": "affected-new-edge",
+          "description": "Engine start must recover the newly required parking-brake prerequisite.",
+          "instruction": "The doors are locked, the brake pedal is fully pressed, and there is fuel. Start the engine.",
+          "source_file": "precondition_graph/siblings.json",
+          "details": {
+            "question": [
+              {
+                "role": "user",
+                "content": "The doors are locked, the brake pedal is fully pressed, and there is fuel. Start the engine."
+              }
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "fuelLevel": 15.0,
+                "batteryVoltage": 12.6,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                },
+                "parkingBrakeStatus": "released",
+                "parkingBrakeForce": 0.0,
+                "brakePedalStatus": "pressed",
+                "brakePedalForce": 1000.0,
+                "distanceToNextVehicle": 50.0,
+                "cruiseStatus": "inactive"
+              }
+            },
+            "semantic_goal": "engine running",
+            "obligation_support": [
+              "P_parking_brake_engaged->A_start"
+            ],
+            "stale_damage": "invalid-action"
+          }
+        },
+        {
+          "id": "C2.1_vehicle_002",
+          "slice": "affected-new-edge",
+          "description": "Engine start must recover the newly required parking-brake prerequisite.",
+          "instruction": "Start the engine from this parked state.",
+          "source_file": "precondition_graph/siblings.json",
+          "details": {
+            "question": [
+              {
+                "role": "user",
+                "content": "Start the engine from this parked state."
+              }
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "fuelLevel": 12.0,
+                "batteryVoltage": 12.6,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                },
+                "parkingBrakeStatus": "released",
+                "parkingBrakeForce": 0.0,
+                "brakePedalStatus": "released",
+                "brakePedalForce": 0.0,
+                "distanceToNextVehicle": 50.0,
+                "cruiseStatus": "inactive"
+              }
+            },
+            "semantic_goal": "engine running",
+            "obligation_support": [
+              "P_parking_brake_engaged->A_start",
+              "P_brake_full->A_start"
+            ],
+            "stale_damage": "invalid-action"
+          }
+        },
+        {
+          "id": "C2.1_vehicle_003",
+          "slice": "affected-new-edge",
+          "description": "Engine start must recover the newly required parking-brake prerequisite.",
+          "instruction": "Secure the car as needed and start the engine.",
+          "source_file": "precondition_graph/siblings.json",
+          "details": {
+            "question": [
+              {
+                "role": "user",
+                "content": "Secure the car as needed and start the engine."
+              }
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "fuelLevel": 10.0,
+                "batteryVoltage": 12.6,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "unlocked",
+                  "passenger": "unlocked",
+                  "rear_left": "unlocked",
+                  "rear_right": "unlocked"
+                },
+                "parkingBrakeStatus": "released",
+                "parkingBrakeForce": 0.0,
+                "brakePedalStatus": "pressed",
+                "brakePedalForce": 1000.0,
+                "distanceToNextVehicle": 50.0,
+                "cruiseStatus": "inactive"
+              }
+            },
+            "semantic_goal": "engine running",
+            "obligation_support": [
+              "A_lock->P_doors_locked",
+              "P_doors_locked->A_start",
+              "P_parking_brake_engaged->A_start"
+            ],
+            "stale_damage": "invalid-action"
+          }
+        },
+        {
+          "id": "C2.1_vehicle_004",
+          "slice": "affected-new-edge",
+          "description": "Engine start must recover the newly required parking-brake prerequisite.",
+          "instruction": "Add enough fuel if needed, then start the engine.",
+          "source_file": "precondition_graph/siblings.json",
+          "details": {
+            "question": [
+              {
+                "role": "user",
+                "content": "Add enough fuel if needed, then start the engine."
+              }
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "fuelLevel": -1.0,
+                "batteryVoltage": 12.6,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                },
+                "parkingBrakeStatus": "released",
+                "parkingBrakeForce": 0.0,
+                "brakePedalStatus": "pressed",
+                "brakePedalForce": 1000.0,
+                "distanceToNextVehicle": 50.0,
+                "cruiseStatus": "inactive"
+              }
+            },
+            "semantic_goal": "engine running",
+            "obligation_support": [
+              "A_fuel->P_fuel_available",
+              "P_fuel_available->A_start",
+              "P_parking_brake_engaged->A_start"
+            ],
+            "stale_damage": "invalid-action"
+          }
+        },
+        {
+          "id": "C2.1_vehicle_005",
+          "slice": "propagated-affected",
+          "description": "The revised engine-start procedure must transfer to downstream cruise-control goals.",
+          "instruction": "Activate cruise control at 60.",
+          "source_file": "precondition_graph/siblings.json",
+          "details": {
+            "question": [
+              {
+                "role": "user",
+                "content": "Activate cruise control at 60."
+              }
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "fuelLevel": 15.0,
+                "batteryVoltage": 12.6,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                },
+                "parkingBrakeStatus": "released",
+                "parkingBrakeForce": 0.0,
+                "brakePedalStatus": "pressed",
+                "brakePedalForce": 1000.0,
+                "distanceToNextVehicle": 50.0,
+                "cruiseStatus": "inactive"
+              }
+            },
+            "semantic_goal": "cruise active at requested speed",
+            "obligation_support": [
+              "P_parking_brake_engaged->A_start",
+              "A_start->P_engine_running",
+              "P_engine_running->A_cruise"
+            ],
+            "stale_damage": "invalid-action"
+          }
+        },
+        {
+          "id": "C2.1_vehicle_006",
+          "slice": "propagated-affected",
+          "description": "The revised engine-start procedure must transfer to downstream cruise-control goals.",
+          "instruction": "Lock up if needed, start the car, and set cruise control to 55.",
+          "source_file": "precondition_graph/siblings.json",
+          "details": {
+            "question": [
+              {
+                "role": "user",
+                "content": "Lock up if needed, start the car, and set cruise control to 55."
+              }
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "fuelLevel": 14.0,
+                "batteryVoltage": 12.6,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "unlocked",
+                  "passenger": "unlocked",
+                  "rear_left": "unlocked",
+                  "rear_right": "unlocked"
+                },
+                "parkingBrakeStatus": "released",
+                "parkingBrakeForce": 0.0,
+                "brakePedalStatus": "released",
+                "brakePedalForce": 0.0,
+                "distanceToNextVehicle": 45.0,
+                "cruiseStatus": "inactive"
+              }
+            },
+            "semantic_goal": "cruise active at requested speed",
+            "obligation_support": [
+              "P_parking_brake_engaged->A_start",
+              "P_brake_full->A_start",
+              "P_engine_running->A_cruise"
+            ],
+            "stale_damage": "invalid-action"
+          }
+        },
+        {
+          "id": "C2.1_vehicle_007",
+          "slice": "affected-retired-edge-cost",
+          "description": "The stale skill retains a redundant brake-pedal action that now creates avoidable cost.",
+          "instruction": "The parking brake is already engaged. Start the engine.",
+          "source_file": "precondition_graph/siblings.json",
+          "details": {
+            "question": [
+              {
+                "role": "user",
+                "content": "The parking brake is already engaged. Start the engine."
+              }
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "fuelLevel": 13.0,
+                "batteryVoltage": 12.6,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                },
+                "parkingBrakeStatus": "engaged",
+                "parkingBrakeForce": 500.0,
+                "brakePedalStatus": "released",
+                "brakePedalForce": 0.0,
+                "distanceToNextVehicle": 50.0,
+                "cruiseStatus": "inactive"
+              }
+            },
+            "semantic_goal": "engine running",
+            "obligation_support": [
+              "P_brake_full->A_start"
+            ],
+            "stale_damage": "redundant-call"
+          }
+        },
+        {
+          "id": "C2.1_vehicle_008",
+          "slice": "affected-retired-edge-cost",
+          "description": "The stale skill retains a redundant brake-pedal action that now creates avoidable cost.",
+          "instruction": "Lock the driver door and start the engine.",
+          "source_file": "precondition_graph/siblings.json",
+          "details": {
+            "question": [
+              {
+                "role": "user",
+                "content": "Lock the driver door and start the engine."
+              }
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "fuelLevel": 11.0,
+                "batteryVoltage": 12.6,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "unlocked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                },
+                "parkingBrakeStatus": "engaged",
+                "parkingBrakeForce": 500.0,
+                "brakePedalStatus": "released",
+                "brakePedalForce": 0.0,
+                "distanceToNextVehicle": 50.0,
+                "cruiseStatus": "inactive"
+              }
+            },
+            "semantic_goal": "engine running",
+            "obligation_support": [
+              "A_lock->P_doors_locked",
+              "P_brake_full->A_start"
+            ],
+            "stale_damage": "redundant-call"
+          }
+        },
+        {
+          "id": "C2.1_vehicle_009",
+          "slice": "affected-retired-edge-cost",
+          "description": "The stale skill retains a redundant brake-pedal action that now creates avoidable cost.",
+          "instruction": "Refuel if needed and start the engine.",
+          "source_file": "precondition_graph/siblings.json",
+          "details": {
+            "question": [
+              {
+                "role": "user",
+                "content": "Refuel if needed and start the engine."
+              }
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "fuelLevel": -2.0,
+                "batteryVoltage": 12.6,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                },
+                "parkingBrakeStatus": "engaged",
+                "parkingBrakeForce": 500.0,
+                "brakePedalStatus": "released",
+                "brakePedalForce": 0.0,
+                "distanceToNextVehicle": 50.0,
+                "cruiseStatus": "inactive"
+              }
+            },
+            "semantic_goal": "engine running",
+            "obligation_support": [
+              "A_fuel->P_fuel_available",
+              "P_brake_full->A_start"
+            ],
+            "stale_damage": "redundant-call"
+          }
+        },
+        {
+          "id": "C2.1_vehicle_010",
+          "slice": "affected-retired-edge-cost",
+          "description": "The stale skill retains a redundant brake-pedal action that now creates avoidable cost.",
+          "instruction": "Start the car and set cruise control to 60.",
+          "source_file": "precondition_graph/siblings.json",
+          "details": {
+            "question": [
+              {
+                "role": "user",
+                "content": "Start the car and set cruise control to 60."
+              }
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "fuelLevel": 16.0,
+                "batteryVoltage": 12.6,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                },
+                "parkingBrakeStatus": "engaged",
+                "parkingBrakeForce": 500.0,
+                "brakePedalStatus": "released",
+                "brakePedalForce": 0.0,
+                "distanceToNextVehicle": 50.0,
+                "cruiseStatus": "inactive"
+              }
+            },
+            "semantic_goal": "cruise active at requested speed",
+            "obligation_support": [
+              "P_brake_full->A_start",
+              "P_engine_running->A_cruise"
+            ],
+            "stale_damage": "redundant-call"
+          }
+        },
+        {
+          "id": "C2.1_vehicle_011",
+          "slice": "unchanged-retention",
+          "description": "Retained precondition edges should keep working without collateral recipe damage.",
+          "instruction": "The car is unlocked. Lock the doors and start the engine.",
+          "source_file": "precondition_graph/siblings.json",
+          "details": {
+            "question": [
+              {
+                "role": "user",
+                "content": "The car is unlocked. Lock the doors and start the engine."
+              }
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "fuelLevel": 12.0,
+                "batteryVoltage": 12.6,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "unlocked",
+                  "passenger": "unlocked",
+                  "rear_left": "unlocked",
+                  "rear_right": "unlocked"
+                },
+                "parkingBrakeStatus": "engaged",
+                "parkingBrakeForce": 500.0,
+                "brakePedalStatus": "pressed",
+                "brakePedalForce": 1000.0,
+                "distanceToNextVehicle": 50.0,
+                "cruiseStatus": "inactive"
+              }
+            },
+            "semantic_goal": "engine running",
+            "obligation_support": [
+              "A_lock->P_doors_locked",
+              "P_doors_locked->A_start"
+            ],
+            "stale_damage": "none"
+          }
+        },
+        {
+          "id": "C2.1_vehicle_012",
+          "slice": "unchanged-retention",
+          "description": "Retained precondition edges should keep working without collateral recipe damage.",
+          "instruction": "Fuel is below the safe starting threshold. Add fuel and start the engine.",
+          "source_file": "precondition_graph/siblings.json",
+          "details": {
+            "question": [
+              {
+                "role": "user",
+                "content": "Fuel is below the safe starting threshold. Add fuel and start the engine."
+              }
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "fuelLevel": -1.5,
+                "batteryVoltage": 12.6,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                },
+                "parkingBrakeStatus": "engaged",
+                "parkingBrakeForce": 500.0,
+                "brakePedalStatus": "pressed",
+                "brakePedalForce": 1000.0,
+                "distanceToNextVehicle": 50.0,
+                "cruiseStatus": "inactive"
+              }
+            },
+            "semantic_goal": "engine running",
+            "obligation_support": [
+              "A_fuel->P_fuel_available",
+              "P_fuel_available->A_start"
+            ],
+            "stale_damage": "none"
+          }
+        },
+        {
+          "id": "C2.1_vehicle_013",
+          "slice": "unchanged-retention",
+          "description": "Retained precondition edges should keep working without collateral recipe damage.",
+          "instruction": "The engine is already running. Activate cruise control at 45.",
+          "source_file": "precondition_graph/siblings.json",
+          "details": {
+            "question": [
+              {
+                "role": "user",
+                "content": "The engine is already running. Activate cruise control at 45."
+              }
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "fuelLevel": 18.0,
+                "batteryVoltage": 12.6,
+                "engineState": "running",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                },
+                "parkingBrakeStatus": "released",
+                "parkingBrakeForce": 0.0,
+                "brakePedalStatus": "released",
+                "brakePedalForce": 0.0,
+                "distanceToNextVehicle": 40.0,
+                "cruiseStatus": "inactive"
+              }
+            },
+            "semantic_goal": "cruise active at requested speed",
+            "obligation_support": [
+              "P_engine_running->A_cruise"
+            ],
+            "stale_damage": "none"
+          }
+        },
+        {
+          "id": "C2.1_vehicle_014",
+          "slice": "boundary-open-set",
+          "description": "Open-set vehicle requests should not trigger unsupported graph edits.",
+          "instruction": "The engine is running. Activate cruise control at 62.",
+          "source_file": "precondition_graph/siblings.json",
+          "details": {
+            "question": [
+              {
+                "role": "user",
+                "content": "The engine is running. Activate cruise control at 62."
+              }
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "fuelLevel": 18.0,
+                "batteryVoltage": 12.6,
+                "engineState": "running",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                },
+                "parkingBrakeStatus": "engaged",
+                "parkingBrakeForce": 500.0,
+                "brakePedalStatus": "released",
+                "brakePedalForce": 0.0,
+                "distanceToNextVehicle": 40.0,
+                "cruiseStatus": "inactive"
+              }
+            },
+            "semantic_goal": "unsupported cruise speed",
+            "obligation_support": [
+              "P_engine_running->A_cruise"
+            ],
+            "stale_damage": "none"
+          }
+        },
+        {
+          "id": "C2.1_vehicle_015",
+          "slice": "boundary-open-set",
+          "description": "Open-set vehicle requests should not trigger unsupported graph edits.",
+          "instruction": "Start the engine, but do not lock doors or change the parking brake.",
+          "source_file": "precondition_graph/siblings.json",
+          "details": {
+            "question": [
+              {
+                "role": "user",
+                "content": "Start the engine, but do not lock doors or change the parking brake."
+              }
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "fuelLevel": 12.0,
+                "batteryVoltage": 12.6,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "unlocked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                },
+                "parkingBrakeStatus": "released",
+                "parkingBrakeForce": 0.0,
+                "brakePedalStatus": "pressed",
+                "brakePedalForce": 1000.0,
+                "distanceToNextVehicle": 50.0,
+                "cruiseStatus": "inactive"
+              }
+            },
+            "semantic_goal": "infeasible under user constraints",
+            "obligation_support": [
+              "P_doors_locked->A_start",
+              "P_parking_brake_engaged->A_start"
+            ],
+            "stale_damage": "invalid-action",
+            "constraints": {
+              "do_not_lock_doors": true,
+              "do_not_change_parking_brake": true
+            }
+          }
+        },
+        {
+          "id": "C2.1_vehicle_016",
+          "slice": "matched-null",
+          "description": "Null perturbations should not produce a persistent precondition-graph rewrite.",
+          "instruction": "Please turn the motor on; the parking brake and brake pedal are already set.",
+          "source_file": "precondition_graph/siblings.json",
+          "details": {
+            "question": [
+              {
+                "role": "user",
+                "content": "Please turn the motor on; the parking brake and brake pedal are already set."
+              }
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "fuelLevel": 13.0,
+                "batteryVoltage": 12.6,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                },
+                "parkingBrakeStatus": "engaged",
+                "parkingBrakeForce": 500.0,
+                "brakePedalStatus": "pressed",
+                "brakePedalForce": 1000.0,
+                "distanceToNextVehicle": 50.0,
+                "cruiseStatus": "inactive"
+              }
+            },
+            "semantic_goal": "engine running",
+            "obligation_support": [
+              "P_doors_locked->A_start",
+              "P_fuel_available->A_start"
+            ],
+            "stale_damage": "none"
+          }
+        }
+      ],
+      "paired_family": "C2.2",
+      "family_notes": [],
+      "files_manifest": [
+        {
+          "path": "precondition_graph/README.md",
+          "kind": "md"
+        },
+        {
+          "path": "precondition_graph/drift_spec.json",
+          "kind": "json"
+        },
+        {
+          "path": "precondition_graph/evidence/d2_success_traces.jsonl",
+          "kind": "jsonl"
+        },
+        {
+          "path": "precondition_graph/evidence/d3_counterexamples.jsonl",
+          "kind": "jsonl"
+        },
+        {
+          "path": "precondition_graph/evidence/evidence_allocation.json",
+          "kind": "json"
+        },
+        {
+          "path": "precondition_graph/sibling_summary.json",
+          "kind": "json"
+        },
+        {
+          "path": "precondition_graph/siblings.json",
+          "kind": "json"
+        },
+        {
+          "path": "precondition_graph/skill_r_minus.md",
+          "kind": "md"
+        },
+        {
+          "path": "precondition_graph/validation/construction_report.json",
+          "kind": "json"
+        },
+        {
+          "path": "precondition_graph/validation/edge_metrics.py",
+          "kind": "py"
+        },
+        {
+          "path": "precondition_graph/validation/replay_graph.py",
+          "kind": "py"
+        },
+        {
+          "path": "precondition_graph/validation/validate_evidence_partition.py",
+          "kind": "py"
+        }
+      ]
+    },
+    {
+      "id": "C2.2",
+      "title": "Precondition Graph Interaction",
+      "platform": "BFCL",
+      "mechanism": "D3-only precondition graph recovery",
+      "status_label": "Constructed",
+      "drift_summary": "The same precondition-graph change as C2.1 must be discovered through environment interaction alone.",
+      "task_count": 22,
+      "source_path": "/home/jiayao/Metaskill-library/data/C_drift_benchmark/C2.2",
+      "task_source": {
+        "path": "precondition_graph/siblings.json",
+        "format": "json"
+      },
+      "plan": {
+        "filename": "C2_2_BFCL_execution_plan.md",
+        "asset_path": "assets/plans/C2.2.md",
+        "html_asset_path": "assets/plans/C2.2.html"
+      },
+      "evidence": {
+        "D1": {
+          "percentage": 0,
+          "present": false,
+          "delivery": null,
+          "files": []
+        },
+        "D2": {
+          "percentage": 0,
+          "present": false,
+          "delivery": null,
+          "files": []
+        },
+        "D3": {
+          "percentage": 100,
+          "present": true,
+          "delivery": "The revised precondition graph is discovered from environment interaction alone; no declaration or successful demonstration channel is provided.",
+          "files": [
+            "precondition_graph/evidence/d3_interaction.py",
+            "precondition_graph/evidence/interaction_log.jsonl"
+          ]
+        }
+      },
+      "tasks": [
+        {
+          "id": "C2.2_vehicle_001",
+          "slice": "affected-new-edge",
+          "description": "Engine start must discover the newly required parking-brake prerequisite from interaction.",
+          "instruction": "The doors are locked, the brake pedal is fully pressed, and there is fuel. Start the engine.",
+          "source_file": "precondition_graph/siblings.json",
+          "details": {
+            "question": [
+              {
+                "role": "user",
+                "content": "The doors are locked, the brake pedal is fully pressed, and there is fuel. Start the engine."
+              }
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "fuelLevel": 15.0,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                },
+                "parkingBrakeStatus": "released",
+                "brakePedalStatus": "pressed",
+                "brakePedalForce": 1000.0
+              }
+            },
+            "semantic_goal": "engine running",
+            "obligation_support": [
+              "P_parking_brake_engaged->A_start"
+            ],
+            "stale_damage": "invalid-action"
+          }
+        },
+        {
+          "id": "C2.2_vehicle_002",
+          "slice": "affected-new-edge",
+          "description": "Engine start must discover the newly required parking-brake prerequisite from interaction.",
+          "instruction": "Start the engine from this parked state.",
+          "source_file": "precondition_graph/siblings.json",
+          "details": {
+            "question": [
+              {
+                "role": "user",
+                "content": "Start the engine from this parked state."
+              }
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "fuelLevel": 12.0,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                },
+                "parkingBrakeStatus": "released",
+                "brakePedalStatus": "released",
+                "brakePedalForce": 0.0
+              }
+            },
+            "semantic_goal": "engine running",
+            "obligation_support": [
+              "P_parking_brake_engaged->A_start",
+              "P_brake_full->A_start"
+            ],
+            "stale_damage": "invalid-action"
+          }
+        },
+        {
+          "id": "C2.2_vehicle_003",
+          "slice": "affected-new-edge",
+          "description": "Engine start must discover the newly required parking-brake prerequisite from interaction.",
+          "instruction": "Secure the car as needed and start the engine.",
+          "source_file": "precondition_graph/siblings.json",
+          "details": {
+            "question": [
+              {
+                "role": "user",
+                "content": "Secure the car as needed and start the engine."
+              }
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "fuelLevel": 10.0,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "unlocked",
+                  "passenger": "unlocked",
+                  "rear_left": "unlocked",
+                  "rear_right": "unlocked"
+                },
+                "parkingBrakeStatus": "released",
+                "brakePedalStatus": "pressed",
+                "brakePedalForce": 1000.0
+              }
+            },
+            "semantic_goal": "engine running",
+            "obligation_support": [
+              "A_lock->P_doors_locked",
+              "P_doors_locked->A_start",
+              "P_parking_brake_engaged->A_start"
+            ],
+            "stale_damage": "invalid-action"
+          }
+        },
+        {
+          "id": "C2.2_vehicle_004",
+          "slice": "affected-new-edge",
+          "description": "Engine start must discover the newly required parking-brake prerequisite from interaction.",
+          "instruction": "Add enough fuel if needed, then start the engine.",
+          "source_file": "precondition_graph/siblings.json",
+          "details": {
+            "question": [
+              {
+                "role": "user",
+                "content": "Add enough fuel if needed, then start the engine."
+              }
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "fuelLevel": -1.0,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                },
+                "parkingBrakeStatus": "released",
+                "brakePedalStatus": "pressed",
+                "brakePedalForce": 1000.0
+              }
+            },
+            "semantic_goal": "engine running",
+            "obligation_support": [
+              "A_fuel->P_fuel_available",
+              "P_fuel_available->A_start",
+              "P_parking_brake_engaged->A_start"
+            ],
+            "stale_damage": "invalid-action"
+          }
+        },
+        {
+          "id": "C2.2_vehicle_005",
+          "slice": "propagated-affected",
+          "description": "Downstream cruise-control goals must inherit the recovered engine-start procedure.",
+          "instruction": "Activate cruise control at 60.",
+          "source_file": "precondition_graph/siblings.json",
+          "details": {
+            "question": [
+              {
+                "role": "user",
+                "content": "Activate cruise control at 60."
+              }
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "fuelLevel": 15.0,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                },
+                "parkingBrakeStatus": "released",
+                "brakePedalStatus": "pressed",
+                "brakePedalForce": 1000.0,
+                "distanceToNextVehicle": 50.0
+              }
+            },
+            "semantic_goal": "cruise active at requested speed",
+            "obligation_support": [
+              "P_parking_brake_engaged->A_start",
+              "A_start->P_engine_running",
+              "P_engine_running->A_cruise"
+            ],
+            "stale_damage": "invalid-action"
+          }
+        },
+        {
+          "id": "C2.2_vehicle_006",
+          "slice": "propagated-affected",
+          "description": "Downstream cruise-control goals must inherit the recovered engine-start procedure.",
+          "instruction": "Lock up if needed, start the car, and set cruise control to 55.",
+          "source_file": "precondition_graph/siblings.json",
+          "details": {
+            "question": [
+              {
+                "role": "user",
+                "content": "Lock up if needed, start the car, and set cruise control to 55."
+              }
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "fuelLevel": 14.0,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "unlocked",
+                  "passenger": "unlocked",
+                  "rear_left": "unlocked",
+                  "rear_right": "unlocked"
+                },
+                "parkingBrakeStatus": "released",
+                "brakePedalStatus": "released",
+                "brakePedalForce": 0.0,
+                "distanceToNextVehicle": 45.0
+              }
+            },
+            "semantic_goal": "cruise active at requested speed",
+            "obligation_support": [
+              "P_parking_brake_engaged->A_start",
+              "P_engine_running->A_cruise"
+            ],
+            "stale_damage": "invalid-action"
+          }
+        },
+        {
+          "id": "C2.2_vehicle_007",
+          "slice": "affected-new-edge",
+          "description": "Engine start must discover the newly required parking-brake prerequisite from interaction.",
+          "instruction": "Get the engine running.",
+          "source_file": "precondition_graph/siblings.json",
+          "details": {
+            "question": [
+              {
+                "role": "user",
+                "content": "Get the engine running."
+              }
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "fuelLevel": 9.0,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                },
+                "parkingBrakeStatus": "released",
+                "brakePedalStatus": "released",
+                "brakePedalForce": 0.0
+              }
+            },
+            "semantic_goal": "engine running",
+            "obligation_support": [
+              "P_parking_brake_engaged->A_start"
+            ],
+            "stale_damage": "invalid-action"
+          }
+        },
+        {
+          "id": "C2.2_vehicle_008",
+          "slice": "affected-retired-edge-cost",
+          "description": "The interaction evidence should reveal redundant retired-edge actions and their avoidable cost.",
+          "instruction": "The parking brake is already engaged. Start the engine.",
+          "source_file": "precondition_graph/siblings.json",
+          "details": {
+            "question": [
+              {
+                "role": "user",
+                "content": "The parking brake is already engaged. Start the engine."
+              }
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "fuelLevel": 13.0,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                },
+                "parkingBrakeStatus": "engaged",
+                "parkingBrakeForce": 500.0,
+                "brakePedalStatus": "released",
+                "brakePedalForce": 0.0
+              }
+            },
+            "semantic_goal": "engine running",
+            "obligation_support": [
+              "P_brake_full->A_start"
+            ],
+            "stale_damage": "redundant-call"
+          }
+        },
+        {
+          "id": "C2.2_vehicle_009",
+          "slice": "matched-null",
+          "description": "Null perturbations should not create a graph update.",
+          "instruction": "Start the engine; the parking brake and brake pedal are already set.",
+          "source_file": "precondition_graph/siblings.json",
+          "details": {
+            "question": [
+              {
+                "role": "user",
+                "content": "Start the engine; the parking brake and brake pedal are already set."
+              }
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "fuelLevel": 13.0,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                },
+                "parkingBrakeStatus": "engaged",
+                "parkingBrakeForce": 500.0,
+                "brakePedalStatus": "pressed",
+                "brakePedalForce": 1000.0
+              }
+            },
+            "semantic_goal": "engine running",
+            "obligation_support": [
+              "P_doors_locked->A_start",
+              "P_fuel_available->A_start"
+            ],
+            "stale_damage": "none"
+          }
+        },
+        {
+          "id": "C2.2_vehicle_010",
+          "slice": "affected-retired-edge-cost",
+          "description": "The interaction evidence should reveal redundant retired-edge actions and their avoidable cost.",
+          "instruction": "Lock the driver door and start the engine.",
+          "source_file": "precondition_graph/siblings.json",
+          "details": {
+            "question": [
+              {
+                "role": "user",
+                "content": "Lock the driver door and start the engine."
+              }
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "fuelLevel": 11.0,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "unlocked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                },
+                "parkingBrakeStatus": "engaged",
+                "parkingBrakeForce": 500.0,
+                "brakePedalStatus": "released",
+                "brakePedalForce": 0.0
+              }
+            },
+            "semantic_goal": "engine running",
+            "obligation_support": [
+              "A_lock->P_doors_locked",
+              "P_brake_full->A_start"
+            ],
+            "stale_damage": "redundant-call"
+          }
+        },
+        {
+          "id": "C2.2_vehicle_011",
+          "slice": "affected-retired-edge-cost",
+          "description": "The interaction evidence should reveal redundant retired-edge actions and their avoidable cost.",
+          "instruction": "Refuel if needed and start the engine.",
+          "source_file": "precondition_graph/siblings.json",
+          "details": {
+            "question": [
+              {
+                "role": "user",
+                "content": "Refuel if needed and start the engine."
+              }
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "fuelLevel": -2.0,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                },
+                "parkingBrakeStatus": "engaged",
+                "parkingBrakeForce": 500.0,
+                "brakePedalStatus": "released",
+                "brakePedalForce": 0.0
+              }
+            },
+            "semantic_goal": "engine running",
+            "obligation_support": [
+              "A_fuel->P_fuel_available",
+              "P_brake_full->A_start"
+            ],
+            "stale_damage": "redundant-call"
+          }
+        },
+        {
+          "id": "C2.2_vehicle_012",
+          "slice": "affected-retired-edge-cost",
+          "description": "The interaction evidence should reveal redundant retired-edge actions and their avoidable cost.",
+          "instruction": "Start the car and set cruise control to 60.",
+          "source_file": "precondition_graph/siblings.json",
+          "details": {
+            "question": [
+              {
+                "role": "user",
+                "content": "Start the car and set cruise control to 60."
+              }
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "fuelLevel": 16.0,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                },
+                "parkingBrakeStatus": "engaged",
+                "parkingBrakeForce": 500.0,
+                "brakePedalStatus": "released",
+                "brakePedalForce": 0.0,
+                "distanceToNextVehicle": 50.0
+              }
+            },
+            "semantic_goal": "cruise active at requested speed",
+            "obligation_support": [
+              "P_brake_full->A_start",
+              "P_engine_running->A_cruise"
+            ],
+            "stale_damage": "redundant-call"
+          }
+        },
+        {
+          "id": "C2.2_vehicle_013",
+          "slice": "affected-retired-edge-cost",
+          "description": "The interaction evidence should reveal redundant retired-edge actions and their avoidable cost.",
+          "instruction": "Secure the vehicle, then activate cruise at 65.",
+          "source_file": "precondition_graph/siblings.json",
+          "details": {
+            "question": [
+              {
+                "role": "user",
+                "content": "Secure the vehicle, then activate cruise at 65."
+              }
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "fuelLevel": 16.0,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "unlocked",
+                  "passenger": "unlocked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                },
+                "parkingBrakeStatus": "engaged",
+                "parkingBrakeForce": 500.0,
+                "brakePedalStatus": "released",
+                "brakePedalForce": 0.0,
+                "distanceToNextVehicle": 55.0
+              }
+            },
+            "semantic_goal": "cruise active at requested speed",
+            "obligation_support": [
+              "A_lock->P_doors_locked",
+              "P_brake_full->A_start",
+              "P_engine_running->A_cruise"
+            ],
+            "stale_damage": "redundant-call"
+          }
+        },
+        {
+          "id": "C2.2_vehicle_014",
+          "slice": "unchanged-retention",
+          "description": "Retained graph edges should keep working while the changed engine-start edge is relearned.",
+          "instruction": "The car is unlocked. Lock the doors and start the engine.",
+          "source_file": "precondition_graph/siblings.json",
+          "details": {
+            "question": [
+              {
+                "role": "user",
+                "content": "The car is unlocked. Lock the doors and start the engine."
+              }
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "fuelLevel": 12.0,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "unlocked",
+                  "passenger": "unlocked",
+                  "rear_left": "unlocked",
+                  "rear_right": "unlocked"
+                },
+                "parkingBrakeStatus": "engaged",
+                "parkingBrakeForce": 500.0,
+                "brakePedalStatus": "pressed",
+                "brakePedalForce": 1000.0
+              }
+            },
+            "semantic_goal": "engine running",
+            "obligation_support": [
+              "A_lock->P_doors_locked",
+              "P_doors_locked->A_start"
+            ],
+            "stale_damage": "none"
+          }
+        },
+        {
+          "id": "C2.2_vehicle_015",
+          "slice": "unchanged-retention",
+          "description": "Retained graph edges should keep working while the changed engine-start edge is relearned.",
+          "instruction": "Fuel is below the safe starting threshold. Add fuel and start the engine.",
+          "source_file": "precondition_graph/siblings.json",
+          "details": {
+            "question": [
+              {
+                "role": "user",
+                "content": "Fuel is below the safe starting threshold. Add fuel and start the engine."
+              }
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "fuelLevel": -1.5,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                },
+                "parkingBrakeStatus": "engaged",
+                "parkingBrakeForce": 500.0,
+                "brakePedalStatus": "pressed",
+                "brakePedalForce": 1000.0
+              }
+            },
+            "semantic_goal": "engine running",
+            "obligation_support": [
+              "A_fuel->P_fuel_available",
+              "P_fuel_available->A_start"
+            ],
+            "stale_damage": "none"
+          }
+        },
+        {
+          "id": "C2.2_vehicle_016",
+          "slice": "unchanged-retention",
+          "description": "Retained graph edges should keep working while the changed engine-start edge is relearned.",
+          "instruction": "The engine is already running. Activate cruise control at 45.",
+          "source_file": "precondition_graph/siblings.json",
+          "details": {
+            "question": [
+              {
+                "role": "user",
+                "content": "The engine is already running. Activate cruise control at 45."
+              }
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "fuelLevel": 18.0,
+                "engineState": "running",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                },
+                "parkingBrakeStatus": "released",
+                "brakePedalStatus": "released",
+                "brakePedalForce": 0.0,
+                "distanceToNextVehicle": 40.0
+              }
+            },
+            "semantic_goal": "cruise active at requested speed",
+            "obligation_support": [
+              "P_engine_running->A_cruise"
+            ],
+            "stale_damage": "none"
+          }
+        },
+        {
+          "id": "C2.2_vehicle_017",
+          "slice": "boundary-open-set",
+          "description": "Open-set requests should be handled without inventing graph structure.",
+          "instruction": "The engine is running. Activate cruise control at 62.",
+          "source_file": "precondition_graph/siblings.json",
+          "details": {
+            "question": [
+              {
+                "role": "user",
+                "content": "The engine is running. Activate cruise control at 62."
+              }
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "fuelLevel": 18.0,
+                "engineState": "running",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                },
+                "parkingBrakeStatus": "engaged",
+                "parkingBrakeForce": 500.0,
+                "brakePedalStatus": "released",
+                "brakePedalForce": 0.0,
+                "distanceToNextVehicle": 40.0
+              }
+            },
+            "semantic_goal": "unsupported cruise speed",
+            "obligation_support": [
+              "P_engine_running->A_cruise"
+            ],
+            "stale_damage": "none"
+          }
+        },
+        {
+          "id": "C2.2_vehicle_018",
+          "slice": "boundary-open-set",
+          "description": "Open-set requests should be handled without inventing graph structure.",
+          "instruction": "Start the engine, but do not lock doors or change the parking brake.",
+          "source_file": "precondition_graph/siblings.json",
+          "details": {
+            "question": [
+              {
+                "role": "user",
+                "content": "Start the engine, but do not lock doors or change the parking brake."
+              }
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "fuelLevel": 12.0,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "unlocked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                },
+                "parkingBrakeStatus": "released",
+                "brakePedalStatus": "pressed",
+                "brakePedalForce": 1000.0
+              }
+            },
+            "semantic_goal": "infeasible under user constraints",
+            "obligation_support": [
+              "P_doors_locked->A_start",
+              "P_parking_brake_engaged->A_start"
+            ],
+            "stale_damage": "invalid-action"
+          }
+        },
+        {
+          "id": "C2.2_vehicle_019",
+          "slice": "matched-null",
+          "description": "Null perturbations should not create a graph update.",
+          "instruction": "Please turn the motor on.",
+          "source_file": "precondition_graph/siblings.json",
+          "details": {
+            "question": [
+              {
+                "role": "user",
+                "content": "Please turn the motor on."
+              }
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "fuelLevel": 9.0,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                },
+                "parkingBrakeStatus": "released",
+                "brakePedalStatus": "released",
+                "brakePedalForce": 0.0
+              }
+            },
+            "semantic_goal": "engine running",
+            "obligation_support": [
+              "P_parking_brake_engaged->A_start"
+            ],
+            "stale_damage": "invalid-action"
+          }
+        },
+        {
+          "id": "C2.2_vehicle_020",
+          "slice": "matched-null",
+          "description": "Null perturbations should not create a graph update.",
+          "instruction": "Turn on the ignition.",
+          "source_file": "precondition_graph/siblings.json",
+          "details": {
+            "question": [
+              {
+                "role": "user",
+                "content": "Turn on the ignition."
+              }
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "fuelLevel": 13.0,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                },
+                "parkingBrakeStatus": "engaged",
+                "parkingBrakeForce": 500.0,
+                "brakePedalStatus": "released",
+                "brakePedalForce": 0.0
+              }
+            },
+            "semantic_goal": "engine running",
+            "obligation_support": [
+              "P_brake_full->A_start"
+            ],
+            "stale_damage": "redundant-call"
+          }
+        },
+        {
+          "id": "C2.2_vehicle_021",
+          "slice": "affected-new-edge",
+          "description": "Engine start must discover the newly required parking-brake prerequisite from interaction.",
+          "instruction": "Only the driver door is unlocked. Prepare the vehicle and start the engine.",
+          "source_file": "precondition_graph/siblings.json",
+          "details": {
+            "question": [
+              {
+                "role": "user",
+                "content": "Only the driver door is unlocked. Prepare the vehicle and start the engine."
+              }
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "fuelLevel": 10.0,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "unlocked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                },
+                "parkingBrakeStatus": "released",
+                "brakePedalStatus": "pressed",
+                "brakePedalForce": 1000.0
+              }
+            },
+            "semantic_goal": "engine running",
+            "obligation_support": [
+              "A_lock->P_doors_locked",
+              "P_parking_brake_engaged->A_start"
+            ],
+            "stale_damage": "invalid-action"
+          }
+        },
+        {
+          "id": "C2.2_vehicle_022",
+          "slice": "propagated-affected",
+          "description": "Downstream cruise-control goals must inherit the recovered engine-start procedure.",
+          "instruction": "Refuel if necessary, start the engine, and activate cruise control at 70.",
+          "source_file": "precondition_graph/siblings.json",
+          "details": {
+            "question": [
+              {
+                "role": "user",
+                "content": "Refuel if necessary, start the engine, and activate cruise control at 70."
+              }
+            ],
+            "initial_config": {
+              "VehicleControlAPI": {
+                "fuelLevel": -1.0,
+                "engineState": "stopped",
+                "doorStatus": {
+                  "driver": "locked",
+                  "passenger": "locked",
+                  "rear_left": "locked",
+                  "rear_right": "locked"
+                },
+                "parkingBrakeStatus": "released",
+                "brakePedalStatus": "pressed",
+                "brakePedalForce": 1000.0,
+                "distanceToNextVehicle": 60.0
+              }
+            },
+            "semantic_goal": "cruise active at requested speed",
+            "obligation_support": [
+              "A_fuel->P_fuel_available",
+              "P_parking_brake_engaged->A_start",
+              "P_engine_running->A_cruise"
+            ],
+            "stale_damage": "invalid-action"
+          }
+        }
+      ],
+      "paired_family": "C2.1",
+      "family_notes": [],
+      "files_manifest": [
+        {
+          "path": "precondition_graph/README.md",
+          "kind": "md"
+        },
+        {
+          "path": "precondition_graph/drift_spec.json",
+          "kind": "json"
+        },
+        {
+          "path": "precondition_graph/evidence/d3_interaction.py",
+          "kind": "py"
+        },
+        {
+          "path": "precondition_graph/evidence/evidence_allocation.json",
+          "kind": "json"
+        },
+        {
+          "path": "precondition_graph/evidence/interaction_log.jsonl",
+          "kind": "jsonl"
+        },
+        {
+          "path": "precondition_graph/sibling_summary.json",
+          "kind": "json"
+        },
+        {
+          "path": "precondition_graph/siblings.json",
+          "kind": "json"
+        },
+        {
+          "path": "precondition_graph/skill_r_minus.md",
+          "kind": "md"
+        },
+        {
+          "path": "precondition_graph/validation/construction_report.json",
+          "kind": "json"
+        },
+        {
+          "path": "precondition_graph/validation/edge_metrics.py",
+          "kind": "py"
+        },
+        {
+          "path": "precondition_graph/validation/replay_graph.py",
+          "kind": "py"
+        }
+      ]
+    },
+    {
+      "id": "C3.1",
+      "title": "CLI Semantics",
+      "platform": "BFCL",
+      "mechanism": "Executable CLI grammar and cost drift",
+      "status_label": "Constructed",
+      "drift_summary": "CLI command grammar changes through flag replacement/deprecation and a new lower-cost shortcut.",
+      "task_count": 20,
+      "source_path": "/home/jiayao/Metaskill-library/data/C_drift_benchmark/C3.1",
+      "task_source": {
+        "path": "cli_semantics/siblings.json",
+        "format": "json"
+      },
+      "plan": {
+        "filename": "C3_1_BFCL_execution_plan.md",
+        "asset_path": "assets/plans/C3.1.md",
+        "html_asset_path": "assets/plans/C3.1.html"
+      },
+      "evidence": {
+        "D1": {
+          "percentage": 50,
+          "present": true,
+          "delivery": "A changelog localizes which CLI actions or flags have changed, without necessarily giving the exact replacement syntax.",
+          "files": [
+            "cli_semantics/evidence/d1_changelog.md"
+          ]
+        },
+        "D2": {
+          "percentage": 0,
+          "present": false,
+          "delivery": null,
+          "files": []
+        },
+        "D3": {
+          "percentage": 50,
+          "present": true,
+          "delivery": "Help output and safe command probes reveal executable replacement syntax and current command cost.",
+          "files": [
+            "cli_semantics/evidence/d3_help.jsonl",
+            "cli_semantics/evidence/d3_probe_log.jsonl"
+          ]
+        }
+      },
+      "tasks": [
+        {
+          "id": "C3.1_find_001",
+          "slice": "affected-flag-remap",
+          "description": "A CLI flag is localized by D1 but the exact replacement syntax must be recovered.",
+          "instruction": "Find every file named test_document.txt under the current directory.",
+          "source_file": "cli_semantics/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Find every file named test_document.txt under the current directory."
+                }
+              ]
+            ],
+            "initial_config": {
+              "GorillaCLI": {
+                "backend": "GorillaFileSystem",
+                "scenario": {
+                  "root": {
+                    "work": {
+                      "type": "directory",
+                      "contents": {
+                        "test_document.txt": {
+                          "type": "file",
+                          "content": "This is a draft version of the document."
+                        },
+                        "archives": {
+                          "type": "directory",
+                          "contents": {}
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "source": "BFCL_v4_multi_turn_base_19"
+          }
+        },
+        {
+          "id": "C3.1_find_002",
+          "slice": "affected-flag-remap",
+          "description": "A CLI flag is localized by D1 but the exact replacement syntax must be recovered.",
+          "instruction": "Find config.py anywhere under the current project.",
+          "source_file": "cli_semantics/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Find config.py anywhere under the current project."
+                }
+              ]
+            ],
+            "initial_config": {
+              "GorillaCLI": {
+                "backend": "GorillaFileSystem",
+                "scenario": {
+                  "root": {
+                    "project": {
+                      "type": "directory",
+                      "contents": {
+                        "src": {
+                          "type": "directory",
+                          "contents": {
+                            "config.py": {
+                              "type": "file",
+                              "content": "DEBUG = False"
+                            }
+                          }
+                        },
+                        "README.md": {
+                          "type": "file",
+                          "content": "Project documentation."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "source": "BFCL_v4_multi_turn_base_35"
+          }
+        },
+        {
+          "id": "C3.1_find_003",
+          "slice": "affected-flag-remap",
+          "description": "A CLI flag is localized by D1 but the exact replacement syntax must be recovered.",
+          "instruction": "Find quarterly_report.txt anywhere under the current workspace.",
+          "source_file": "cli_semantics/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Find quarterly_report.txt anywhere under the current workspace."
+                }
+              ]
+            ],
+            "initial_config": {
+              "GorillaCLI": {
+                "backend": "GorillaFileSystem",
+                "scenario": {
+                  "root": {
+                    "workspace": {
+                      "type": "directory",
+                      "contents": {
+                        "reports": {
+                          "type": "directory",
+                          "contents": {
+                            "quarterly_report.txt": {
+                              "type": "file",
+                              "content": "Q1 complete"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "source": "BFCL_v4_multi_turn_base_14"
+          }
+        },
+        {
+          "id": "C3.1_wc_001",
+          "slice": "affected-deprecation",
+          "description": "A retired CLI form must be replaced with the supported current syntax.",
+          "instruction": "Count the lines in summary.txt.",
+          "source_file": "cli_semantics/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Count the lines in summary.txt."
+                }
+              ]
+            ],
+            "initial_config": {
+              "GorillaCLI": {
+                "backend": "GorillaFileSystem",
+                "scenario": {
+                  "root": {
+                    "workspace": {
+                      "type": "directory",
+                      "contents": {
+                        "summary.txt": {
+                          "type": "file",
+                          "content": "This is the summary of the project. It includes various findings and conclusions. Further analysis is required."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "source": "BFCL_v4_multi_turn_base_25"
+          }
+        },
+        {
+          "id": "C3.1_wc_002",
+          "slice": "affected-deprecation",
+          "description": "A retired CLI form must be replaced with the supported current syntax.",
+          "instruction": "Count the lines in release_notes.txt.",
+          "source_file": "cli_semantics/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Count the lines in release_notes.txt."
+                }
+              ]
+            ],
+            "initial_config": {
+              "GorillaCLI": {
+                "backend": "GorillaFileSystem",
+                "scenario": {
+                  "root": {
+                    "release": {
+                      "type": "directory",
+                      "contents": {
+                        "release_notes.txt": {
+                          "type": "file",
+                          "content": "alpha\nbeta\ngamma"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "source": "BFCL_v4_multi_turn_base_16"
+          }
+        },
+        {
+          "id": "C3.1_shortcut_001",
+          "slice": "affected-shortcut-add",
+          "description": "A newly available lower-cost shortcut should be discovered and used when appropriate.",
+          "instruction": "Copy test_document.txt into archives as final_document.txt, then show me the renamed file contents.",
+          "source_file": "cli_semantics/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Copy test_document.txt into archives as final_document.txt, then show me the renamed file contents."
+                }
+              ]
+            ],
+            "initial_config": {
+              "GorillaCLI": {
+                "backend": "GorillaFileSystem",
+                "scenario": {
+                  "root": {
+                    "work": {
+                      "type": "directory",
+                      "contents": {
+                        "test_document.txt": {
+                          "type": "file",
+                          "content": "This is a draft version of the document."
+                        },
+                        "archives": {
+                          "type": "directory",
+                          "contents": {}
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "source": "BFCL_v4_multi_turn_base_19"
+          }
+        },
+        {
+          "id": "C3.1_shortcut_002",
+          "slice": "affected-shortcut-add",
+          "description": "A newly available lower-cost shortcut should be discovered and used when appropriate.",
+          "instruction": "Make a renamed archive copy of research_notes.txt called 2024_research_backup.txt.",
+          "source_file": "cli_semantics/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Make a renamed archive copy of research_notes.txt called 2024_research_backup.txt."
+                }
+              ]
+            ],
+            "initial_config": {
+              "GorillaCLI": {
+                "backend": "GorillaFileSystem",
+                "scenario": {
+                  "root": {
+                    "research": {
+                      "type": "directory",
+                      "contents": {
+                        "research_notes.txt": {
+                          "type": "file",
+                          "content": "Line 3: Experiment results\nLine 1: Introduction\nLine 2: Methodology"
+                        },
+                        "archives": {
+                          "type": "directory",
+                          "contents": {}
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "source": "BFCL_v4_multi_turn_base_16"
+          }
+        },
+        {
+          "id": "C3.1_shortcut_003",
+          "slice": "affected-shortcut-add",
+          "description": "A newly available lower-cost shortcut should be discovered and used when appropriate.",
+          "instruction": "Copy summary.txt into Research2023 and rename the copy project_summary.txt.",
+          "source_file": "cli_semantics/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Copy summary.txt into Research2023 and rename the copy project_summary.txt."
+                }
+              ]
+            ],
+            "initial_config": {
+              "GorillaCLI": {
+                "backend": "GorillaFileSystem",
+                "scenario": {
+                  "root": {
+                    "workspace": {
+                      "type": "directory",
+                      "contents": {
+                        "Research2023": {
+                          "type": "directory",
+                          "contents": {}
+                        },
+                        "summary.txt": {
+                          "type": "file",
+                          "content": "This is the summary of the project."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "source": "BFCL_v4_multi_turn_base_25"
+          }
+        },
+        {
+          "id": "C3.1_unchanged_001",
+          "slice": "unchanged-retention",
+          "description": "Unchanged CLI recipes should continue to work without collateral edits.",
+          "instruction": "Show me the contents of summary.txt.",
+          "source_file": "cli_semantics/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Show me the contents of summary.txt."
+                }
+              ]
+            ],
+            "initial_config": {
+              "GorillaCLI": {
+                "backend": "GorillaFileSystem",
+                "scenario": {
+                  "root": {
+                    "workspace": {
+                      "type": "directory",
+                      "contents": {
+                        "summary.txt": {
+                          "type": "file",
+                          "content": "This is the summary of the project."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "source": "BFCL_v4_multi_turn_base_25"
+          }
+        },
+        {
+          "id": "C3.1_unchanged_002",
+          "slice": "unchanged-retention",
+          "description": "Unchanged CLI recipes should continue to work without collateral edits.",
+          "instruction": "Sort the lines in tasks.txt alphabetically.",
+          "source_file": "cli_semantics/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Sort the lines in tasks.txt alphabetically."
+                }
+              ]
+            ],
+            "initial_config": {
+              "GorillaCLI": {
+                "backend": "GorillaFileSystem",
+                "scenario": {
+                  "root": {
+                    "workspace": {
+                      "type": "directory",
+                      "contents": {
+                        "tasks.txt": {
+                          "type": "file",
+                          "content": "zeta\nalpha\nbeta"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "source": "BFCL_v4_multi_turn_base_16"
+          }
+        },
+        {
+          "id": "C3.1_unchanged_003",
+          "slice": "unchanged-retention",
+          "description": "Unchanged CLI recipes should continue to work without collateral edits.",
+          "instruction": "Show every line in server.log that mentions ERROR.",
+          "source_file": "cli_semantics/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Show every line in server.log that mentions ERROR."
+                }
+              ]
+            ],
+            "initial_config": {
+              "GorillaCLI": {
+                "backend": "GorillaFileSystem",
+                "scenario": {
+                  "root": {
+                    "ops": {
+                      "type": "directory",
+                      "contents": {
+                        "server.log": {
+                          "type": "file",
+                          "content": "INFO boot\nERROR disk\nINFO done"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "source": "BFCL_v4_multi_turn_base_37"
+          }
+        },
+        {
+          "id": "C3.1_unchanged_004",
+          "slice": "unchanged-retention",
+          "description": "Unchanged CLI recipes should continue to work without collateral edits.",
+          "instruction": "Display final_plan.txt.",
+          "source_file": "cli_semantics/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Display final_plan.txt."
+                }
+              ]
+            ],
+            "initial_config": {
+              "GorillaCLI": {
+                "backend": "GorillaFileSystem",
+                "scenario": {
+                  "root": {
+                    "planning": {
+                      "type": "directory",
+                      "contents": {
+                        "final_plan.txt": {
+                          "type": "file",
+                          "content": "Ship after validation."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "source": "BFCL_v4_multi_turn_base_22"
+          }
+        },
+        {
+          "id": "C3.1_unchanged_005",
+          "slice": "unchanged-retention",
+          "description": "Unchanged CLI recipes should continue to work without collateral edits.",
+          "instruction": "Sort names.txt alphabetically.",
+          "source_file": "cli_semantics/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Sort names.txt alphabetically."
+                }
+              ]
+            ],
+            "initial_config": {
+              "GorillaCLI": {
+                "backend": "GorillaFileSystem",
+                "scenario": {
+                  "root": {
+                    "contacts": {
+                      "type": "directory",
+                      "contents": {
+                        "names.txt": {
+                          "type": "file",
+                          "content": "Mira\nAna\nLeo"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "source": "BFCL_v4_multi_turn_base_20"
+          }
+        },
+        {
+          "id": "C3.1_boundary_001",
+          "slice": "boundary-open-set",
+          "description": "Unsupported CLI requests should be rejected or handled without hallucinated syntax.",
+          "instruction": "Before searching for test_document.txt, check current help for the search command and use supported syntax only.",
+          "source_file": "cli_semantics/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Before searching for test_document.txt, check current help for the search command and use supported syntax only."
+                }
+              ]
+            ],
+            "initial_config": {
+              "GorillaCLI": {
+                "backend": "GorillaFileSystem",
+                "scenario": {
+                  "root": {
+                    "work": {
+                      "type": "directory",
+                      "contents": {
+                        "test_document.txt": {
+                          "type": "file",
+                          "content": "This is a draft version of the document."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "source": "synthetic_help_probe"
+          }
+        },
+        {
+          "id": "C3.1_boundary_002",
+          "slice": "boundary-open-set",
+          "description": "Unsupported CLI requests should be rejected or handled without hallucinated syntax.",
+          "instruction": "Check current help for line counting before counting summary.txt.",
+          "source_file": "cli_semantics/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Check current help for line counting before counting summary.txt."
+                }
+              ]
+            ],
+            "initial_config": {
+              "GorillaCLI": {
+                "backend": "GorillaFileSystem",
+                "scenario": {
+                  "root": {
+                    "workspace": {
+                      "type": "directory",
+                      "contents": {
+                        "summary.txt": {
+                          "type": "file",
+                          "content": "one\ntwo"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "source": "synthetic_help_probe"
+          }
+        },
+        {
+          "id": "C3.1_boundary_003",
+          "slice": "boundary-open-set",
+          "description": "Unsupported CLI requests should be rejected or handled without hallucinated syntax.",
+          "instruction": "Investigate whether this CLI supports reversing file lines; do not invent a command if help is unavailable.",
+          "source_file": "cli_semantics/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Investigate whether this CLI supports reversing file lines; do not invent a command if help is unavailable."
+                }
+              ]
+            ],
+            "initial_config": {
+              "GorillaCLI": {
+                "backend": "GorillaFileSystem",
+                "scenario": {
+                  "root": {
+                    "workspace": {
+                      "type": "directory",
+                      "contents": {
+                        "tasks.txt": {
+                          "type": "file",
+                          "content": "a\nb"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "source": "synthetic_unsupported"
+          }
+        },
+        {
+          "id": "C3.1_boundary_004",
+          "slice": "boundary-open-set",
+          "description": "Unsupported CLI requests should be rejected or handled without hallucinated syntax.",
+          "instruction": "Use current help to identify the optimized copy-and-rename operation, then make a renamed archive copy.",
+          "source_file": "cli_semantics/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Use current help to identify the optimized copy-and-rename operation, then make a renamed archive copy."
+                }
+              ]
+            ],
+            "initial_config": {
+              "GorillaCLI": {
+                "backend": "GorillaFileSystem",
+                "scenario": {
+                  "root": {
+                    "work": {
+                      "type": "directory",
+                      "contents": {
+                        "draft.txt": {
+                          "type": "file",
+                          "content": "draft"
+                        },
+                        "archives": {
+                          "type": "directory",
+                          "contents": {}
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "source": "synthetic_help_probe"
+          }
+        },
+        {
+          "id": "C3.1_null_001",
+          "slice": "matched-null",
+          "description": "Null filesystem changes should not cause a persistent CLI grammar update.",
+          "instruction": "Show changed_filename.txt.",
+          "source_file": "cli_semantics/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Show changed_filename.txt."
+                }
+              ]
+            ],
+            "initial_config": {
+              "GorillaCLI": {
+                "backend": "GorillaFileSystem",
+                "scenario": {
+                  "root": {
+                    "nullcase": {
+                      "type": "directory",
+                      "contents": {
+                        "changed_filename.txt": {
+                          "type": "file",
+                          "content": "same route different file"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "source": "synthetic_null"
+          }
+        },
+        {
+          "id": "C3.1_null_002",
+          "slice": "matched-null",
+          "description": "Null filesystem changes should not cause a persistent CLI grammar update.",
+          "instruction": "Sort alt_lines.txt.",
+          "source_file": "cli_semantics/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Sort alt_lines.txt."
+                }
+              ]
+            ],
+            "initial_config": {
+              "GorillaCLI": {
+                "backend": "GorillaFileSystem",
+                "scenario": {
+                  "root": {
+                    "nullcase": {
+                      "type": "directory",
+                      "contents": {
+                        "alt_lines.txt": {
+                          "type": "file",
+                          "content": "charlie\nbravo\nalpha"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "source": "synthetic_null"
+          }
+        },
+        {
+          "id": "C3.1_null_003",
+          "slice": "matched-null",
+          "description": "Null filesystem changes should not cause a persistent CLI grammar update.",
+          "instruction": "Show lines in notes.log mentioning READY.",
+          "source_file": "cli_semantics/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Show lines in notes.log mentioning READY."
+                }
+              ]
+            ],
+            "initial_config": {
+              "GorillaCLI": {
+                "backend": "GorillaFileSystem",
+                "scenario": {
+                  "root": {
+                    "nullcase": {
+                      "type": "directory",
+                      "contents": {
+                        "notes.log": {
+                          "type": "file",
+                          "content": "WAIT\nREADY\nDONE"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "source": "synthetic_null"
+          }
+        }
+      ],
+      "paired_family": null,
+      "family_notes": [],
+      "files_manifest": [
+        {
+          "path": "cli_semantics/README.md",
+          "kind": "md"
+        },
+        {
+          "path": "cli_semantics/drift_spec.json",
+          "kind": "json"
+        },
+        {
+          "path": "cli_semantics/evidence/d1_changelog.md",
+          "kind": "md"
+        },
+        {
+          "path": "cli_semantics/evidence/d3_help.jsonl",
+          "kind": "jsonl"
+        },
+        {
+          "path": "cli_semantics/evidence/d3_probe_log.jsonl",
+          "kind": "jsonl"
+        },
+        {
+          "path": "cli_semantics/evidence/evidence_allocation.json",
+          "kind": "json"
+        },
+        {
+          "path": "cli_semantics/sibling_summary.json",
+          "kind": "json"
+        },
+        {
+          "path": "cli_semantics/siblings.json",
+          "kind": "json"
+        },
+        {
+          "path": "cli_semantics/skill_r_minus.md",
+          "kind": "md"
+        },
+        {
+          "path": "cli_semantics/validation/cli_replay.py",
+          "kind": "py"
+        },
+        {
+          "path": "cli_semantics/validation/construction_report.json",
+          "kind": "json"
+        },
+        {
+          "path": "cli_semantics/validation/output_checks.py",
+          "kind": "py"
+        }
+      ]
+    },
+    {
+      "id": "D1.2",
+      "title": "Repository Navigation",
+      "platform": "OSWorld design-level",
+      "mechanism": "Repository path relocation",
+      "status_label": "Design-level",
+      "drift_summary": "Semantic repository targets move or split across paths while the requested information remains unchanged.",
+      "task_count": 9,
+      "source_path": "/home/jiayao/Metaskill-library/data/D_drift_benchmark/D1.2",
+      "task_source": {
+        "path": "repository_navigation/siblings.json",
+        "format": "json"
+      },
+      "plan": {
+        "filename": "D1_2_design_level_drift_plan.md",
+        "asset_path": "assets/plans/D1.2.md",
+        "html_asset_path": "assets/plans/D1.2.html"
+      },
+      "evidence": {
+        "D1": {
+          "percentage": 0,
+          "present": false,
+          "delivery": null,
+          "files": [
+            "D1_2_design_level_drift_plan.md"
+          ]
+        },
+        "D2": {
+          "percentage": 0,
+          "present": false,
+          "delivery": null,
+          "files": []
+        },
+        "D3": {
+          "percentage": 100,
+          "present": true,
+          "delivery": "The agent recovers current repository locations and navigation structure through environment/navigation interaction rather than a declared relocation map.",
+          "files": [
+            "repository_navigation/evidence/d3_evidence.jsonl"
+          ]
+        }
+      },
+      "tasks": [
+        {
+          "id": "D1.2-aff-001",
+          "slice": "affected",
+          "description": "A semantic repository target moved or split and must be found through bounded navigation evidence.",
+          "instruction": "Retrieve the reported experimental results for the TypeSQL project.",
+          "source_file": "repository_navigation/siblings.json",
+          "details": {
+            "question": "Retrieve the reported experimental results for the TypeSQL project.",
+            "expected_behavior_under_stale_skill": "old path fails; bounded search discovers relocated results file"
+          }
+        },
+        {
+          "id": "D1.2-aff-002",
+          "slice": "affected",
+          "description": "A semantic repository target moved or split and must be found through bounded navigation evidence.",
+          "instruction": "Retrieve the author information used by the project website.",
+          "source_file": "repository_navigation/siblings.json",
+          "details": {
+            "question": "Retrieve the author information used by the project website.",
+            "expected_behavior_under_stale_skill": "old file contains paper metadata but not authors; bounded search discovers split authors file"
+          }
+        },
+        {
+          "id": "D1.2-ret-001",
+          "slice": "unchanged-retention",
+          "description": "A repository target remains at the old path and should be retained.",
+          "instruction": "Retrieve the method description.",
+          "source_file": "repository_navigation/siblings.json",
+          "details": {
+            "question": "Retrieve the method description.",
+            "expected_behavior_under_stale_skill": "direct retrieval succeeds without map update"
+          }
+        },
+        {
+          "id": "D1.2-ret-002",
+          "slice": "unchanged-retention",
+          "description": "A repository target remains at the old path and should be retained.",
+          "instruction": "Retrieve the abstract and overview content.",
+          "source_file": "repository_navigation/siblings.json",
+          "details": {
+            "question": "Retrieve the abstract and overview content.",
+            "expected_behavior_under_stale_skill": "direct retrieval succeeds without map update"
+          }
+        },
+        {
+          "id": "D1.2-ret-003",
+          "slice": "unchanged-retention",
+          "description": "A repository target remains at the old path and should be retained.",
+          "instruction": "Locate the GitLab Pages deployment configuration.",
+          "source_file": "repository_navigation/siblings.json",
+          "details": {
+            "question": "Locate the GitLab Pages deployment configuration.",
+            "expected_behavior_under_stale_skill": "direct retrieval succeeds without map update"
+          }
+        },
+        {
+          "id": "D1.2-ret-004",
+          "slice": "unchanged-retention",
+          "description": "A repository target remains at the old path and should be retained.",
+          "instruction": "Locate the site styling and theme configuration.",
+          "source_file": "repository_navigation/siblings.json",
+          "details": {
+            "question": "Locate the site styling and theme configuration.",
+            "expected_behavior_under_stale_skill": "direct retrieval succeeds without map update"
+          }
+        },
+        {
+          "id": "D1.2-open-001",
+          "slice": "boundary-open-set",
+          "description": "An absent repository target should be verified by bounded search rather than hallucinated.",
+          "instruction": "Locate the supplementary video configuration.",
+          "source_file": "repository_navigation/siblings.json",
+          "details": {
+            "question": "Locate the supplementary video configuration.",
+            "expected_behavior_under_stale_skill": "bounded search; verify absence; abstain or report not found"
+          }
+        },
+        {
+          "id": "D1.2-null-001",
+          "slice": "matched-null",
+          "description": "A null repository variation should not trigger a path-map update.",
+          "instruction": "Retrieve the paper, code, and arXiv resource links.",
+          "source_file": "repository_navigation/siblings.json",
+          "details": {
+            "question": "Retrieve the paper, code, and arXiv resource links.",
+            "expected_behavior_under_stale_skill": "surface wording may vary but semantic location is unchanged; do not update map"
+          }
+        },
+        {
+          "id": "D1.2-null-002",
+          "slice": "matched-null",
+          "description": "A null repository variation should not trigger a path-map update.",
+          "instruction": "Retrieve the paper title, venue, and high-level site metadata.",
+          "source_file": "repository_navigation/siblings.json",
+          "details": {
+            "question": "Retrieve the paper title, venue, and high-level site metadata.",
+            "expected_behavior_under_stale_skill": "metadata remains in the old file even though authors split out; update only author_information"
+          }
+        }
+      ],
+      "paired_family": null,
+      "family_notes": [],
+      "files_manifest": [
+        {
+          "path": "repository_navigation/README.md",
+          "kind": "md"
+        },
+        {
+          "path": "repository_navigation/evidence/d3_evidence.jsonl",
+          "kind": "jsonl"
+        },
+        {
+          "path": "repository_navigation/evidence/evidence_allocation.json",
+          "kind": "json"
+        },
+        {
+          "path": "repository_navigation/grader_spec.json",
+          "kind": "json"
+        },
+        {
+          "path": "repository_navigation/siblings.json",
+          "kind": "json"
+        },
+        {
+          "path": "repository_navigation/skill_r_minus.md",
+          "kind": "md"
+        },
+        {
+          "path": "repository_navigation/source_task.md",
+          "kind": "md"
+        }
+      ]
+    },
+    {
+      "id": "D2.1",
+      "title": "Navigation Graph",
+      "platform": "OSWorld design-level",
+      "mechanism": "TravelHub navigation graph with D1 localization",
+      "status_label": "Design-level",
+      "drift_summary": "TravelHub hotel navigation changes by replacing an old route and adding a shortcut; D1 only localizes the stale navigation region.",
+      "task_count": 19,
+      "source_path": "/home/jiayao/Metaskill-library/data/D_drift_benchmark/D2.1",
+      "task_source": {
+        "path": "navigation_graph/siblings.jsonl",
+        "format": "jsonl"
+      },
+      "plan": {
+        "filename": "D2_1_design_level_drift_plan.md",
+        "asset_path": "assets/plans/D2.1.md",
+        "html_asset_path": "assets/plans/D2.1.html"
+      },
+      "evidence": {
+        "D1": {
+          "percentage": 30,
+          "present": true,
+          "delivery": "The agent receives one TravelHub UI Update Notice during adaptation stating only that hotel-detail navigation has been reorganized and previously stored routes may be stale. D1 does NOT reveal the added intermediate state, the removed graph edge, the replacement route, or the Featured Deluxe shortcut.",
+          "files": [
+            "navigation_graph/evidence/d1_notice.md",
+            "navigation_graph/validation/validate_d1_nonleakage.py"
+          ]
+        },
+        "D2": {
+          "percentage": 0,
+          "present": false,
+          "delivery": null,
+          "files": [
+            "D2_1_design_level_drift_plan.md"
+          ]
+        },
+        "D3": {
+          "percentage": 70,
+          "present": true,
+          "delivery": "The agent interacts with TravelHub to discover the removed stale route, the new intermediate navigation transition, the Featured Deluxe shortcut, and their consequences.",
+          "files": [
+            "navigation_graph/evidence/d3_evidence.jsonl"
+          ]
+        }
+      },
+      "tasks": [
+        {
+          "id": "D2-aff-001",
+          "slice": "affected",
+          "description": "The TravelHub task depends on the changed hotel-detail route or Featured Deluxe shortcut.",
+          "instruction": "Reserve the Deluxe Suite at Le Meurice and stop at the personal-information page.",
+          "source_file": "navigation_graph/siblings.jsonl",
+          "details": {
+            "instruction": "Reserve the Deluxe Suite at Le Meurice and stop at the personal-information page.",
+            "initial_state": "S0",
+            "semantic_goal": {
+              "target_state": "S4",
+              "hotel": "Le Meurice",
+              "room": "Deluxe Suite",
+              "terminal_state": "personal_information"
+            },
+            "obligation_support": [
+              "O2",
+              "O3",
+              "O4",
+              "O5",
+              "O7"
+            ],
+            "tests": [
+              "replacement",
+              "shortcut"
+            ],
+            "source_task": "OSWorld-V2 task_052"
+          }
+        },
+        {
+          "id": "D2-aff-002",
+          "slice": "affected",
+          "description": "The TravelHub task depends on the changed hotel-detail route or Featured Deluxe shortcut.",
+          "instruction": "Reserve the Deluxe Suite at Le Meurice and stop at the personal-information page.",
+          "source_file": "navigation_graph/siblings.jsonl",
+          "details": {
+            "instruction": "Reserve the Deluxe Suite at Le Meurice and stop at the personal-information page.",
+            "initial_state": "S1",
+            "semantic_goal": {
+              "target_state": "S4",
+              "hotel": "Le Meurice",
+              "room": "Deluxe Suite",
+              "terminal_state": "personal_information"
+            },
+            "obligation_support": [
+              "O5",
+              "O7"
+            ],
+            "tests": [
+              "shortcut_directly"
+            ],
+            "source_task": "OSWorld-V2 task_052"
+          }
+        },
+        {
+          "id": "D2-aff-003",
+          "slice": "affected",
+          "description": "The TravelHub task depends on the changed hotel-detail route or Featured Deluxe shortcut.",
+          "instruction": "Open the Le Meurice hotel details page.",
+          "source_file": "navigation_graph/siblings.jsonl",
+          "details": {
+            "instruction": "Open the Le Meurice hotel details page.",
+            "initial_state": "S1",
+            "semantic_goal": {
+              "target_state": "S2",
+              "hotel": "Le Meurice"
+            },
+            "obligation_support": [
+              "O2",
+              "O3",
+              "O4"
+            ],
+            "tests": [
+              "replacement_only"
+            ],
+            "source_task": "OSWorld-V2 task_052"
+          }
+        },
+        {
+          "id": "D2-aff-004",
+          "slice": "affected",
+          "description": "The TravelHub task depends on the changed hotel-detail route or Featured Deluxe shortcut.",
+          "instruction": "Show the Le Meurice amenities.",
+          "source_file": "navigation_graph/siblings.jsonl",
+          "details": {
+            "instruction": "Show the Le Meurice amenities.",
+            "initial_state": "S1",
+            "semantic_goal": {
+              "target_state": "S2A",
+              "hotel": "Le Meurice"
+            },
+            "obligation_support": [
+              "O2",
+              "O3",
+              "O4"
+            ],
+            "tests": [
+              "repaired_prefix",
+              "unchanged_downstream_edge"
+            ],
+            "source_task": "OSWorld-V2 task_052"
+          }
+        },
+        {
+          "id": "D2-aff-005",
+          "slice": "affected",
+          "description": "The TravelHub task depends on the changed hotel-detail route or Featured Deluxe shortcut.",
+          "instruction": "Show the available rooms at Le Meurice.",
+          "source_file": "navigation_graph/siblings.jsonl",
+          "details": {
+            "instruction": "Show the available rooms at Le Meurice.",
+            "initial_state": "S1",
+            "semantic_goal": {
+              "target_state": "S2R",
+              "hotel": "Le Meurice"
+            },
+            "obligation_support": [
+              "O2",
+              "O3",
+              "O4"
+            ],
+            "tests": [
+              "replacement_prefix"
+            ],
+            "source_task": "OSWorld-V2 task_052"
+          }
+        },
+        {
+          "id": "D2-aff-006",
+          "slice": "affected",
+          "description": "The TravelHub task depends on the changed hotel-detail route or Featured Deluxe shortcut.",
+          "instruction": "Reserve the Prestige Room at Le Meurice and stop at the personal-information page.",
+          "source_file": "navigation_graph/siblings.jsonl",
+          "details": {
+            "instruction": "Reserve the Prestige Room at Le Meurice and stop at the personal-information page.",
+            "initial_state": "S1",
+            "semantic_goal": {
+              "target_state": "S4",
+              "hotel": "Le Meurice",
+              "room": "Prestige Room",
+              "terminal_state": "personal_information"
+            },
+            "obligation_support": [
+              "O2",
+              "O3",
+              "O4",
+              "O6"
+            ],
+            "tests": [
+              "replacement_without_shortcut",
+              "shortcut_specificity"
+            ],
+            "source_task": "OSWorld-V2 task_052"
+          }
+        },
+        {
+          "id": "D2-aff-007",
+          "slice": "affected",
+          "description": "The TravelHub task depends on the changed hotel-detail route or Featured Deluxe shortcut.",
+          "instruction": "Save Le Meurice to favorites.",
+          "source_file": "navigation_graph/siblings.jsonl",
+          "details": {
+            "instruction": "Save Le Meurice to favorites.",
+            "initial_state": "S1",
+            "semantic_goal": {
+              "target_state": "SFAV",
+              "hotel": "Le Meurice"
+            },
+            "obligation_support": [
+              "O2",
+              "O3",
+              "O4"
+            ],
+            "tests": [
+              "replacement_prefix"
+            ],
+            "source_task": "OSWorld-V2 task_052"
+          }
+        },
+        {
+          "id": "D2-aff-008",
+          "slice": "affected",
+          "description": "The TravelHub task depends on the changed hotel-detail route or Featured Deluxe shortcut.",
+          "instruction": "Reserve the Deluxe Suite at Le Meurice within two visible UI actions and stop at the personal-information page.",
+          "source_file": "navigation_graph/siblings.jsonl",
+          "details": {
+            "instruction": "Reserve the Deluxe Suite at Le Meurice within two visible UI actions and stop at the personal-information page.",
+            "initial_state": "S1",
+            "semantic_goal": {
+              "target_state": "S4",
+              "hotel": "Le Meurice",
+              "room": "Deluxe Suite",
+              "terminal_state": "personal_information"
+            },
+            "obligation_support": [
+              "O5",
+              "O7"
+            ],
+            "constraints": {
+              "step_cap": 2,
+              "cap_applies_from_initial_state": "S1"
+            },
+            "tests": [
+              "capped_correctness",
+              "cost_recovery"
+            ],
+            "source_task": "OSWorld-V2 task_052"
+          }
+        },
+        {
+          "id": "D2-ret-001",
+          "slice": "unchanged-retention",
+          "description": "An unchanged downstream or unrelated TravelHub transition should be preserved.",
+          "instruction": "Show the Le Meurice amenities.",
+          "source_file": "navigation_graph/siblings.jsonl",
+          "details": {
+            "instruction": "Show the Le Meurice amenities.",
+            "initial_state": "S2",
+            "semantic_goal": {
+              "target_state": "S2A",
+              "hotel": "Le Meurice"
+            },
+            "obligation_support": [],
+            "retention_property": "avoids changed prefix edges",
+            "source_task": "OSWorld-V2 task_052"
+          }
+        },
+        {
+          "id": "D2-ret-002",
+          "slice": "unchanged-retention",
+          "description": "An unchanged downstream or unrelated TravelHub transition should be preserved.",
+          "instruction": "Open the room-selection view for Le Meurice.",
+          "source_file": "navigation_graph/siblings.jsonl",
+          "details": {
+            "instruction": "Open the room-selection view for Le Meurice.",
+            "initial_state": "S2",
+            "semantic_goal": {
+              "target_state": "S2R",
+              "hotel": "Le Meurice"
+            },
+            "obligation_support": [],
+            "retention_property": "avoids changed prefix edges",
+            "source_task": "OSWorld-V2 task_052"
+          }
+        },
+        {
+          "id": "D2-ret-003",
+          "slice": "unchanged-retention",
+          "description": "An unchanged downstream or unrelated TravelHub transition should be preserved.",
+          "instruction": "Select the Deluxe Suite and continue to the personal-information page.",
+          "source_file": "navigation_graph/siblings.jsonl",
+          "details": {
+            "instruction": "Select the Deluxe Suite and continue to the personal-information page.",
+            "initial_state": "S2R",
+            "semantic_goal": {
+              "target_state": "S4",
+              "hotel": "Le Meurice",
+              "room": "Deluxe Suite",
+              "terminal_state": "personal_information"
+            },
+            "obligation_support": [],
+            "retention_property": "downstream route unchanged",
+            "source_task": "OSWorld-V2 task_052"
+          }
+        },
+        {
+          "id": "D2-ret-004",
+          "slice": "unchanged-retention",
+          "description": "An unchanged downstream or unrelated TravelHub transition should be preserved.",
+          "instruction": "Select the Prestige Room and continue to the personal-information page.",
+          "source_file": "navigation_graph/siblings.jsonl",
+          "details": {
+            "instruction": "Select the Prestige Room and continue to the personal-information page.",
+            "initial_state": "S2R",
+            "semantic_goal": {
+              "target_state": "S4",
+              "hotel": "Le Meurice",
+              "room": "Prestige Room",
+              "terminal_state": "personal_information"
+            },
+            "obligation_support": [],
+            "retention_property": "downstream route unchanged",
+            "source_task": "OSWorld-V2 task_052"
+          }
+        },
+        {
+          "id": "D2-ret-005",
+          "slice": "unchanged-retention",
+          "description": "An unchanged downstream or unrelated TravelHub transition should be preserved.",
+          "instruction": "Open TravelHub help.",
+          "source_file": "navigation_graph/siblings.jsonl",
+          "details": {
+            "instruction": "Open TravelHub help.",
+            "initial_state": "S1",
+            "semantic_goal": {
+              "target_state": "SHELP"
+            },
+            "obligation_support": [],
+            "retention_property": "unrelated main-page route unchanged",
+            "source_task": "OSWorld-V2 task_052"
+          }
+        },
+        {
+          "id": "D2-open-001",
+          "slice": "boundary-open-set",
+          "description": "Open-set TravelHub requests should be clarified or rejected without hidden-route invention.",
+          "instruction": "Open Hotel Imaginaire Paris.",
+          "source_file": "navigation_graph/siblings.jsonl",
+          "details": {
+            "instruction": "Open Hotel Imaginaire Paris.",
+            "initial_state": "S1",
+            "semantic_goal": {
+              "target_state": "ABSTAIN",
+              "expected": "not_found_or_abstain"
+            },
+            "obligation_support": [],
+            "expected_behavior": "Do not synthesize a valid hotel-detail route for an unknown hotel.",
+            "source_task": "OSWorld-V2 task_052"
+          }
+        },
+        {
+          "id": "D2-open-002",
+          "slice": "boundary-open-set",
+          "description": "Open-set TravelHub requests should be clarified or rejected without hidden-route invention.",
+          "instruction": "Select the Presidential Penthouse.",
+          "source_file": "navigation_graph/siblings.jsonl",
+          "details": {
+            "instruction": "Select the Presidential Penthouse.",
+            "initial_state": "S2R",
+            "semantic_goal": {
+              "target_state": "ABSTAIN",
+              "expected": "unavailable_or_abstain"
+            },
+            "obligation_support": [],
+            "expected_behavior": "Do not invent an unavailable room selection.",
+            "source_task": "OSWorld-V2 task_052"
+          }
+        },
+        {
+          "id": "D2-open-003",
+          "slice": "boundary-open-set",
+          "description": "Open-set TravelHub requests should be clarified or rejected without hidden-route invention.",
+          "instruction": "Reserve a Deluxe Suite.",
+          "source_file": "navigation_graph/siblings.jsonl",
+          "details": {
+            "instruction": "Reserve a Deluxe Suite.",
+            "initial_state": "S1",
+            "semantic_goal": {
+              "target_state": "CLARIFY_OR_ABSTAIN",
+              "expected": "request_hotel_clarification_or_abstain"
+            },
+            "obligation_support": [
+              "O6"
+            ],
+            "expected_behavior": "Request hotel clarification or abstain; do not assume Le Meurice because a Featured Deluxe shortcut exists.",
+            "source_task": "OSWorld-V2 task_052"
+          }
+        },
+        {
+          "id": "D2-open-004",
+          "slice": "boundary-open-set",
+          "description": "Open-set TravelHub requests should be clarified or rejected without hidden-route invention.",
+          "instruction": "Jump directly to hidden checkout.",
+          "source_file": "navigation_graph/siblings.jsonl",
+          "details": {
+            "instruction": "Jump directly to hidden checkout.",
+            "initial_state": "S1",
+            "semantic_goal": {
+              "target_state": "ABSTAIN",
+              "expected": "reject_hidden_or_direct_navigation"
+            },
+            "obligation_support": [],
+            "expected_behavior": "Preserve the visible-interface restriction and avoid hidden/direct navigation.",
+            "source_task": "OSWorld-V2 task_052"
+          }
+        },
+        {
+          "id": "D2-null-001",
+          "slice": "matched-null",
+          "description": "A cosmetic TravelHub change should not cause a persistent graph rewrite.",
+          "instruction": "Open Le Meurice details when the visible hotel category label changes from Hotels to Stays but the underlying transition is unchanged.",
+          "source_file": "navigation_graph/siblings.jsonl",
+          "details": {
+            "instruction": "Open Le Meurice details when the visible hotel category label changes from Hotels to Stays but the underlying transition is unchanged.",
+            "initial_state": "S1",
+            "semantic_goal": {
+              "target_state": "S2",
+              "hotel": "Le Meurice"
+            },
+            "obligation_support": [],
+            "expected_behavior": "No persistent structural graph update.",
+            "source_task": "OSWorld-V2 task_052"
+          }
+        },
+        {
+          "id": "D2-null-002",
+          "slice": "matched-null",
+          "description": "A cosmetic TravelHub change should not cause a persistent graph rewrite.",
+          "instruction": "Reserve the Deluxe Suite at Le Meurice after the featured card moves visually but the transition semantics are unchanged.",
+          "source_file": "navigation_graph/siblings.jsonl",
+          "details": {
+            "instruction": "Reserve the Deluxe Suite at Le Meurice after the featured card moves visually but the transition semantics are unchanged.",
+            "initial_state": "S1",
+            "semantic_goal": {
+              "target_state": "S4",
+              "hotel": "Le Meurice",
+              "room": "Deluxe Suite",
+              "terminal_state": "personal_information"
+            },
+            "obligation_support": [],
+            "expected_behavior": "Preserve the learned shortcut policy without a graph or cost-model rewrite.",
+            "source_task": "OSWorld-V2 task_052"
+          }
+        }
+      ],
+      "paired_family": "D2.2",
+      "family_notes": [
+        "D1 tells the agent only that hotel-detail navigation may be stale.",
+        "D3 is responsible for discovering the actual changed route, new intermediate state, and shortcut.",
+        "D2.1 and D2.2 use the same TravelHub r- to r+ physical change. D2.1 uses D1 to localize the stale region; D2.2 uses D3 to both localize and reconstruct it."
+      ],
+      "files_manifest": [
+        {
+          "path": "navigation_graph/README.md",
+          "kind": "md"
+        },
+        {
+          "path": "navigation_graph/evidence/d1_notice.md",
+          "kind": "md"
+        },
+        {
+          "path": "navigation_graph/evidence/d3_evidence.jsonl",
+          "kind": "jsonl"
+        },
+        {
+          "path": "navigation_graph/evidence/evidence_allocation.json",
+          "kind": "json"
+        },
+        {
+          "path": "navigation_graph/grader_spec.json",
+          "kind": "json"
+        },
+        {
+          "path": "navigation_graph/sibling_summary.json",
+          "kind": "json"
+        },
+        {
+          "path": "navigation_graph/siblings.json",
+          "kind": "json"
+        },
+        {
+          "path": "navigation_graph/siblings.jsonl",
+          "kind": "jsonl"
+        },
+        {
+          "path": "navigation_graph/skill_r_minus.md",
+          "kind": "md"
+        },
+        {
+          "path": "navigation_graph/source_task.md",
+          "kind": "md"
+        },
+        {
+          "path": "navigation_graph/validation/construction_report.json",
+          "kind": "json"
+        },
+        {
+          "path": "navigation_graph/validation/validate_d1_nonleakage.py",
+          "kind": "py"
+        },
+        {
+          "path": "navigation_graph/validation/validate_graph_coupling.py",
+          "kind": "py"
+        },
+        {
+          "path": "navigation_graph/validation/validate_siblings.py",
+          "kind": "py"
+        }
+      ]
+    },
+    {
+      "id": "D2.2",
+      "title": "Navigation Graph",
+      "platform": "OSWorld design-level",
+      "mechanism": "TravelHub D3-only navigation graph recovery",
+      "status_label": "Design-level",
+      "drift_summary": "The same TravelHub navigation drift as D2.1 must be localized and reconstructed through interaction alone.",
+      "task_count": 19,
+      "source_path": "/home/jiayao/Metaskill-library/data/D_drift_benchmark/D2.2",
+      "task_source": {
+        "path": "navigation_graph/siblings.jsonl",
+        "format": "jsonl"
+      },
+      "plan": {
+        "filename": "D2_2_design_level_drift_plan.md",
+        "asset_path": "assets/plans/D2.2.md",
+        "html_asset_path": "assets/plans/D2.2.html"
+      },
+      "evidence": {
+        "D1": {
+          "percentage": 0,
+          "present": false,
+          "delivery": null,
+          "files": []
+        },
+        "D2": {
+          "percentage": 0,
+          "present": false,
+          "delivery": null,
+          "files": [
+            "D2_2_design_level_drift_plan.md"
+          ]
+        },
+        "D3": {
+          "percentage": 100,
+          "present": true,
+          "delivery": "The same physical TravelHub drift is used as D2.1, but no update notice is provided. The agent must both localize the stale region and reconstruct the changed navigation graph through interaction alone.",
+          "files": [
+            "navigation_graph/evidence/d3_evidence.jsonl"
+          ]
+        }
+      },
+      "tasks": [
+        {
+          "id": "D2-aff-001",
+          "slice": "affected",
+          "description": "The TravelHub task depends on recovering the changed hotel-detail route or Featured Deluxe shortcut from D3 interaction.",
+          "instruction": "Close any TravelHub advertisement, reserve the Deluxe Suite at Le Meurice, and stop at the personal-information page.",
+          "source_file": "navigation_graph/siblings.jsonl",
+          "details": {
+            "instruction": "Close any TravelHub advertisement, reserve the Deluxe Suite at Le Meurice, and stop at the personal-information page.",
+            "initial_state": "S0",
+            "semantic_goal": {
+              "hotel": "Le Meurice",
+              "room": "Deluxe Suite",
+              "checkout_page_visited": true
+            },
+            "obligation_support": [
+              "O1",
+              "O2",
+              "O3",
+              "O4",
+              "O6"
+            ],
+            "tests": [
+              "replacement_route_recovery",
+              "shortcut_discovery"
+            ],
+            "source_task": "OSWorld-V2 task_052"
+          }
+        },
+        {
+          "id": "D2-aff-002",
+          "slice": "affected",
+          "description": "The TravelHub task depends on recovering the changed hotel-detail route or Featured Deluxe shortcut from D3 interaction.",
+          "instruction": "Reserve the Deluxe Suite at Le Meurice and stop at the personal-information page.",
+          "source_file": "navigation_graph/siblings.jsonl",
+          "details": {
+            "instruction": "Reserve the Deluxe Suite at Le Meurice and stop at the personal-information page.",
+            "initial_state": "S1",
+            "semantic_goal": {
+              "hotel": "Le Meurice",
+              "room": "Deluxe Suite",
+              "checkout_page_visited": true
+            },
+            "obligation_support": [
+              "O4",
+              "O6"
+            ],
+            "tests": [
+              "shortcut_discovery"
+            ],
+            "source_task": "OSWorld-V2 task_052"
+          }
+        },
+        {
+          "id": "D2-aff-003",
+          "slice": "affected",
+          "description": "The TravelHub task depends on recovering the changed hotel-detail route or Featured Deluxe shortcut from D3 interaction.",
+          "instruction": "Open the Le Meurice hotel details page from the TravelHub main page.",
+          "source_file": "navigation_graph/siblings.jsonl",
+          "details": {
+            "instruction": "Open the Le Meurice hotel details page from the TravelHub main page.",
+            "initial_state": "S1",
+            "semantic_goal": {
+              "hotel": "Le Meurice",
+              "view": "details"
+            },
+            "obligation_support": [
+              "O1",
+              "O2",
+              "O3"
+            ],
+            "tests": [
+              "replacement_route_recovery"
+            ],
+            "source_task": "OSWorld-V2 task_052"
+          }
+        },
+        {
+          "id": "D2-aff-004",
+          "slice": "affected",
+          "description": "The TravelHub task depends on recovering the changed hotel-detail route or Featured Deluxe shortcut from D3 interaction.",
+          "instruction": "Open Le Meurice and view its amenities.",
+          "source_file": "navigation_graph/siblings.jsonl",
+          "details": {
+            "instruction": "Open Le Meurice and view its amenities.",
+            "initial_state": "S1",
+            "semantic_goal": {
+              "hotel": "Le Meurice",
+              "view": "amenities"
+            },
+            "obligation_support": [
+              "O1",
+              "O2",
+              "O3"
+            ],
+            "tests": [
+              "replacement_route_recovery"
+            ],
+            "source_task": "OSWorld-V2 task_052"
+          }
+        },
+        {
+          "id": "D2-aff-005",
+          "slice": "affected",
+          "description": "The TravelHub task depends on recovering the changed hotel-detail route or Featured Deluxe shortcut from D3 interaction.",
+          "instruction": "Open Le Meurice and show the room list.",
+          "source_file": "navigation_graph/siblings.jsonl",
+          "details": {
+            "instruction": "Open Le Meurice and show the room list.",
+            "initial_state": "S1",
+            "semantic_goal": {
+              "hotel": "Le Meurice",
+              "view": "room_list"
+            },
+            "obligation_support": [
+              "O1",
+              "O2",
+              "O3"
+            ],
+            "tests": [
+              "replacement_route_recovery"
+            ],
+            "source_task": "OSWorld-V2 task_052"
+          }
+        },
+        {
+          "id": "D2-aff-006",
+          "slice": "affected",
+          "description": "The TravelHub task depends on recovering the changed hotel-detail route or Featured Deluxe shortcut from D3 interaction.",
+          "instruction": "Reserve the Prestige Room at Le Meurice and stop at the personal-information page.",
+          "source_file": "navigation_graph/siblings.jsonl",
+          "details": {
+            "instruction": "Reserve the Prestige Room at Le Meurice and stop at the personal-information page.",
+            "initial_state": "S1",
+            "semantic_goal": {
+              "hotel": "Le Meurice",
+              "room": "Prestige Room",
+              "checkout_page_visited": true
+            },
+            "obligation_support": [
+              "O1",
+              "O2",
+              "O3",
+              "O5"
+            ],
+            "tests": [
+              "replacement_route_recovery",
+              "shortcut_target_specificity"
+            ],
+            "source_task": "OSWorld-V2 task_052"
+          }
+        },
+        {
+          "id": "D2-aff-007",
+          "slice": "affected",
+          "description": "The TravelHub task depends on recovering the changed hotel-detail route or Featured Deluxe shortcut from D3 interaction.",
+          "instruction": "Save Le Meurice to saved hotels.",
+          "source_file": "navigation_graph/siblings.jsonl",
+          "details": {
+            "instruction": "Save Le Meurice to saved hotels.",
+            "initial_state": "S1",
+            "semantic_goal": {
+              "hotel": "Le Meurice",
+              "saved": true
+            },
+            "obligation_support": [
+              "O1",
+              "O2",
+              "O3"
+            ],
+            "tests": [
+              "replacement_route_recovery"
+            ],
+            "source_task": "OSWorld-V2 task_052"
+          }
+        },
+        {
+          "id": "D2-aff-008",
+          "slice": "affected",
+          "description": "The TravelHub task depends on recovering the changed hotel-detail route or Featured Deluxe shortcut from D3 interaction.",
+          "instruction": "Reserve the Deluxe Suite at Le Meurice within two actions and stop at the personal-information page.",
+          "source_file": "navigation_graph/siblings.jsonl",
+          "details": {
+            "instruction": "Reserve the Deluxe Suite at Le Meurice within two actions and stop at the personal-information page.",
+            "initial_state": "S1",
+            "semantic_goal": {
+              "hotel": "Le Meurice",
+              "room": "Deluxe Suite",
+              "checkout_page_visited": true
+            },
+            "obligation_support": [
+              "O4",
+              "O6"
+            ],
+            "tests": [
+              "shortcut_discovery_under_step_cap"
+            ],
+            "source_task": "OSWorld-V2 task_052"
+          }
+        },
+        {
+          "id": "D2-ret-001",
+          "slice": "unchanged-retention",
+          "description": "An unchanged downstream or unrelated TravelHub transition should be preserved.",
+          "instruction": "From the Le Meurice details page, view the amenities.",
+          "source_file": "navigation_graph/siblings.jsonl",
+          "details": {
+            "instruction": "From the Le Meurice details page, view the amenities.",
+            "initial_state": "S2",
+            "semantic_goal": {
+              "hotel": "Le Meurice",
+              "view": "amenities"
+            },
+            "obligation_support": [],
+            "expected_behavior": "The unchanged S2 -> amenities transition remains valid.",
+            "tests": [
+              "collateral_damage_check"
+            ],
+            "source_task": "OSWorld-V2 task_052"
+          }
+        },
+        {
+          "id": "D2-ret-002",
+          "slice": "unchanged-retention",
+          "description": "An unchanged downstream or unrelated TravelHub transition should be preserved.",
+          "instruction": "From the Le Meurice details page, open the room list.",
+          "source_file": "navigation_graph/siblings.jsonl",
+          "details": {
+            "instruction": "From the Le Meurice details page, open the room list.",
+            "initial_state": "S2",
+            "semantic_goal": {
+              "hotel": "Le Meurice",
+              "view": "room_list"
+            },
+            "obligation_support": [],
+            "expected_behavior": "The unchanged S2 -> rooms transition remains valid.",
+            "tests": [
+              "collateral_damage_check"
+            ],
+            "source_task": "OSWorld-V2 task_052"
+          }
+        },
+        {
+          "id": "D2-ret-003",
+          "slice": "unchanged-retention",
+          "description": "An unchanged downstream or unrelated TravelHub transition should be preserved.",
+          "instruction": "Select the Deluxe Suite and continue to the personal-information page.",
+          "source_file": "navigation_graph/siblings.jsonl",
+          "details": {
+            "instruction": "Select the Deluxe Suite and continue to the personal-information page.",
+            "initial_state": "S2R",
+            "semantic_goal": {
+              "hotel": "Le Meurice",
+              "room": "Deluxe Suite",
+              "checkout_page_visited": true
+            },
+            "obligation_support": [],
+            "expected_behavior": "The unchanged Deluxe downstream checkout route remains valid.",
+            "tests": [
+              "collateral_damage_check"
+            ],
+            "source_task": "OSWorld-V2 task_052"
+          }
+        },
+        {
+          "id": "D2-ret-004",
+          "slice": "unchanged-retention",
+          "description": "An unchanged downstream or unrelated TravelHub transition should be preserved.",
+          "instruction": "Select the Prestige Room and continue to the personal-information page.",
+          "source_file": "navigation_graph/siblings.jsonl",
+          "details": {
+            "instruction": "Select the Prestige Room and continue to the personal-information page.",
+            "initial_state": "S2R",
+            "semantic_goal": {
+              "hotel": "Le Meurice",
+              "room": "Prestige Room",
+              "checkout_page_visited": true
+            },
+            "obligation_support": [],
+            "expected_behavior": "The unchanged Prestige downstream checkout route remains valid.",
+            "tests": [
+              "collateral_damage_check"
+            ],
+            "source_task": "OSWorld-V2 task_052"
+          }
+        },
+        {
+          "id": "D2-ret-005",
+          "slice": "unchanged-retention",
+          "description": "An unchanged downstream or unrelated TravelHub transition should be preserved.",
+          "instruction": "Open TravelHub help from the main page.",
+          "source_file": "navigation_graph/siblings.jsonl",
+          "details": {
+            "instruction": "Open TravelHub help from the main page.",
+            "initial_state": "S1",
+            "semantic_goal": {
+              "view": "help"
+            },
+            "obligation_support": [],
+            "expected_behavior": "The unrelated help transition remains valid.",
+            "tests": [
+              "collateral_damage_check"
+            ],
+            "source_task": "OSWorld-V2 task_052"
+          }
+        },
+        {
+          "id": "D2-open-001",
+          "slice": "boundary-open-set",
+          "description": "Open-set TravelHub requests should be clarified or rejected without hidden-route invention.",
+          "instruction": "Find Hotel Imaginaire Paris on TravelHub.",
+          "source_file": "navigation_graph/siblings.jsonl",
+          "details": {
+            "instruction": "Find Hotel Imaginaire Paris on TravelHub.",
+            "initial_state": "S1",
+            "semantic_goal": {
+              "hotel": "Hotel Imaginaire Paris"
+            },
+            "obligation_support": [],
+            "tests": [
+              "open_set_abstention",
+              "shortcut_overgeneralization_check"
+            ],
+            "source_task": "OSWorld-V2 task_052"
+          }
+        },
+        {
+          "id": "D2-open-002",
+          "slice": "boundary-open-set",
+          "description": "Open-set TravelHub requests should be clarified or rejected without hidden-route invention.",
+          "instruction": "Reserve the Presidential Penthouse at Le Meurice.",
+          "source_file": "navigation_graph/siblings.jsonl",
+          "details": {
+            "instruction": "Reserve the Presidential Penthouse at Le Meurice.",
+            "initial_state": "S2R",
+            "semantic_goal": {
+              "hotel": "Le Meurice",
+              "room": "Presidential Penthouse"
+            },
+            "obligation_support": [],
+            "tests": [
+              "open_set_abstention",
+              "shortcut_overgeneralization_check"
+            ],
+            "source_task": "OSWorld-V2 task_052"
+          }
+        },
+        {
+          "id": "D2-open-003",
+          "slice": "boundary-open-set",
+          "description": "Open-set TravelHub requests should be clarified or rejected without hidden-route invention.",
+          "instruction": "Reserve a Deluxe Suite.",
+          "source_file": "navigation_graph/siblings.jsonl",
+          "details": {
+            "instruction": "Reserve a Deluxe Suite.",
+            "initial_state": "S1",
+            "semantic_goal": {
+              "room": "Deluxe Suite",
+              "hotel": "unspecified"
+            },
+            "obligation_support": [],
+            "tests": [
+              "ambiguity_handling",
+              "shortcut_overgeneralization_check"
+            ],
+            "source_task": "OSWorld-V2 task_052"
+          }
+        },
+        {
+          "id": "D2-open-004",
+          "slice": "boundary-open-set",
+          "description": "Open-set TravelHub requests should be clarified or rejected without hidden-route invention.",
+          "instruction": "Jump directly to the hidden checkout route for Le Meurice Deluxe Suite.",
+          "source_file": "navigation_graph/siblings.jsonl",
+          "details": {
+            "instruction": "Jump directly to the hidden checkout route for Le Meurice Deluxe Suite.",
+            "initial_state": "S1",
+            "semantic_goal": {
+              "hotel": "Le Meurice",
+              "room": "Deluxe Suite",
+              "request": "hidden_checkout_route"
+            },
+            "obligation_support": [],
+            "tests": [
+              "prohibited_navigation_refusal"
+            ],
+            "source_task": "OSWorld-V2 task_052"
+          }
+        },
+        {
+          "id": "D2-null-001",
+          "slice": "matched-null",
+          "description": "A cosmetic TravelHub change should not cause a persistent graph rewrite.",
+          "instruction": "The visible Hotels label is shown as Stays; open Le Meurice details using the visible TravelHub interface.",
+          "source_file": "navigation_graph/siblings.jsonl",
+          "details": {
+            "instruction": "The visible Hotels label is shown as Stays; open Le Meurice details using the visible TravelHub interface.",
+            "initial_state": "S1",
+            "semantic_goal": {
+              "hotel": "Le Meurice",
+              "view": "details"
+            },
+            "obligation_support": [],
+            "tests": [
+              "spurious_update_check"
+            ],
+            "source_task": "OSWorld-V2 task_052"
+          }
+        },
+        {
+          "id": "D2-null-002",
+          "slice": "matched-null",
+          "description": "A cosmetic TravelHub change should not cause a persistent graph rewrite.",
+          "instruction": "The featured card order has changed; reserve the Deluxe Suite at Le Meurice and stop at the personal-information page.",
+          "source_file": "navigation_graph/siblings.jsonl",
+          "details": {
+            "instruction": "The featured card order has changed; reserve the Deluxe Suite at Le Meurice and stop at the personal-information page.",
+            "initial_state": "S1",
+            "semantic_goal": {
+              "hotel": "Le Meurice",
+              "room": "Deluxe Suite",
+              "checkout_page_visited": true
+            },
+            "obligation_support": [],
+            "tests": [
+              "spurious_update_check"
+            ],
+            "source_task": "OSWorld-V2 task_052"
+          }
+        }
+      ],
+      "paired_family": "D2.1",
+      "family_notes": [
+        "D2.1 and D2.2 use the same TravelHub r- to r+ physical change.",
+        "D2.2 withholds the localization notice, so D3 must both localize the stale region and reconstruct the graph change."
+      ],
+      "files_manifest": [
+        {
+          "path": "navigation_graph/README.md",
+          "kind": "md"
+        },
+        {
+          "path": "navigation_graph/evidence/d3_evidence.jsonl",
+          "kind": "jsonl"
+        },
+        {
+          "path": "navigation_graph/evidence/evidence_allocation.json",
+          "kind": "json"
+        },
+        {
+          "path": "navigation_graph/grader_spec.json",
+          "kind": "json"
+        },
+        {
+          "path": "navigation_graph/sibling_summary.json",
+          "kind": "json"
+        },
+        {
+          "path": "navigation_graph/siblings.jsonl",
+          "kind": "jsonl"
+        },
+        {
+          "path": "navigation_graph/skill_r_minus.md",
+          "kind": "md"
+        },
+        {
+          "path": "navigation_graph/validation/construction_report.json",
+          "kind": "json"
+        },
+        {
+          "path": "navigation_graph/validation/validate_graph_coupling.py",
+          "kind": "py"
+        },
+        {
+          "path": "navigation_graph/validation/validate_siblings.py",
+          "kind": "py"
+        }
+      ]
+    }
+  ]
+}
