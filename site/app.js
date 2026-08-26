@@ -1,4 +1,5 @@
 const CHANNELS = ["D1", "D2", "D3"];
+const ASSET_VERSION = "20260826-osworld-label";
 
 const app = document.querySelector("#app");
 let benchmarkIndex = null;
@@ -12,7 +13,7 @@ let expandedTasks = new Set();
 
 async function init() {
   try {
-    const response = await fetch("data/benchmark_index.json");
+    const response = await fetch(`data/benchmark_index.json?v=${ASSET_VERSION}`, { cache: "no-store" });
     if (!response.ok) {
       throw new Error(`benchmark_index.json returned ${response.status}`);
     }
@@ -50,7 +51,7 @@ function renderOverview() {
   const platforms = [...new Set(benchmarkIndex.families.map((family) => family.platform))].sort();
   const totalTasks = benchmarkIndex.families.reduce((sum, family) => sum + family.task_count, 0);
   const bfclCount = benchmarkIndex.families.filter((family) => family.platform === "BFCL").length;
-  const designCount = benchmarkIndex.families.length - bfclCount;
+  const osworldCount = benchmarkIndex.families.filter((family) => family.platform === "OSWorld").length;
 
   app.innerHTML = `
     <header class="hero">
@@ -61,7 +62,7 @@ function renderOverview() {
         ${summaryItem("Families", benchmarkIndex.families.length)}
         ${summaryItem("Tasks", totalTasks)}
         ${summaryItem("BFCL Families", bfclCount)}
-        ${summaryItem("Design-Level Families", designCount)}
+        ${summaryItem("OSWorld Families", osworldCount)}
       </div>
     </header>
     <section class="toolbar" aria-label="Overview filters">

@@ -122,16 +122,14 @@ def build_family(family_dir: Path, site_dir: Path, overrides: dict[str, Any]) ->
     if plan_path:
         plan = copy_plan_asset(plan_path, site_dir, family_id)
 
-    status_label = (
-        family_overrides.get("status_label")
-        or _status_from(summary)
-        or _status_from(drift_spec)
-        or "Unknown"
-    )
+    if "status_label" in family_overrides:
+        status_label = family_overrides["status_label"]
+    else:
+        status_label = _status_from(summary) or _status_from(drift_spec) or "Unknown"
     family = {
         "id": family_id,
         "title": family_overrides.get("title", family_id),
-        "platform": family_overrides.get("platform", "BFCL" if family_id.startswith("C") else "Design-level"),
+        "platform": family_overrides.get("platform", "BFCL" if family_id.startswith("C") else "OSWorld"),
         "mechanism": family_overrides.get("mechanism", ""),
         "status_label": status_label,
         "drift_summary": extract_drift_summary(family_id, drift_spec, overrides),
