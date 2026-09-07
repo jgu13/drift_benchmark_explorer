@@ -1,0 +1,41 @@
+<h1>A5.1 Placement-Codebook Drift Execution Plan</h1>
+<h2>Objective</h2>
+<p>Build an executable ALFWorld-pattern placement-codebook drift benchmark. Navigation is fixed across regimes; the task is to update accepted placement rules, handle one newly available room, and preserve version-scoped memory during recurrence.</p>
+<h2>Package Layout</h2>
+<p>Family root:</p>
+<pre><code>alfworld/data/A5.1/</code></pre>
+<p>Semantic package:</p>
+<pre><code>alfworld/data/A5.1/placement_codebook/</code></pre>
+<p>The package contains &#96;placement_inventory.json&#96;, local regime files, &#96;siblings.json&#96;, &#96;possible_answer_r_minus.json&#96;, &#96;possible_answer_r_plus.json&#96;, D2/D3 evidence, compiler, simulator, construction report, and local validators.</p>
+<h2>Drift Definition</h2>
+<p>The pilot has 16 object-class placement obligations. Exactly four classes are remapped, meeting the 25% changed-mass requirement:</p>
+<pre><code>mug:   kitchen_cabinet -&gt; pantry_cupboard
+plate: kitchen_cabinet -&gt; pantry_cupboard
+bowl:  kitchen_cabinet -&gt; pantry_cupboard
+glass: kitchen_cabinet -&gt; pantry_cupboard</code></pre>
+<p>The r+ regime introduces the new room &#96;pantry&#96;. All navigation costs and edges are invariant across regimes for shared rooms, so this family tests placement correctness rather than search efficiency.</p>
+<h2>Evidence Allocation</h2>
+<pre><code>D1 = 0%
+D2 = 50%
+D3 = 50%</code></pre>
+<p>D2 covers common remapped classes &#96;mug&#96; and &#96;plate&#96;, each with exactly one success trajectory and one failure trajectory. D3 covers rare remapped classes &#96;bowl&#96; and &#96;glass&#96;, plus confirmation that &#96;pantry&#96; is a valid new room.</p>
+<p>&#96;skill_r_minus.md&#96; stores the stale table. &#96;skill_r_plus_oracle.md&#96; stores the hidden r+ table and must remain outside &#96;evidence/&#96;.</p>
+<h2>Sibling Construction</h2>
+<p>Build exactly 19 siblings:</p>
+<pre><code>8 affected
+4 unchanged-retention
+4 boundary/open-set
+3 matched-null</code></pre>
+<p>Use normalized IDs:</p>
+<pre><code>A5.1_aff_001 ... A5.1_aff_008
+A5.1_ret_001 ... A5.1_ret_004
+A5.1_bnd_001 ... A5.1_bnd_004
+A5.1_null_001 ... A5.1_null_003</code></pre>
+<p>Affected siblings cover D2-covered remapped classes, D3-covered remapped classes, compound take+navigate+put variants, different starting rooms, already-held starts, and return-to-r+ after an r- recurrence block. Retention, boundary, and matched-null siblings exercise unchanged classes, unknown-class abstention, new-room boundary behavior, plausible-but-rejected placements, already-correct placements, paraphrases, and irrelevant state changes.</p>
+<h2>Compilation</h2>
+<pre><code>python alfworld/data/A5.1/placement_codebook/compile_a5_1.py --write</code></pre>
+<h2>Validation</h2>
+<pre><code>bash alfworld/data/A5.1/placement_codebook/validation/check_a5_1_architecture.sh</code></pre>
+<p>The bash validator checks layout, JSON syntax, 16 obligations, exactly four remapped classes, new-room expansion, invariant navigation, 19 siblings with 8/4/4/3 slices, D2 success/failure pairing, D3 probe schema, recurrence annotations, compiled answer coverage, replay, evidence disjointness, and oracle non-leakage.</p>
+<h2>Limitations</h2>
+<p>This is a deterministic pilot. Empirical metrics are unmeasured and remain &#96;null&#96;. Primary grading is semantic accepted-placement state; exact trajectory match is diagnostic.</p>

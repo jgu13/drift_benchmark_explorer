@@ -1,0 +1,41 @@
+<h1>D3.2 Search-Strategy Drift Execution Plan</h1>
+<h2>Objective</h2>
+<p>Build an ALFWorld-pattern SearchWorld benchmark using the same physical drift as D3.1, but with mixed evidence: S1 redistribution is disclosed through D2 trajectories, while S2 path blocking and stopping-value calibration are exposed through D3 probes.</p>
+<h2>Package Layout</h2>
+<p>Family root:</p>
+<pre><code>alfworld/data/D3.2/</code></pre>
+<p>Semantic package:</p>
+<pre><code>alfworld/data/D3.2/search_strategy/</code></pre>
+<p>The package contains &#96;siblings.json&#96;, local regime/layout/prior files, &#96;possible_answer_r_minus.json&#96;, &#96;possible_answer_r_plus.json&#96;, D2/D3 evidence, compiler, local simulator, construction report, and validation scripts.</p>
+<h2>Drift Definition</h2>
+<p>S1 remaps drinkware search priority from &#96;kitchen_cabinet&#96; to &#96;pantry_shelf&#96;. S2 blocks &#96;hall -&gt; kitchen&#96;; the valid r+ route is &#96;hall -&gt; dining -&gt; kitchen&#96;. Retrieval semantics remain fixed.</p>
+<h2>Evidence Allocation</h2>
+<pre><code>D1 = 0%
+D2 = 50%
+D3 = 50%</code></pre>
+<p>D2 learner-visible evidence:</p>
+<pre><code>evidence/d2_success_trajectories.jsonl
+evidence/d2_failure_trajectories.jsonl</code></pre>
+<p>D3 learner-visible evidence:</p>
+<pre><code>evidence/d3_probe_interface.py
+evidence/d3_probe_log.jsonl</code></pre>
+<p>&#96;skill_r_minus.md&#96; is the stale prior skill. &#96;skill_r_plus_oracle.md&#96; is hidden evaluation-only guidance and must remain outside &#96;evidence/&#96;.</p>
+<h2>Sibling Construction</h2>
+<p>Build exactly 19 siblings:</p>
+<pre><code>8 affected
+4 unchanged-retention
+4 boundary/open-set
+3 matched-null</code></pre>
+<p>Use normalized IDs:</p>
+<pre><code>D3.2_aff_001 ... D3.2_aff_008
+D3.2_ret_001 ... D3.2_ret_004
+D3.2_bnd_001 ... D3.2_bnd_004
+D3.2_null_001 ... D3.2_null_003</code></pre>
+<p>Affected tasks cover three redistribution-only, three blocked-route-only, and two combined cases. Boundary tasks cover absent target, already-held target, start-near-blocked-edge, and equal-value locations. Matched-null tasks preserve the optimal policy.</p>
+<h2>Compilation</h2>
+<pre><code>python alfworld/data/D3.2/search_strategy/compile_d3_2.py --write</code></pre>
+<h2>Validation</h2>
+<pre><code>bash alfworld/data/D3.2/search_strategy/validation/check_d3_2_architecture.sh</code></pre>
+<p>The bash validator checks layout, JSON syntax, task counts, evidence allocation, D2 success/failure pairing, D3 probe schema, answer coverage, replay, and oracle non-leakage.</p>
+<h2>Limitations</h2>
+<p>This is a deterministic pilot rather than a THOR physics benchmark. Empirical metrics are unmeasured and remain &#96;null&#96;.</p>

@@ -13,9 +13,17 @@ from pathlib import Path
 from typing import Any
 
 
-FAMILY_RE = re.compile(r"^[CD][0-9]+\.[0-9]+$")
+FAMILY_RE = re.compile(r"^[A-D][0-9]+\.[0-9]+$")
 CHANNELS = ("D1", "D2", "D3")
 TASK_FILE_NAMES = ("siblings.json", "siblings.jsonl", "task.json")
+SLICE_LIKE_PREFIXES = (
+    "affected",
+    "unchanged",
+    "boundary",
+    "matched-null",
+    "retention",
+    "propagated",
+)
 HIDDEN_DETAIL_KEYS = {
     "gold_r_plus",
     "skill_r_plus_oracle",
@@ -28,7 +36,7 @@ HIDDEN_DETAIL_KEYS = {
 
 
 def natural_family_key(family_id: str) -> tuple[str, int, int]:
-    match = re.match(r"^([CD])([0-9]+)\.([0-9]+)$", family_id)
+    match = re.match(r"^([A-D])([0-9]+)\.([0-9]+)$", family_id)
     if not match:
         return (family_id, 0, 0)
     prefix, major, minor = match.groups()
@@ -148,12 +156,22 @@ def normalize_slice(value: Any) -> str:
     return aliases.get(normalized, normalized)
 
 
+def looks_like_slice(value: Any) -> bool:
+    if value is None or not str(value).strip():
+        return False
+    normalized = normalize_slice(value)
+    return any(normalized == prefix or normalized.startswith(f"{prefix}-") for prefix in SLICE_LIKE_PREFIXES)
+
+
 def extract_task_slice(task: dict[str, Any]) -> str:
-    # Prefer more specific categorical labels when present.
-    for key in ("category", "task_category", "slice", "affectedness", "group"):
-        value = task.get(key)
-        if value is not None and str(value).strip():
-            return normalize_slice(value)
+    category = task.get("category") or task.get("task_category")
+    slice_value = task.get("slice") or task.get("affectedness") or task.get("group")
+    if looks_like_slice(category):
+        return normalize_slice(category)
+    if slice_value is not None and str(slice_value).strip():
+        return normalize_slice(slice_value)
+    if category is not None and str(category).strip():
+        return normalize_slice(category)
     return "unspecified"
 
 
@@ -250,7 +268,14 @@ def parse_percentages(
             ]
         )
     if drift_spec:
-        candidates.append(drift_spec.get("evidence"))
+        candidates.extend(
+            [
+                drift_spec.get("evidence"),
+                drift_spec.get("evidence_allocation"),
+                drift_spec.get("evidence_split"),
+                drift_spec.get("d_evidence_weights"),
+            ]
+        )
     if summary:
         candidates.append(summary.get("evidence_split"))
     family_default = overrides.get(family_id, {}).get("evidence")
@@ -336,14 +361,22 @@ def parse_evidence_mix(
     percentages = parse_percentages(allocation_data, drift_spec, summary, overrides, family_id)
     files = find_evidence_files(family_dir, allocation_path, allocation_data)
     delivery_overrides = overrides.get(family_id, {}).get("evidence_delivery", {})
+    allocation_delivery = allocation_data.get("delivery") if isinstance(allocation_data, dict) else {}
 
     evidence: dict[str, dict[str, Any]] = {}
     for channel in CHANNELS:
         pct = percentages.get(channel, 0)
+        delivery = None
+        if pct > 0:
+            delivery = delivery_overrides.get(channel)
+            if not delivery and isinstance(allocation_delivery, dict):
+                raw_delivery = allocation_delivery.get(channel)
+                if raw_delivery:
+                    delivery = str(raw_delivery)
         evidence[channel] = {
             "percentage": pct,
             "present": pct > 0,
-            "delivery": delivery_overrides.get(channel) if pct > 0 else None,
+            "delivery": delivery,
             "files": files.get(channel, []),
         }
     return evidence

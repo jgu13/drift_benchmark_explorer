@@ -1,0 +1,142 @@
+<h1>D3.1 Search-Strategy Drift Execution Plan</h1>
+<h2>Objective</h2>
+<p>Build an ALFWorld-pattern search-strategy drift benchmark where the semantic object-retrieval goal is stable, but the optimal search policy changes after a physical drift. The benchmark is D3-only: there is no changelog and no demonstration; adaptation evidence is available only through metered, current-regime probes.</p>
+<p>The constructed benchmark must be self-contained under:</p>
+<pre><code>alfworld/data/D3.1/</code></pre>
+<p>with the semantic package:</p>
+<pre><code>alfworld/data/D3.1/search_strategy/</code></pre>
+<h2>Package Layout</h2>
+<p>The family root contains this execution plan and the constructed package:</p>
+<pre><code>alfworld/data/D3.1/
+├── D3_1_search_strategy_execution_plan.md
+└── search_strategy/
+    ├── README.md
+    ├── compile_d3_1.py
+    ├── drift_spec.json
+    ├── source_task.json
+    ├── siblings.json
+    ├── sibling_summary.json
+    ├── possible_answer_r_minus.json
+    ├── possible_answer_r_plus.json
+    ├── regime_r_minus.json
+    ├── regime_r_plus.json
+    ├── regime_null.json
+    ├── layout_r_minus.json
+    ├── layout_r_plus.json
+    ├── search_prior_r_minus.json
+    ├── search_prior_r_plus.json
+    ├── searchworld_simulator.py
+    ├── skill_r_minus.md
+    ├── skill_r_plus_oracle.md
+    ├── evidence/
+    │   ├── d3_probe_log.jsonl
+    │   └── evidence_allocation.json
+    └── validation/
+        ├── check_d3_1_architecture.sh
+        ├── construction_report.json
+        └── replay_checks.py</code></pre>
+<p>&#96;siblings.json&#96; is the canonical task source. &#96;possible_answer_r_minus.json&#96; and &#96;possible_answer_r_plus.json&#96; are the package-level compiled answer files.</p>
+<h2>Drift Definition</h2>
+<p>Build a deterministic SearchWorld substrate with locations:</p>
+<pre><code>foyer
+hall
+kitchen
+dining
+pantry
+bedroom
+bathroom
+storage</code></pre>
+<p>Actions and costs:</p>
+<pre><code>move(location) = 1
+inspect(receptacle) = 1
+take(object) = 1
+stop() = 0
+invalid move = 1</code></pre>
+<p>Use a cost-sensitive hard cap on every sibling.</p>
+<p>Two atomic drift obligations define the r+ regime:</p>
+<pre><code>S1 redistribution:
+  r_minus: drinkware is high-probability in kitchen_cabinet
+  r_plus:  drinkware is high-probability in pantry_shelf
+
+S2 path_block:
+  r_minus: hall -&gt; kitchen is valid
+  r_plus:  hall -&gt; kitchen is blocked
+  alternate route: hall -&gt; dining -&gt; kitchen</code></pre>
+<p>The object-retrieval success semantics do not change. A sibling is affected only when executable support shows that its gold or optimal trace intersects a changed obligation, its graded final output differs, or its current optimal cost target changes.</p>
+<h2>Evidence Allocation</h2>
+<p>The evidence allocation is:</p>
+<pre><code>D1 = 0%
+D2 = 0%
+D3 = 100%</code></pre>
+<p>Learner-visible evidence lives only under &#96;evidence/&#96; and must use lowercase D-level filename prefixes. For D3.1, the only learner-visible evidence file is:</p>
+<pre><code>evidence/d3_probe_log.jsonl</code></pre>
+<p>&#96;skill_r_minus.md&#96; represents the stale prior skill the learner may enter with. It is not placed under &#96;evidence/&#96; and is not counted as D1 or D2 evidence. &#96;skill_r_plus_oracle.md&#96; is hidden evaluation-only oracle guidance and must not be exposed through the learner evidence API.</p>
+<p>D3 probes must be safe, metered, current-regime, evidence-only, and disjoint from evaluation siblings. Each probe record contains:</p>
+<pre><code>probe_id
+rule_id
+state_before
+action
+arguments
+response
+state_after
+cost</code></pre>
+<p>The D3 probes provide one stale/negative observation and one confirming current-regime observation for each changed obligation when both are needed.</p>
+<h2>Sibling Construction</h2>
+<p>Build exactly 19 evaluation siblings with normalized family-prefixed IDs:</p>
+<pre><code>8 affected:             D3.1_aff_001 ... D3.1_aff_008
+4 unchanged-retention:  D3.1_ret_001 ... D3.1_ret_004
+4 boundary/open-set:    D3.1_bnd_001 ... D3.1_bnd_004
+3 matched-null:         D3.1_null_001 ... D3.1_null_003</code></pre>
+<p>Affected siblings:</p>
+<pre><code>3 redistribution-only
+3 blocked-route-only
+2 interaction cases using both S1 and S2</code></pre>
+<p>At least two affected siblings must remain eventually solvable by exhaustive stale search while exceeding or approaching the cost cap, so efficiency drift is measurable even when the final semantic state is unchanged.</p>
+<p>Unchanged-retention siblings must avoid the changed drinkware placement and the blocked hall-&gt;kitchen edge.</p>
+<p>Boundary/open-set siblings must cover:</p>
+<pre><code>target absent from all searchable locations
+target already in inventory
+start state on opposite side of blocked edge
+two locations with equal expected search value</code></pre>
+<p>Use explicit stopping or abstention behavior for absent targets.</p>
+<p>Matched-null siblings must cover:</p>
+<pre><code>room naming paraphrase
+irrelevant object relocation
+equivalent graph presentation / neighbor ordering</code></pre>
+<p>and have identical optimal policy under r- and r+.</p>
+<h2>Compilation</h2>
+<p>The package compile script is:</p>
+<pre><code>alfworld/data/D3.1/search_strategy/compile_d3_1.py</code></pre>
+<p>It must:</p>
+<ol>
+<li>Load &#96;siblings.json&#96;.</li>
+<li>Compile each task&#x27;s r- trace into &#96;possible_answer_r_minus.json&#96;.</li>
+<li>Compile each task&#x27;s r+ trace into &#96;possible_answer_r_plus.json&#96;.</li>
+<li>Preserve &#96;regime_null.json&#96; for matched-null controls.</li>
+<li>Avoid upstream BFCL or external benchmark imports.</li>
+</ol>
+<p>Recommended command:</p>
+<pre><code>python alfworld/data/D3.1/search_strategy/compile_d3_1.py --write</code></pre>
+<h2>Validation</h2>
+<p>Validation must be self-contained and local to the package:</p>
+<pre><code>alfworld/data/D3.1/search_strategy/validation/replay_checks.py
+alfworld/data/D3.1/search_strategy/validation/check_d3_1_architecture.sh</code></pre>
+<p>The replay validator executes compiled answer traces against local &#96;searchworld_simulator.py&#96; backends for r- and r+, verifies final state, validates trace cost, and checks slice counts.</p>
+<p>The bash architecture test checks:</p>
+<ol>
+<li>Required family/package layout exists.</li>
+<li>JSON sidecars are syntactically valid.</li>
+<li>&#96;siblings.json&#96; is a manifest with exactly 19 tasks.</li>
+<li>Slice counts are 8 affected, 4 retention, 4 boundary/open-set, and 3</li>
+<p>matched-null.</p>
+<li>Evidence allocation is D1=0, D2=0, D3=100.</li>
+<li>Learner-visible evidence files use D-level prefixes.</li>
+<li>Skills exist and oracle skill is outside &#96;evidence/&#96;.</li>
+<li>Package-level &#96;possible_answer_r_minus.json&#96; and</li>
+<p>&#96;possible_answer_r_plus.json&#96; exist and cover all tasks.</p>
+<li>Local replay validation passes.</li>
+</ol>
+<p>Recommended command:</p>
+<pre><code>bash alfworld/data/D3.1/search_strategy/validation/check_d3_1_architecture.sh</code></pre>
+<h2>Limitations</h2>
+<p>This is a deterministic pilot, not an empirical ALFWorld calibration. The construction report must leave unmeasured empirical metrics as &#96;null&#96;. The pilot intentionally uses 19 siblings before any larger sweep. The local SearchWorld simulator mirrors ALFWorld-style object retrieval and search-order drift, but it is not a THOR physics benchmark.</p>

@@ -21,7 +21,7 @@
     "title": "Device Enum Changelog",
     "platform": "BFCL",
     "mechanism": "Declared private enum migration",
-    "status_label": "Pilot constructed",
+    "status_label": "Constructed",
     "drift_summary": "The private ignition token for engine start changes from START to X7 while engine-start semantics remain fixed.",
     "evidence_delivery": {
       "D1": "The agent receives the stale skill plus an explicit changelog before adaptation. The changelog declares that the private start-engine token changed from START to X7."
@@ -32,7 +32,10 @@
       "The zero-shot and static controls do not receive this declaration."
     ],
     "task_descriptions": {
-      "unspecified": "Engine start must update the private ignition token from START to X7 using the explicit changelog."
+      "affected": "Engine start must update the private ignition token from START to X7 using the explicit changelog.",
+      "unchanged-retention": "Unchanged vehicle-control actions should keep working without a token rewrite.",
+      "boundary-open-set": "Unsupported engine-start requests should be rejected without inventing a new token.",
+      "matched-null": "A cosmetic prompt change should not trigger a persistent enum rewrite."
     }
   },
   "C2.1": {
@@ -82,6 +85,7 @@
     "mechanism": "Executable CLI grammar and cost drift",
     "status_label": "Constructed",
     "drift_summary": "CLI command grammar changes through flag replacement/deprecation and a new lower-cost shortcut.",
+    "paired_family": "C3.2",
     "evidence_delivery": {
       "D1": "A changelog localizes which CLI actions or flags have changed, without necessarily giving the exact replacement syntax.",
       "D3": "Help output and safe command probes reveal executable replacement syntax and current command cost."
@@ -153,6 +157,161 @@
       "unchanged-retention": "An unchanged downstream or unrelated TravelHub transition should be preserved.",
       "boundary-open-set": "Open-set TravelHub requests should be clarified or rejected without hidden-route invention.",
       "matched-null": "A cosmetic TravelHub change should not cause a persistent graph rewrite."
+    }
+  },
+  "A5.1": {
+    "title": "Placement Codebook",
+    "platform": "ALFWorld",
+    "mechanism": "Accepted placement-rule remapping",
+    "status_label": "Constructed",
+    "drift_summary": "Four object-class placements remap into a new pantry room while navigation costs stay fixed.",
+    "evidence_delivery": {
+      "D2": "Explicit rule-bearing success and failure put-away trajectories are supplied for mug and plate.",
+      "D3": "Safe metered placement interactions reveal bowl, glass, and pantry-room expansion."
+    },
+    "task_descriptions": {
+      "affected": "A remapped object must be placed in the new pantry receptacle rather than the stale kitchen cabinet.",
+      "unchanged-retention": "Unchanged object classes should keep their original accepted placements.",
+      "boundary-open-set": "Unknown classes or invalid pantry placements should be rejected without inventing a codebook entry.",
+      "matched-null": "A paraphrase or irrelevant state change should not rewrite the placement table."
+    }
+  },
+  "B2.3": {
+    "title": "Priority Selection",
+    "platform": "SkillLearn",
+    "mechanism": "D2-only policy-rule update",
+    "status_label": "Constructed",
+    "drift_summary": "Priority adjudication changes eligibility cutoff, dominant category, score direction, and tie-break.",
+    "evidence_delivery": {
+      "D2": "Successful post-drift trajectories are supplied once during adaptation. Each trajectory states one current v2 rule and demonstrates it on one sibling."
+    },
+    "task_descriptions": {
+      "affected": "The current priority winner depends on one or more changed adjudication rules.",
+      "unchanged-retention": "The selected record remains the same under both stale and current rules.",
+      "boundary-open-set": "An empty or invalid candidate pool should be rejected rather than inventing a winner.",
+      "matched-null": "Cosmetic record wording should not trigger a persistent policy rewrite."
+    }
+  },
+  "B6.2": {
+    "title": "Discount Calculation",
+    "platform": "SkillLearn",
+    "mechanism": "D2-only formula update",
+    "status_label": "Constructed",
+    "drift_summary": "The fee formula changes its price anchor, tier multipliers, and rounding rule while multiply-then-round order is retained.",
+    "evidence_delivery": {
+      "D2": "Successful post-drift discount-calculation trajectories are supplied once during adaptation. Each trajectory states one current v2 formula rule and demonstrates it on one invoice."
+    },
+    "task_descriptions": {
+      "affected": "The current fee depends on the changed anchor, multiplier, or rounding rule.",
+      "unchanged-retention": "A case that only uses retained multiply-then-round order should keep the same fee.",
+      "boundary-open-set": "An invalid item set or unsupported tier should be rejected without inventing a formula.",
+      "matched-null": "A cosmetic invoice change should not trigger a persistent formula rewrite."
+    }
+  },
+  "B10.1": {
+    "title": "Account Actions",
+    "platform": "Tau2",
+    "mechanism": "Policy cap shift plus added precondition",
+    "status_label": "Under construction",
+    "drift_summary": "Account credit cap falls from 100 to 60, and verify_identity becomes required before issuing credit.",
+    "evidence_delivery": {
+      "D1": "A declared rule states that the issue_account_credit cap changed from 100 to 60 units.",
+      "D3": "Safe probes reveal that verify_identity is now required before issue_account_credit."
+    },
+    "task_descriptions": {
+      "affected": "A credit action must use the new cap and satisfy the added identity-verification precondition.",
+      "unchanged-retention": "Unchanged account actions should keep working without collateral policy edits.",
+      "boundary-open-set": "Out-of-scope credit requests should be rejected rather than inventing a new policy.",
+      "matched-null": "A cosmetic account-state change should not trigger a persistent policy rewrite."
+    }
+  },
+  "C3.2": {
+    "title": "CLI Semantics",
+    "platform": "BFCL",
+    "mechanism": "D2+D3 CLI grammar and cost recovery",
+    "status_label": "Constructed",
+    "drift_summary": "The same CLI grammar change as C3.1 must be recovered from demonstrations and probes, with no changelog.",
+    "paired_family": "C3.1",
+    "evidence_delivery": {
+      "D2": "Paired success and failure trajectories reveal that find now uses --root instead of --path.",
+      "D3": "Metered current-regime probes reveal wc --lines and the lower-cost copy-as shortcut."
+    },
+    "task_descriptions": {
+      "affected": "A CLI request depends on the remapped find flag, retired wc form, or new copy-as shortcut.",
+      "unchanged-retention": "Unchanged CLI recipes should continue to work without collateral edits.",
+      "boundary-open-set": "Unsupported CLI requests should be rejected or handled without hallucinated syntax.",
+      "matched-null": "Null filesystem changes should not cause a persistent CLI grammar update."
+    }
+  },
+  "D3.1": {
+    "title": "Search Strategy",
+    "platform": "ALFWorld",
+    "mechanism": "D3-only search-policy recovery",
+    "status_label": "Constructed",
+    "drift_summary": "Drinkware search priority moves to the pantry, and the direct hall-to-kitchen route is blocked.",
+    "paired_family": "D3.2",
+    "evidence_delivery": {
+      "D3": "Metered current-regime probes identify the new drinkware search prior and the blocked hall-to-kitchen path. No changelog or demonstration is supplied."
+    },
+    "task_descriptions": {
+      "affected": "Object retrieval depends on the remapped drinkware prior or the blocked kitchen route.",
+      "unchanged-retention": "An unchanged object or route should still be found without rewriting the search policy.",
+      "boundary-open-set": "Unknown objects or blocked destinations should be handled by bounded search rather than invention.",
+      "matched-null": "A cosmetic layout change should not trigger a persistent search-policy rewrite."
+    }
+  },
+  "D3.2": {
+    "title": "Search Strategy",
+    "platform": "ALFWorld",
+    "mechanism": "D2+D3 search-policy recovery",
+    "status_label": "Constructed",
+    "drift_summary": "The same SearchWorld drift as D3.1 is split: D2 shows the drinkware remap, D3 reveals the blocked route.",
+    "paired_family": "D3.1",
+    "evidence_delivery": {
+      "D2": "Success and failure trajectories disclose that drinkware search priority moved from kitchen_cabinet to pantry_shelf.",
+      "D3": "Metered probes reveal the blocked hall-to-kitchen path and when search should stop."
+    },
+    "task_descriptions": {
+      "affected": "Object retrieval depends on the remapped drinkware prior or the blocked kitchen route.",
+      "unchanged-retention": "An unchanged object or route should still be found without rewriting the search policy.",
+      "boundary-open-set": "Unknown objects or blocked destinations should be handled by bounded search rather than invention.",
+      "matched-null": "A cosmetic layout change should not trigger a persistent search-policy rewrite."
+    }
+  },
+  "D4.1": {
+    "title": "Bulk Tag App",
+    "platform": "AppWorld",
+    "mechanism": "Better-path action add with D1 localization",
+    "status_label": "Constructed",
+    "drift_summary": "A bulk_add_tag endpoint is added so 3-5 same-workspace tag updates become one cheaper call.",
+    "paired_family": "D4.2",
+    "evidence_delivery": {
+      "D1": "A declared API update states that bulk_add_tag(contact_ids, tag) exists for 3-5 same-workspace shared-tag updates.",
+      "D3": "Metered probes confirm that the bulk endpoint is equivalent to repeated add_tag calls and cheaper when in scope."
+    },
+    "task_descriptions": {
+      "affected": "A 3-5 contact same-workspace tag update should use the new cheaper bulk_add_tag action.",
+      "unchanged-retention": "A single-contact or out-of-scope update should keep using the old add_tag path.",
+      "boundary-open-set": "Cross-workspace or oversized bulk requests should be rejected rather than forcing the new endpoint.",
+      "matched-null": "A cosmetic contact-label change should not trigger a persistent API rewrite."
+    }
+  },
+  "D4.2": {
+    "title": "Bulk Tag App",
+    "platform": "AppWorld",
+    "mechanism": "Better-path action add from D2+D3",
+    "status_label": "Constructed",
+    "drift_summary": "The same bulk_add_tag improvement as D4.1 must be inferred from trajectories and probes, with no changelog.",
+    "paired_family": "D4.1",
+    "evidence_delivery": {
+      "D2": "One success/failure trajectory pair shows when bulk_add_tag is the cheaper in-scope action.",
+      "D3": "Disjoint probes confirm equivalence, lower cost, and idempotence of the new bulk endpoint."
+    },
+    "task_descriptions": {
+      "affected": "A 3-5 contact same-workspace tag update should recover and use the new cheaper bulk_add_tag action.",
+      "unchanged-retention": "A single-contact or out-of-scope update should keep using the old add_tag path.",
+      "boundary-open-set": "Cross-workspace or oversized bulk requests should be rejected rather than forcing the new endpoint.",
+      "matched-null": "A cosmetic contact-label change should not trigger a persistent API rewrite."
     }
   }
 }

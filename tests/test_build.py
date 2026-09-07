@@ -25,21 +25,23 @@ class DriftWebBuildTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.overrides = load_optional_json(DRIFT_WEB_ROOT / "family_overrides.json") or {}
+        cls.a_root = PROJECT_ROOT / "data" / "A_drift_benchmark"
+        cls.b_root = PROJECT_ROOT / "data" / "B_drift_benchmark"
         cls.c_root = PROJECT_ROOT / "data" / "C_drift_benchmark"
         cls.d_root = PROJECT_ROOT / "data" / "D_drift_benchmark"
 
-    def test_c1_2_single_task_parsing(self):
+    def test_c1_2_sibling_parsing(self):
         family_dir = self.c_root / "C1.2"
         task_file = find_task_file(family_dir)
         self.assertIsNotNone(task_file)
-        self.assertEqual(task_file.name, "task.json")
+        self.assertEqual(task_file.name, "siblings.json")
 
         tasks = extract_task_list(load_json_or_jsonl(task_file))
-        self.assertEqual(len(tasks), 1)
+        self.assertEqual(len(tasks), 19)
         normalized = normalize_task("C1.2", tasks[0], 1, task_file.relative_to(family_dir).as_posix(), self.overrides)
-        self.assertEqual(normalized["id"], "C1.2_pilot_001")
-        self.assertEqual(normalized["slice"], "unspecified")
-        self.assertIn("START to X7", normalized["description"])
+        self.assertEqual(normalized["id"], "C1.2_aff_001")
+        self.assertEqual(normalized["slice"], "affected")
+        self.assertIn("START", normalized["description"] + (normalized["instruction"] or ""))
 
     def test_c2_1_sibling_ids_and_slices(self):
         family_dir = self.c_root / "C2.1"
@@ -61,9 +63,17 @@ class DriftWebBuildTests(unittest.TestCase):
             "C2.1": (self.c_root / "C2.1", {"D1": 0, "D2": 40, "D3": 60}),
             "C2.2": (self.c_root / "C2.2", {"D1": 0, "D2": 0, "D3": 100}),
             "C3.1": (self.c_root / "C3.1", {"D1": 50, "D2": 0, "D3": 50}),
+            "C3.2": (self.c_root / "C3.2", {"D1": 0, "D2": 50, "D3": 50}),
+            "A5.1": (self.a_root / "A5.1", {"D1": 0, "D2": 50, "D3": 50}),
+            "B2.3": (self.b_root / "B2.3", {"D1": 0, "D2": 100, "D3": 0}),
+            "B6.2": (self.b_root / "B6.2", {"D1": 0, "D2": 100, "D3": 0}),
             "D1.2": (self.d_root / "D1.2", {"D1": 0, "D2": 0, "D3": 100}),
             "D2.1": (self.d_root / "D2.1", {"D1": 30, "D2": 0, "D3": 70}),
             "D2.2": (self.d_root / "D2.2", {"D1": 0, "D2": 0, "D3": 100}),
+            "D3.1": (self.d_root / "D3.1", {"D1": 0, "D2": 0, "D3": 100}),
+            "D3.2": (self.d_root / "D3.2", {"D1": 0, "D2": 50, "D3": 50}),
+            "D4.1": (self.d_root / "D4.1", {"D1": 50, "D2": 0, "D3": 50}),
+            "D4.2": (self.d_root / "D4.2", {"D1": 0, "D2": 50, "D3": 50}),
         }
         for family_id, (family_dir, percentages) in expected.items():
             with self.subTest(family_id=family_id):
@@ -84,12 +94,27 @@ class DriftWebBuildTests(unittest.TestCase):
             "C2.1": "C2_1_BFCL_execution_plan.md",
             "C2.2": "C2_2_BFCL_execution_plan.md",
             "C3.1": "C3_1_BFCL_execution_plan.md",
+            "C3.2": "C3_2_CLI_execution_plan.md",
+            "A5.1": "A5_1_placement_codebook_execution_plan.md",
+            "B2.3": "B2_3_priority_selection_D2_execution_plan.md",
+            "B6.2": "B6_2_discount_calculation_D2_execution_plan.md",
+            "B10.1": "B10_1_account_actions_execution_plan.md",
             "D1.2": "D1_2_design_level_drift_plan.md",
             "D2.1": "D2_1_design_level_drift_plan.md",
             "D2.2": "D2_2_design_level_drift_plan.md",
+            "D3.1": "D3_1_search_strategy_execution_plan.md",
+            "D3.2": "D3_2_search_strategy_execution_plan.md",
+            "D4.1": "D4_1_BFCL_execution_plan.md",
+            "D4.2": "D4_2_BFCL_execution_plan.md",
+        }
+        roots = {
+            "A": self.a_root,
+            "B": self.b_root,
+            "C": self.c_root,
+            "D": self.d_root,
         }
         for family_id, filename in expected.items():
-            root = self.c_root if family_id.startswith("C") else self.d_root
+            root = roots[family_id[0]]
             with self.subTest(family_id=family_id):
                 self.assertEqual(find_execution_plan(root / family_id).name, filename)
 
@@ -107,6 +132,26 @@ class DriftWebBuildTests(unittest.TestCase):
         }
         with self.assertRaises(ValueError):
             validate_family(family)
+
+    def test_a5_1_and_b2_3_sibling_counts(self):
+        cases = (
+            (self.a_root / "A5.1", "A5.1", 19, "A5.1_aff_001", "affected"),
+            (self.b_root / "B2.3", "B2.3", 19, "B2.3_aff_001", "affected"),
+            (self.c_root / "C3.2", "C3.2", 19, "C3.2_aff_001", "affected"),
+            (self.d_root / "D3.1", "D3.1", 19, "D3.1_aff_001", "affected"),
+            (self.d_root / "D4.1", "D4.1", 19, "D4.1_aff_001", "affected"),
+        )
+        for family_dir, family_id, count, first_id, first_slice in cases:
+            with self.subTest(family_id=family_id):
+                task_file = find_task_file(family_dir)
+                tasks = extract_task_list(load_json_or_jsonl(task_file))
+                normalized = [
+                    normalize_task(family_id, task, ordinal, task_file.relative_to(family_dir).as_posix(), self.overrides)
+                    for ordinal, task in enumerate(tasks, start=1)
+                ]
+                self.assertEqual(len(normalized), count)
+                self.assertEqual(normalized[0]["id"], first_id)
+                self.assertEqual(normalized[0]["slice"], first_slice)
 
 
 if __name__ == "__main__":

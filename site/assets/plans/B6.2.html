@@ -1,0 +1,644 @@
+<h1>B6.2 — Discount-Calculation Drift: D2-Only Agent Execution Plan</h1>
+<h2>Architecture Alignment Amendment</h2>
+<p>This plan is normalized to the reusable benchmark contract in &#96;data/Drift_benchmark_architecture_guide.md&#96;.</p>
+<p>Build B6.2 under:</p>
+<pre><code>data/B_drift_benchmark/B6.2/
+├── B6_2_discount_calculation_D2_execution_plan.md
+└── discount_calculation/
+    ├── README.md
+    ├── generate_b6_2.py
+    ├── compile_b6_2.py
+    ├── formula_v1.json
+    ├── formula_v2.json
+    ├── drift_spec.json
+    ├── source_task.json
+    ├── source_task.md
+    ├── siblings.json
+    ├── sibling_summary.json
+    ├── possible_answer_r_minus.json
+    ├── possible_answer_r_plus.json
+    ├── regime_r_minus.json
+    ├── regime_r_plus.json
+    ├── regime_null.json
+    ├── skill_r_minus.md
+    ├── skill_r_plus_oracle.md
+    ├── evidence/
+    │   ├── evidence_allocation.json
+    │   ├── evidence_candidates.jsonl
+    │   ├── d2_success_trajectories.jsonl
+    │   └── d2_manifest_private.json
+    └── validation/
+        ├── construction_report.json
+        ├── replay_checks.py
+        └── test_b6_2_architecture.sh</code></pre>
+<p>The package root is &#96;discount_calculation/&#96;, and &#96;siblings.json&#96; is the canonical loader-facing task source. Package-level regime answers must use &#96;possible_answer_r_minus.json&#96; and &#96;possible_answer_r_plus.json&#96;. Private/source audit aliases &#96;gold_v1.jsonl&#96; and &#96;gold_v2.jsonl&#96; may also be emitted.</p>
+<p>Use architecture-style task IDs:</p>
+<pre><code>B6.2_aff_001
+B6.2_ret_001
+B6.2_open_001
+B6.2_null_001</code></pre>
+<p>The family should be registered in &#96;data/dataloader.py&#96; as:</p>
+<pre><code>&quot;B6.2&quot;: Path(&quot;B6.2/discount_calculation/siblings.json&quot;)</code></pre>
+<p>When loading via the shared dataloader, use:</p>
+<pre><code>python data/dataloader.py --root data/B_drift_benchmark --benchmark-ids B6.2 --regime r+</code></pre>
+<h3>Extracted Source Truth</h3>
+<p>The executable source in &#96;data/skilllearnbench_drift/gen/build_arbitrary_families.py&#96; defines:</p>
+<pre><code>MULT_V1 = {&quot;A&quot;: 1.2, &quot;B&quot;: 1.5, &quot;C&quot;: 2.0}
+MULT_V2 = {&quot;A&quot;: 1.1, &quot;B&quot;: 1.4, &quot;C&quot;: 1.8}
+# v1: anchor = second-lowest price; fee = 5 * floor(raw / 5)
+# v2: anchor = second-highest price; fee = 10 * ceil(raw / 10)</code></pre>
+<p>No cap, tax, or additional operation-order term exists in the executable source. B6.2 therefore records &#96;F05 operation_order&#96; as retained multiply-then-round semantics and does not create &#96;F06 cap&#96;.</p>
+<h2>0. Objective</h2>
+<p>Build **B6.2** as a drift benchmark derived from the existing &#96;discount-calculation&#96; arbitrary-rule family.</p>
+<p>The source family already contains the hidden pricing formula and its &#96;v1 -&gt; v2&#96; transition. **Do not invent a new formula, coefficient table, cap, or ordering rule.** Extract the exact rule from the existing family implementation and use it as benchmark truth.</p>
+<p>B6.2 is the **D2-only** condition from the Roster:</p>
+<pre><code>Family: discount-calculation
+Setting: B6.2
+
+D1 = 0%
+D2 = 100%
+D3 = 0%
+
+Initial pilot:
+19 evaluation siblings
+  8 affected
+  4 unchanged-retention
+  4 boundary/open-set
+  3 matched-null</code></pre>
+<p>The solver starts with the stale &#96;v1&#96; pricing skill and receives only successful post-drift invoice trajectories. It must infer the current semantic formula and transfer it to unseen invoices.</p>
+<p>The desired competence is:</p>
+<pre><code>not:
+memorize demonstrated invoice -&gt; fee pairs
+
+but:
+recover the v2 anchor selection,
+tier-dependent numeric parameters,
+and rounding/operation semantics</code></pre>
+<p>---</p>
+<h2>1. Use the existing &#96;discount-calculation&#96; family as source truth</h2>
+<p>Start from:</p>
+<pre><code>data/skilllearnbench_drift/tasks/discount-calculation/</code></pre>
+<p>The source instances follow the shared layout:</p>
+<pre><code>&lt;instance&gt;/
+├── instruction.md
+├── task.toml
+├── environment/
+│   └── records.json
+├── tests/
+└── ...</code></pre>
+<p>Early beta instances may also contain:</p>
+<pre><code>worked_examples.json</code></pre>
+<p>The arbitrary-rule stream is:</p>
+<pre><code>01-05  -&gt; v1
+06-11  -&gt; v2
+12-16  -&gt; interleaved v1/v2</code></pre>
+<p>Use the original 16 instances as source/regression tests, not as the final B6.2 evaluation pool.</p>
+<p>---</p>
+<h2>2. Extract the exact v1 and v2 pricing rules</h2>
+<p>Locate the source family generator, seed skill, solution code, test oracle, or constants.</p>
+<p>Create:</p>
+<pre><code>formula_v1.json
+formula_v2.json</code></pre>
+<p>The task-family description establishes these core semantics:</p>
+<h3>v1</h3>
+<pre><code>anchor item:
+    second-lowest price
+
+tier:
+    apply the v1 tier multiplier
+
+rounding:
+    round DOWN to a multiple of 5
+    after tier multiplication</code></pre>
+<h3>v2</h3>
+<pre><code>anchor item:
+    second-highest price
+
+tier:
+    apply the v2 tier multiplier table
+
+rounding:
+    round UP to a multiple of 10</code></pre>
+<p>The source description intentionally does not enumerate every numeric multiplier.</p>
+<p>Therefore:</p>
+<pre><code>extract exact multiplier values from the implementation</code></pre>
+<p>rather than inventing them.</p>
+<p>If the existing source family truly contains additional parameters such as:</p>
+<pre><code>cap
+tax/discount ordering
+other coefficients</code></pre>
+<p>include them in the normalized formula objects.</p>
+<p>If those fields do not exist in the executable source, do not add them merely because the Roster uses a generic formula-family description.</p>
+<p>---</p>
+<h2>3. Normalize the formula into auditable obligations</h2>
+<p>Create:</p>
+<pre><code>drift_spec.json</code></pre>
+<p>Recommended obligation decomposition:</p>
+<pre><code>F01 anchor_selector
+F02 tier_multiplier_table
+F03 rounding_direction
+F04 rounding_quantum
+F05 operation_order
+F06 cap</code></pre>
+<p>Only mark &#96;F05&#96;/&#96;F06&#96; present if the source implementation contains them.</p>
+<p>For the catalog-guaranteed drift:</p>
+<pre><code>F01:
+    second-lowest -&gt; second-highest
+    changed
+
+F02:
+    v1 multipliers -&gt; v2 multipliers
+    changed
+
+F03:
+    floor -&gt; ceiling
+    changed
+
+F04:
+    multiple of 5 -&gt; multiple of 10
+    changed</code></pre>
+<p>Any source-defined unchanged formula components should be recorded as retained obligations.</p>
+<p>---</p>
+<h2>4. Preserve the semantic task and output contract</h2>
+<p>The source task asks the agent to compute a service fee from:</p>
+<pre><code>/root/records.json</code></pre>
+<p>and write:</p>
+<pre><code>/root/answer.json</code></pre>
+<p>with:</p>
+<pre><code>{
+  &quot;fee&quot;: 0,
+  &quot;anchor_id&quot;: &quot;P00i&quot;
+}</code></pre>
+<p>Keep this interface stable.</p>
+<p>The instruction must not reveal:</p>
+<pre><code>second-highest
+current multiplier table
+ceil-to-10
+changed cap/order</code></pre>
+<p>The task-level records alone should not be sufficient to recover the private formula.</p>
+<p>---</p>
+<h2>5. Build stale and oracle skills</h2>
+<p>Create:</p>
+<pre><code>skill_v1.md
+skill_v2_oracle.md</code></pre>
+<p>&#96;skill_v1.md&#96; contains the complete source &#96;v1&#96; formula.</p>
+<p>&#96;skill_v2_oracle.md&#96; contains the complete source &#96;v2&#96; formula.</p>
+<p>Adaptive methods receive the stale skill only.</p>
+<p>Never expose:</p>
+<pre><code>formula_v2.json
+skill_v2_oracle.md
+private obligation annotations</code></pre>
+<p>to the learner.</p>
+<p>---</p>
+<h2>6. B6.2 evidence contract</h2>
+<p>Create:</p>
+<pre><code>evidence/evidence_allocation.json</code></pre>
+<p>with:</p>
+<pre><code>{
+  &quot;D1&quot;: 0,
+  &quot;D2&quot;: 100,
+  &quot;D3&quot;: 0,
+  &quot;delivery&quot;: {
+    &quot;D1&quot;: null,
+    &quot;D2&quot;: &quot;Successful post-drift discount-calculation trajectories are supplied once during adaptation. Each trajectory explicitly states one correct v2 formula rule and demonstrates it on one successful invoice.&quot;,
+    &quot;D3&quot;: null
+  }
+}</code></pre>
+<p>For B6.2, make D2 deliberately **maximally revealing**.</p>
+<p>Each trajectory should contain:</p>
+<pre><code>invoice / records
++
+accepted answer
++
+one explicit statement of exactly one correct current formula rule</code></pre>
+<p>Use one trajectory per atomic post-drift formula rule or parameter.</p>
+<p>Do not provide a separate all-rules-at-once D1 changelog. Do not provide D3 probes. The explicit rule statement belongs inside the successful trajectory.</p>
+<h2>7. Inspect and reuse existing worked examples carefully</h2>
+<p>Inspect &#96;worked_examples.json&#96; from the early &#96;v2&#96; source instances.</p>
+<p>For each example:</p>
+<ol>
+<li>verify its accepted answer under the actual v2 grader;</li>
+<li>determine which one atomic formula rule it can cleanly demonstrate;</li>
+<li>attach an explicit statement of that rule;</li>
+<li>avoid using the same trajectory to state several rules;</li>
+<li>reject any example overlapping the evaluation pool.</li>
+</ol>
+<p>If the existing worked examples do not cover every current v2 formula rule, generate additional evidence-only invoices.</p>
+<p>The final D2 set should favor **clarity and full rule coverage** over minimality.</p>
+<h2>8. Generate an evidence-only invoice pool</h2>
+<p>Create:</p>
+<pre><code>evidence/evidence_candidates.jsonl</code></pre>
+<p>Generate many valid source-schema invoices with controlled variation over:</p>
+<pre><code>number of items
+item prices
+price ordering
+price ties
+tier
+fields used by any source-defined cap/order terms</code></pre>
+<p>For every candidate, privately compute:</p>
+<pre><code>answer_v1
+answer_v2
+obligation_support
+hypotheses eliminated by observing answer_v2</code></pre>
+<p>Evidence candidate IDs must use a namespace disjoint from evaluation:</p>
+<pre><code>B6.2-evidence-001
+...</code></pre>
+<p>---</p>
+<h2>9. Build a minimal discriminating D2 invoice set</h2>
+<p>Do not optimize for the smallest implicit evidence set.</p>
+<p>Instead, enumerate the exact current v2 formula into atomic rules and create one maximally revealing successful trajectory for each.</p>
+<p>At minimum, the catalog guarantees these rule groups:</p>
+<pre><code>D2-anchor:
+    current anchor-selection rule
+
+D2-round-direction:
+    current rounding direction
+
+D2-round-quantum:
+    current rounding quantum
+
+D2-tier-*:
+    one trajectory per current tier multiplier or multiplier rule</code></pre>
+<p>If executable source truth contains additional formula components such as a cap or operation-order rule, create one trajectory for each of those too.</p>
+<h3>Anchor-selection trajectory</h3>
+<p>Construct an invoice with sufficiently distinct prices that the anchor is unambiguous.</p>
+<p>Explicitly state the verified current rule, expected from the catalog to be:</p>
+<pre><code>Current rule: the anchor item is the second-highest-priced item.</code></pre>
+<h3>Tier-multiplier trajectories</h3>
+<p>For every tier-specific multiplier or multiplier rule stored in the v2 skill, construct a successful invoice that uses it and explicitly state:</p>
+<pre><code>Current rule: for tier &lt;TIER&gt;, use multiplier &lt;VALUE&gt;.</code></pre>
+<p>Do not invent &#96;&lt;VALUE&gt;&#96;; extract it from source truth.</p>
+<h3>Rounding-direction trajectory</h3>
+<p>Use an invoice whose pre-rounding fee makes the direction observable.</p>
+<p>Explicitly state:</p>
+<pre><code>Current rule: round the computed fee upward.</code></pre>
+<h3>Rounding-quantum trajectory</h3>
+<p>Use an invoice near a rounding boundary.</p>
+<p>Explicitly state:</p>
+<pre><code>Current rule: round the fee to the next multiple of 10.</code></pre>
+<h3>Additional source-defined rules</h3>
+<p>For every other atomic formula component present in executable truth:</p>
+<pre><code>one successful trajectory
++
+one explicit rule statement</code></pre>
+<p>The solver should be able to reconstruct the complete v2 formula directly from the D2 trajectory set.</p>
+<h2>10. D2 success trajectory format</h2>
+<p>Create:</p>
+<pre><code>evidence/d2_success_trajectories.jsonl</code></pre>
+<p>Each learner-visible record explicitly reveals one formula rule.</p>
+<p>Recommended schema:</p>
+<pre><code>{
+  &quot;evidence_id&quot;: &quot;B6.2-D2-anchor&quot;,
+  &quot;regime&quot;: &quot;v2&quot;,
+  &quot;rule_id&quot;: &quot;anchor_selector&quot;,
+  &quot;revealed_rule&quot;: &quot;The anchor item is the second-highest-priced item.&quot;,
+  &quot;instruction&quot;: &quot;Compute the service fee and report the anchor item.&quot;,
+  &quot;records&quot;: [
+    {&quot;id&quot;: &quot;P001&quot;, &quot;price&quot;: 10, &quot;tier&quot;: &quot;example&quot;},
+    {&quot;id&quot;: &quot;P002&quot;, &quot;price&quot;: 20, &quot;tier&quot;: &quot;example&quot;},
+    {&quot;id&quot;: &quot;P003&quot;, &quot;price&quot;: 30, &quot;tier&quot;: &quot;example&quot;},
+    {&quot;id&quot;: &quot;P004&quot;, &quot;price&quot;: 40, &quot;tier&quot;: &quot;example&quot;}
+  ],
+  &quot;accepted_answer&quot;: {
+    &quot;fee&quot;: 0,
+    &quot;anchor_id&quot;: &quot;P003&quot;
+  },
+  &quot;verification&quot;: {
+    &quot;passed&quot;: true
+  }
+}</code></pre>
+<p>The numeric fee above is schematic. The generator must replace it with the true v2 result from executable source truth and the real grader.</p>
+<p>The contract is:</p>
+<pre><code>one trajectory
+=
+one explicit formula rule
++
+one successful concrete invoice</code></pre>
+<p>For B6.2, &#96;rule_id&#96; and &#96;revealed_rule&#96; are intentionally learner-visible. Private generation metadata and oracle intermediates remain in:</p>
+<pre><code>evidence/d2_manifest_private.json</code></pre>
+<h2>11. Generate trajectories from the actual v2 grader</h2>
+<p>Pipeline:</p>
+<pre><code>evidence-only invoice
+        +
+formula_v2 oracle
+        |
+        v
+produce fee + anchor_id
+        |
+        v
+write /root/answer.json
+        |
+        v
+run source tests
+        |
+        v
+pass
+        |
+        v
+serialize sanitized D2 trajectory</code></pre>
+<p>Do not hand-enter an accepted fee.</p>
+<p>If agent logs are used, do not expose chain-of-thought. Each sanitized trajectory must retain or add its single explicit &#96;revealed_rule&#96; statement. Do not state unrelated formula rules in the same trajectory.</p>
+<p>---</p>
+<h2>12. Generate the 19 evaluation siblings</h2>
+<p>Create:</p>
+<pre><code>siblings.json</code></pre>
+<p>with:</p>
+<pre><code>8 affected
+4 unchanged-retention
+4 boundary/open-set
+3 matched-null
+= 19 total</code></pre>
+<p>Recommended private schema:</p>
+<pre><code>{
+  &quot;id&quot;: &quot;B6.2-aff-001&quot;,
+  &quot;slice&quot;: &quot;affected&quot;,
+  &quot;regime&quot;: &quot;v2&quot;,
+  &quot;obligation_support&quot;: [&quot;F01&quot;, &quot;F03&quot;],
+  &quot;source_family&quot;: &quot;discount-calculation&quot;
+}</code></pre>
+<p>---</p>
+<h2>13. Define affectedness by paired formula compilation</h2>
+<p>For each candidate invoice:</p>
+<pre><code>answer_v1 = solve(records, formula_v1)
+answer_v2 = solve(records, formula_v2)</code></pre>
+<p>Mark it affected iff either graded output changes:</p>
+<pre><code>fee
+anchor_id</code></pre>
+<p>A change in an internal intermediate value that leaves both graded fields identical does not make the sibling affected for primary correctness.</p>
+<p>Track such cases separately if useful for diagnostics.</p>
+<p>---</p>
+<h2>14. Build the 8 affected siblings</h2>
+<p>Cover changed formula obligations independently and jointly.</p>
+<p>Recommended sub-slices:</p>
+<pre><code>anchor-only decisive
+multiplier-only decisive
+rounding-only decisive
+anchor + multiplier
+anchor + rounding
+multiplier + rounding
+full interaction
+cap/order decisive, if present</code></pre>
+<h3>Anchor-selection siblings</h3>
+<p>Use at least four distinct prices where possible so:</p>
+<pre><code>second-lowest != second-highest</code></pre>
+<p>and the expected &#96;anchor_id&#96; changes.</p>
+<h3>Multiplier siblings</h3>
+<p>Control anchor selection while varying tier.</p>
+<p>Ensure the changed multiplier alters the final fee after rounding.</p>
+<h3>Rounding siblings</h3>
+<p>Choose pre-rounding amounts near boundaries that distinguish the v1 and v2 rounding rules.</p>
+<h3>Interaction siblings</h3>
+<p>Create cases where a solver must correctly recover:</p>
+<pre><code>anchor
++
+multiplier
++
+rounding</code></pre>
+<p>to obtain the final fee.</p>
+<p>---</p>
+<h2>15. Build the 4 unchanged-retention siblings</h2>
+<p>Search for valid invoices satisfying:</p>
+<pre><code>answer_v1 == answer_v2</code></pre>
+<p>despite the formula drift.</p>
+<p>Possible sources include:</p>
+<pre><code>cases where second-lowest and second-highest are the same item
+cases where different intermediate calculations happen to round to the same final fee
+tiers whose relevant source parameters are retained
+source-defined cap saturation that equalizes outputs, if such a cap exists</code></pre>
+<p>Do not rely on intuition.</p>
+<p>Generate and compile until exact output equality is verified.</p>
+<p>---</p>
+<h2>16. Build the 4 boundary/open-set siblings</h2>
+<p>Prefer source-valid numeric boundaries:</p>
+<pre><code>price ties
+near-price ties around the anchor position
+minimum valid item count
+exact rounding boundaries
+one unit below a rounding boundary
+one unit above a rounding boundary
+tier boundary values
+cap boundary values, if present</code></pre>
+<p>Only include malformed/missing-field tasks if the existing source family defines expected behavior for them.</p>
+<p>The source grader remains authoritative.</p>
+<p>---</p>
+<h2>17. Build the 3 matched-null siblings</h2>
+<p>Matched-null perturbations should not alter the formula or expected answer.</p>
+<p>Examples:</p>
+<pre><code>permute item order
+rename item IDs consistently
+change irrelevant metadata
+reorder JSON keys
+change a non-anchor item while preserving order statistics and final fee
+instruction paraphrase</code></pre>
+<p>Compile before and after the null perturbation and require identical graded outputs.</p>
+<p>These cases detect spurious skill rewrites caused by surface changes.</p>
+<p>---</p>
+<h2>18. Compile all gold outputs automatically</h2>
+<p>Create:</p>
+<pre><code>compile_b6_2.py</code></pre>
+<p>Inputs:</p>
+<pre><code>formula_v1.json
+formula_v2.json
+siblings.json</code></pre>
+<p>Outputs:</p>
+<pre><code>gold_v1.jsonl
+gold_v2.jsonl
+sibling_summary.json</code></pre>
+<p>For each sibling record privately:</p>
+<pre><code>v1 anchor
+v2 anchor
+v1 raw fee
+v2 raw fee
+v1 final fee
+v2 final fee
+decisive obligations
+affected?</code></pre>
+<p>Keep intermediate values private from the learner.</p>
+<p>---</p>
+<h2>19. Deliver D2 once during adaptation</h2>
+<p>Recommended episode:</p>
+<pre><code>stale skill_v1.md
+        +
+d2_success_trajectories.jsonl
+        |
+        v
+adapt / rewrite skill
+        |
+        v
+evaluate on held-out v2 siblings</code></pre>
+<p>Do not prepend all worked examples to each evaluation invoice.</p>
+<p>This should measure persistent skill adaptation rather than in-context copying.</p>
+<p>---</p>
+<h2>20. Construction controls</h2>
+<p>Run:</p>
+<pre><code>zero_shot
+static_v1
+simple_D2_update
+oracle_v2</code></pre>
+<p>Conditions:</p>
+<pre><code>zero_shot:
+    no skill, no D2
+
+static_v1:
+    stale v1 formula, no D2
+
+simple_D2_update:
+    stale v1 formula + D2 examples
+
+oracle_v2:
+    current v2 skill, no adaptation needed</code></pre>
+<p>Use these to validate that:</p>
+<pre><code>the drift matters
+the D2 evidence is sufficient
+the evaluation pool is solvable</code></pre>
+<p>---</p>
+<h2>21. D2 identifiability validation</h2>
+<p>Create:</p>
+<pre><code>validation/validate_evidence_rule_coverage.py</code></pre>
+<p>Compare the learner-visible D2 trajectories against private &#96;formula_v2.json&#96;.</p>
+<p>Require:</p>
+<pre><code>every atomic current v2 rule is explicitly stated in at least one trajectory
+each trajectory states exactly one rule
+the stated rule matches executable source truth
+the concrete invoice actually exercises that rule
+the accepted answer passes the actual v2 grader</code></pre>
+<p>At minimum verify coverage for:</p>
+<pre><code>anchor selector
+every tier multiplier / multiplier rule
+rounding direction
+rounding quantum</code></pre>
+<p>Also verify any source-defined cap, operation-order rule, or other coefficient if present.</p>
+<p>Fail benchmark construction if any current formula component remains unstated.</p>
+<h2>22. Anti-memorization validation</h2>
+<p>A D2-only benchmark is only useful if demonstrated invoices cannot simply be retrieved.</p>
+<p>Require:</p>
+<pre><code>evidence invoice hashes != evaluation invoice hashes
+different item IDs
+different price combinations
+different item counts where possible
+different tier combinations</code></pre>
+<p>Also include held-out combinations that were never demonstrated.</p>
+<p>The skill must generalize structurally.</p>
+<p>---</p>
+<h2>23. Recommended metrics</h2>
+<p>Primary:</p>
+<pre><code>Q_after
+fee correctness
+anchor_id correctness
+affected-slice Q
+retention Q
+boundary Q
+matched-null Q</code></pre>
+<p>Drift metrics:</p>
+<pre><code>G_Q^need
+G_Q^stale
+RR</code></pre>
+<p>Formula diagnostics:</p>
+<pre><code>anchor-selector recovery
+multiplier parameter error
+rounding-rule recovery
+operation-order recovery, if present
+semantic transfer rate (STR)
+collateral damage (CD)</code></pre>
+<p>Do not fabricate numeric results before execution.</p>
+<p>---</p>
+<h2>24. Recommended package</h2>
+<pre><code>B6.2/
+├── B6_2_discount_calculation_execution_plan.md
+└── discount_calculation/
+    ├── README.md
+    ├── extract_source_formula.py
+    ├── formula_v1.json
+    ├── formula_v2.json
+    ├── drift_spec.json
+    ├── skill_v1.md
+    ├── skill_v2_oracle.md
+    ├── generate_b6_2.py
+    ├── compile_b6_2.py
+    ├── siblings.json
+    ├── sibling_summary.json
+    ├── gold_v1.jsonl
+    ├── gold_v2.jsonl
+    ├── evidence/
+    │   ├── evidence_allocation.json
+    │   ├── evidence_candidates.jsonl
+    │   ├── d2_success_trajectories.jsonl
+    │   └── d2_manifest_private.json
+    └── validation/
+        ├── replay_source_grader.py
+        ├── validate_evidence_rule_coverage.py
+        ├── validate_evidence_disjointness.py
+        ├── validate_sibling_slices.py
+        └── construction_report.json</code></pre>
+<p>---</p>
+<h2>25. Suggested implementation order</h2>
+<ol>
+<li>Locate the existing &#96;discount-calculation&#96; source rule and grader.</li>
+<li>Extract exact v1/v2 formula objects, including all multiplier values.</li>
+<li>Confirm whether cap/order terms actually exist in the source.</li>
+<li>Replay all original 16 instances and reproduce their gold outputs.</li>
+<li>Normalize the formula into changed/retained obligations.</li>
+<li>Build a large invoice sibling generator.</li>
+<li>Generate evidence-only candidate invoices.</li>
+<li>Search for a minimal discriminating D2 set.</li>
+<li>Verify all D2 examples with the source v2 grader.</li>
+<li>Write learner-visible &#96;d2_success_trajectories.jsonl&#96;.</li>
+<li>Generate the 19 held-out evaluation siblings.</li>
+<li>Enforce 8/4/4/3 slice counts.</li>
+<li>Compile paired v1/v2 gold outputs.</li>
+<li>Validate D2/evaluation disjointness.</li>
+<li>Validate explicit D2 rule coverage.</li>
+<li>Run zero-shot/static/simple-D2/oracle construction controls.</li>
+<li>Only then run full adaptive-skill baselines.</li>
+</ol>
+<p>---</p>
+<h2>26. Acceptance checklist</h2>
+<ul>
+<li>[ ] no new pricing formula was invented;</li>
+<li>[ ] exact source v1/v2 rules were extracted;</li>
+<li>[ ] exact source tier multipliers were recovered from executable truth;</li>
+<li>[ ] any cap/order terms are included only if they exist in the source family;</li>
+<li>[ ] D1 = 0%;</li>
+<li>[ ] D2 = 100%;</li>
+<li>[ ] D3 = 0%;</li>
+<li>[ ] D2 consists of successful v2 invoice precedents;</li>
+<li>[ ] every D2 trajectory passes the actual v2 grader;</li>
+<li>[ ] each learner-visible D2 trajectory explicitly states exactly one correct current formula rule;</li>
+<li>[ ] every current v2 formula rule/parameter is explicitly covered;</li>
+<li>[ ] each concrete invoice genuinely exercises the rule stated in its trajectory;</li>
+<li>[ ] evidence invoices are disjoint from evaluation invoices;</li>
+<li>[ ] solver starts from stale v1 skill;</li>
+<li>[ ] exactly 19 evaluation siblings are generated;</li>
+<li>[ ] slice counts are 8/4/4/3;</li>
+<li>[ ] affectedness is computed from v1/v2 graded outputs;</li>
+<li>[ ] fresh invoices test structural transfer rather than memorization;</li>
+<li>[ ] oracle solves all valid siblings;</li>
+<li>[ ] empirical results remain unset until execution.</li>
+</ul>
+<p>---</p>
+<h2>27. Minimal conceptual summary</h2>
+<pre><code>existing discount-calculation family
+
+v1 hidden formula
+       |
+       | abrupt source-defined drift
+       v
+v2 hidden formula
+       |
+       +---- evidence-only v2 invoices
+       |            |
+       |            v
+       |    successful invoice -&gt; answer
+       |            trajectories
+       |
+stale v1 skill + D2 100%
+             |
+             v
+store the explicitly revealed current semantic formula
+             |
+             v
+19 fresh held-out invoices
+             |
+             v
+measure application of revealed formula rules
+not invoice memorization</code></pre>

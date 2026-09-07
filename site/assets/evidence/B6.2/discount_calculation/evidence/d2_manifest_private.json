@@ -1,0 +1,41 @@
+{
+  "selected_evidence_ids": [
+    "B6.2-D2-anchor",
+    "B6.2-D2-tier-A",
+    "B6.2-D2-tier-B",
+    "B6.2-D2-tier-C",
+    "B6.2-D2-round-direction",
+    "B6.2-D2-round-quantum",
+    "B6.2-D2-operation-order"
+  ],
+  "evidence_hashes": {
+    "B6.2-D2-anchor": "ee53ec74b944927f2b3b94c4e2c6483dd66c44df5ff3642033e1eb46dc284052",
+    "B6.2-D2-tier-A": "2280b10c7cb13399e599f43d2b3d05fa2473855812d377f6e9bf7bc80c6ba441",
+    "B6.2-D2-tier-B": "7dd02699193bc14ad09c4531d7eb4fce0790d82df07ba95ca819caa1e65f246a",
+    "B6.2-D2-tier-C": "4b259e55cbcbc545e8fce7c4e4e242f49da86bf4aa52baedf3187f1512da30c8",
+    "B6.2-D2-round-direction": "75b464727387de972b3af7b21ce08ddcfe42b9e0d2195d8ed592192245491586",
+    "B6.2-D2-round-quantum": "4d5b5d25aea5c221248a6f1920ffa6410842ebd9c0a4d52c6406f13f6f5eb084",
+    "B6.2-D2-operation-order": "7801e562d3f6e1fc916b51560f5faf8aacefdef1edbb632d71416eeae2b4dd64"
+  },
+  "evaluation_hashes": {
+    "B6.2_aff_001": "dea737ae697d6ed0f3d6d747e71f3588967f02e90767da7fa9f264b4cf193e29",
+    "B6.2_aff_002": "19cb4d7a0ca967efea5a7ac301007423083dde77ceb88405f1dbb2bf26d8f64c",
+    "B6.2_aff_003": "b63bdd0272a823a823deb6f9b8f18fa4233be18214c5501e0c12e78edd587cb8",
+    "B6.2_aff_004": "ae887f8bd34501fb6ab29eeae005411f5f3c0fa6edc9b01aeb8d578134100a6a",
+    "B6.2_aff_005": "d469fb61cbeb77b5a46f9e00d724ab8c921a7948264bd8349d1ffc600d8bc0f2",
+    "B6.2_aff_006": "5f281092f068cc6fc4695122d8dc90799954ced94004621311dc1a0b6ae33b6b",
+    "B6.2_aff_007": "1e22ca65fd92d749c7220b69ec7379c2db157a563f603acb0e326867c85fdd4a",
+    "B6.2_aff_008": "462471c507cc7447b297bd58ede758c33f2abebe823c1b1e19aefe568dd2d235",
+    "B6.2_ret_001": "acb64d98c8133d07c5bc13e15c5e92f69b2a866b4de9792cb9fe28ca9dbfe205",
+    "B6.2_ret_002": "0659ff514c843657f27267bd720fb56d95bc3285c004084bef2b9437940a3ceb",
+    "B6.2_ret_003": "6b8e2220280592864312fb18e8906a2246f28a6724a1b725d23518536e04419c",
+    "B6.2_ret_004": "bd7e24c2047172490ad302dd5139bd775e5468e9c2709116d720db9b4265f5bd",
+    "B6.2_open_001": "529d16a4db962268e1c2fdcf100c7ed0e60937ca15a25b621d608b0695046408",
+    "B6.2_open_002": "061a22b8ee1c3197be493d654346ebb586c4b28b2d05ebafb9d88cc4b94e382f",
+    "B6.2_open_003": "11ce324c054c36fdd3d6d659ff385072a8779c6411047a4e867cff64e67bf289",
+    "B6.2_open_004": "506205967833e8d83c7dad6dc6f26012c92f1cdbe2b2e34a29ed0afb96fa26cf",
+    "B6.2_null_001": "dfc120c919d479a03b2d7d1286c84a217fc0c57b1ccdf568cf01655aa8b0a8db",
+    "B6.2_null_002": "7fb978074f1c4923a17ed3ae532f885c17f66520697958607b678918cfcbd265",
+    "B6.2_null_003": "bd7e24c2047172490ad302dd5139bd775e5468e9c2709116d720db9b4265f5bd"
+  }
+}

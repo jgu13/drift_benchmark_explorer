@@ -1,0 +1,147 @@
+<h1>B10.1 Account-Actions Execution Plan</h1>
+<h2>Objective</h2>
+<p>Build a tau2-bench-pattern account-actions drift benchmark aligned with &#96;Drift_benchmark_architecture_guide.md&#96;.</p>
+<p>The benchmark models one compact fictional account-service domain. The drift is:</p>
+<pre><code>Drift: cap_shift + precondition_add
+Topology: replacement + expansion
+Schedule: abrupt
+
+D1 = 50%
+D2 = 0%
+D3 = 50%</code></pre>
+<p>The stale learner skill jointly stores semantic policy rules, action preconditions, and exception order. The current regime changes exactly two atomic obligations:</p>
+<pre><code>E01: issue_account_credit amount cap changes from 100 to 60.
+E02: verify_identity is required before issue_account_credit.</code></pre>
+<p>No exception rule is added in B10.1.</p>
+<h2>Package Layout</h2>
+<p>The family root is:</p>
+<pre><code>data/B10.1/</code></pre>
+<p>It contains the family execution plan and one semantic package folder:</p>
+<pre><code>data/B10.1/
+├── B10_1_account_actions_execution_plan.md
+└── account_actions/
+    ├── README.md
+    ├── compile_b10_1.py
+    ├── drift_spec.json
+    ├── source_task.json
+    ├── siblings.json
+    ├── sibling_summary.json
+    ├── possible_answer_r_minus.json
+    ├── possible_answer_r_plus.json
+    ├── regime_r_minus.json
+    ├── regime_r_plus.json
+    ├── regime_null.json
+    ├── policy_r_minus.json
+    ├── policy_r_plus.json
+    ├── preconditions_r_minus.json
+    ├── preconditions_r_plus.json
+    ├── account_service_r_minus.py
+    ├── account_service_r_plus.py
+    ├── account_service_r_null.py
+    ├── skill_r_minus.md
+    ├── skill_r_plus_oracle.md
+    ├── evidence/
+    │   ├── evidence_allocation.json
+    │   ├── d1_rule_credit_cap.md
+    │   ├── d3_probe_interface.py
+    │   └── d3_probe_log.jsonl
+    └── validation/
+        ├── construction_report.json
+        ├── replay_checks.py
+        └── validate_b10_1_architecture.sh</code></pre>
+<p>The canonical task source is &#96;account_actions/siblings.json&#96;. The loader-facing answer files are &#96;possible_answer_r_minus.json&#96; and &#96;possible_answer_r_plus.json&#96;.</p>
+<h2>Drift Definition</h2>
+<p>Primary action:</p>
+<pre><code>issue_account_credit(amount, reason)</code></pre>
+<p>Supporting action:</p>
+<pre><code>verify_identity()</code></pre>
+<p>Unrelated controls:</p>
+<pre><code>update_email()
+set_notification_preference()
+view_account()
+reset_password()</code></pre>
+<p>&#96;r_minus&#96; semantics:</p>
+<pre><code>credit cap = 100
+identity verification is not required before issue_account_credit</code></pre>
+<p>&#96;r_plus&#96; semantics:</p>
+<pre><code>credit cap = 60
+identity verification is required before issue_account_credit</code></pre>
+<p>State includes:</p>
+<pre><code>identity_verified
+credit_total_this_episode
+account_status
+email
+notification_preference
+password_reset_required
+audit_log</code></pre>
+<p>The &#96;r_plus&#96; backend must reject &#96;issue_account_credit(...)&#96; when identity is unverified. Both regimes reject credits above the active cap. A plan that reaches a requested end state by violating the cap or precondition fails.</p>
+<h2>Evidence Allocation</h2>
+<p>Learner-visible evidence is limited to &#96;account_actions/evidence/&#96;.</p>
+<p>D1 contains exactly one complete atomic artifact for E01:</p>
+<pre><code>evidence/d1_rule_credit_cap.md</code></pre>
+<p>It reveals the current 60-unit cap and the previous 100-unit cap. It does not mention the identity prerequisite.</p>
+<p>D2 is intentionally absent:</p>
+<pre><code>D2 = 0%</code></pre>
+<p>D3 contains only the metered current-regime probe log for E02:</p>
+<pre><code>evidence/d3_probe_interface.py
+evidence/d3_probe_log.jsonl</code></pre>
+<p>The D3 probe is safe, metered, current-regime, evidence-only, and disjoint from evaluation siblings. The smallest discriminating sequence is:</p>
+<pre><code>identity_verified = false
+issue_account_credit(40, &quot;goodwill&quot;) -&gt; rejected: identity verification required
+verify_identity() -&gt; success
+issue_account_credit(40, &quot;goodwill&quot;) -&gt; success</code></pre>
+<p>&#96;skill_r_minus.md&#96; is learner-visible as the stale skill. &#96;skill_r_plus_oracle.md&#96; is hidden and is only for evaluation and validation.</p>
+<h2>Sibling Construction</h2>
+<p>Build exactly 19 evaluation siblings:</p>
+<pre><code>8 affected
+4 unchanged-retention
+4 boundary/open-set
+3 matched-null
+= 19 total</code></pre>
+<p>Use stable hyphenated IDs:</p>
+<pre><code>B10.1-aff-001 ... B10.1-aff-008
+B10.1-ret-001 ... B10.1-ret-004
+B10.1-bnd-001 ... B10.1-bnd-004
+B10.1-null-001 ... B10.1-null-003</code></pre>
+<p>Every sibling is compiled against both &#96;r_minus&#96; and &#96;r_plus&#96;. A sibling is affected from executable obligation support, not wording:</p>
+<pre><code>affected = (
+    gold_or_optimal_trace_intersects_changed_obligation
+    or graded_final_output_differs
+    or current optimal-cost target changes
+)</code></pre>
+<p>Affected siblings cover cap-only, precondition-only, combined cap and precondition, compound workflows, and stale-skill traps. At least two affected siblings require both repaired components.</p>
+<p>Unchanged-retention siblings cover &#96;update_email&#96;, &#96;set_notification_preference&#96;, &#96;view_account&#96;, and &#96;reset_password&#96; with no credit action.</p>
+<p>Boundary/open-set siblings cover amount exactly 60, amount just above 60, identity already verified, and malformed/unsupported credit requests.</p>
+<p>Matched-null siblings use paraphrase or irrelevant metadata changes that preserve the same required end state and do not introduce persistent rule edits.</p>
+<h2>Compilation</h2>
+<p>The package compile script is:</p>
+<pre><code>python data/B10.1/account_actions/compile_b10_1.py --write</code></pre>
+<p>It loads &#96;siblings.json&#96;, derives task answers from &#96;r_minus_ground_truth&#96; and &#96;r_plus_ground_truth&#96;, and writes:</p>
+<pre><code>possible_answer_r_minus.json
+possible_answer_r_plus.json
+sibling_summary.json</code></pre>
+<p>No repository-level gold mirror is required for this B-family package.</p>
+<h2>Validation</h2>
+<p>Run:</p>
+<pre><code>python -m json.tool data/B10.1/account_actions/siblings.json &gt;/dev/null
+python data/B10.1/account_actions/compile_b10_1.py --write
+python data/B10.1/account_actions/validation/replay_checks.py
+bash data/B10.1/account_actions/validation/validate_b10_1_architecture.sh</code></pre>
+<p>Validation checks:</p>
+<ul>
+<li>exact 19 total siblings with 8/4/4/3 slice counts;</li>
+<li>canonical &#96;siblings.json&#96; manifest shape with a &#96;tasks&#96; array;</li>
+<li>package-level &#96;possible_answer_r_minus.json&#96; and</li>
+<p>&#96;possible_answer_r_plus.json&#96;;</p>
+<li>D1/D2/D3 evidence allocation of 50/0/50;</li>
+<li>D1 file starts with &#96;d1&#96; and reveals only the cap rule;</li>
+<li>D3 file names start with &#96;d3&#96; and probes only the identity precondition;</li>
+<li>no D2 evidence files;</li>
+<li>local regime files and local replay validation exist;</li>
+<li>oracle answers replay successfully against local backends;</li>
+<li>unchanged-retention siblings do not use changed obligations;</li>
+<li>construction report leaves unmeasured empirical metrics as &#96;null&#96;.</li>
+</ul>
+<h2>Limitations</h2>
+<p>This pilot is deliberately small. It is intended to validate architecture, coverage, leakage boundaries, oracle replay, stale-skill gaps, and collateral damage behavior before scaling.</p>
+<p>Empirical metrics such as zero-shot success, stale-skill gap magnitude, adaptation lift, and collateral damage rate are not measured by construction. They must remain &#96;null&#96; until an experiment is run.</p>

@@ -1,0 +1,155 @@
+<h1>C3.2 CLI Execution Plan</h1>
+<h2>Objective</h2>
+<p>Build the C3.2 CLI-semantics drift family as a self-contained benchmark package aligned with &#96;Drift_benchmark_architecture_guide.md&#96;.</p>
+<p>C3.2 uses the same physical CLI event as C3.1, but allocates the drift evidence through D2 and D3:</p>
+<pre><code>--path -&gt; --root
+-l -&gt; --lines
+copy-as added as lower-cost shortcut
+
+D1 = 0%
+D2 = 50%
+D3 = 50%</code></pre>
+<p>No D1 changelog is learner-visible.</p>
+<h2>Package Layout</h2>
+<p>The family root is:</p>
+<pre><code>data/C_drift_benchmark/C3.2/</code></pre>
+<p>The concrete semantic package is:</p>
+<pre><code>data/C_drift_benchmark/C3.2/cli_semantics/</code></pre>
+<p>Required artifacts:</p>
+<pre><code>C3.2/
+├── C3_2_CLI_execution_plan.md
+└── cli_semantics/
+    ├── README.md
+    ├── compile_c3_2.py
+    ├── drift_spec.json
+    ├── grammar_r_minus.json
+    ├── grammar_r_plus.json
+    ├── cost_model.json
+    ├── gorilla_filesystem.py
+    ├── gorilla_cli_r_minus.py
+    ├── gorilla_cli_r_plus.py
+    ├── siblings.json
+    ├── possible_answer_r_minus.json
+    ├── possible_answer_r_plus.json
+    ├── regime_r_minus.json
+    ├── regime_r_plus.json
+    ├── skill_r_minus.md
+    ├── skill_r_plus_oracle.md
+    ├── evidence/
+    │   ├── evidence_allocation.json
+    │   ├── d2_success_trajectories.jsonl
+    │   ├── d2_failure_trajectories.jsonl
+    │   ├── d3_probe_interface.py
+    │   └── d3_probe_log.jsonl
+    └── validation/
+        ├── construction_report.json
+        ├── replay_cli.py
+        └── test_c3_2_architecture.sh</code></pre>
+<p>Learner-visible evidence is limited to &#96;evidence/&#96;. The oracle skill &#96;skill_r_plus_oracle.md&#96;, regime objects, sibling answers, and construction labels are hidden from learners.</p>
+<h2>Drift Definition</h2>
+<p>The stale &#96;r_minus&#96; CLI supports:</p>
+<pre><code>find --path &lt;dir&gt; --name &lt;name&gt;
+wc -l &lt;file&gt;
+cp &lt;src&gt; &lt;dst&gt;
+mv &lt;src&gt; &lt;dst&gt;
+cat &lt;file&gt;
+sort &lt;file&gt;</code></pre>
+<p>The current &#96;r_plus&#96; CLI supports:</p>
+<pre><code>find --root &lt;dir&gt; --name &lt;name&gt;
+wc --lines &lt;file&gt;
+copy-as &lt;src&gt; --to &lt;dir&gt; --name &lt;new&gt;
+cp &lt;src&gt; &lt;dst&gt;
+mv &lt;src&gt; &lt;dst&gt;
+cat &lt;file&gt;
+sort &lt;file&gt;</code></pre>
+<p>Atomic changed obligations:</p>
+<pre><code>R1: find root flag remap. `--path` is obsolete; `--root` is current.
+R2: wc line flag retirement. `-l` is obsolete; `--lines` is current.
+R3: copy-as shortcut. `copy-as` creates a renamed copy and is cheaper than cp+mv.</code></pre>
+<p>Final filesystem and output semantics remain stable unless the submitted command uses obsolete or invalid syntax. For R3, semantic correctness can match across regimes while the optimal current-regime cost target changes.</p>
+<h2>Evidence Allocation</h2>
+<p>D2 receives R1 and has 50% allocation. It contains exactly one success and one failure trajectory for the same atomic rule:</p>
+<pre><code>success: find --root . --name test_document.txt
+failure: find --path . --name test_document.txt</code></pre>
+<p>D3 receives R2 and R3 and has 50% allocation. It provides metered current-regime probes only:</p>
+<pre><code>R2 stale probe: wc -l summary.txt
+R2 confirming probe: wc --lines summary.txt
+R3 old route probe: cp summary.txt archives/ ; mv archives/summary.txt archives/final_summary.txt
+R3 shortcut probe: copy-as summary.txt --to archives --name final_summary.txt</code></pre>
+<p>Every D3 probe record includes &#96;probe_id&#96;, &#96;rule_id&#96;, &#96;state_before&#96;, &#96;action&#96;, &#96;arguments&#96;, &#96;response&#96;, &#96;state_after&#96;, and &#96;cost&#96;. D3 evidence must be disjoint from evaluation siblings and must not expose the oracle skill or gold traces.</p>
+<h2>Sibling Construction</h2>
+<p>Build exactly 19 evaluation siblings:</p>
+<pre><code>8 affected
+4 unchanged-retention
+4 boundary/open-set
+3 matched-null</code></pre>
+<p>Use underscore-delimited stable IDs:</p>
+<pre><code>C3.2_aff_001 ... C3.2_aff_008
+C3.2_ret_001 ... C3.2_ret_004
+C3.2_bnd_001 ... C3.2_bnd_004
+C3.2_null_001 ... C3.2_null_003</code></pre>
+<p>Affected coverage:</p>
+<pre><code>3 find-remap
+2 wc-deprecation
+2 copy-as efficiency
+1 compound</code></pre>
+<p>Unchanged-retention siblings use unaffected &#96;cat&#96;, &#96;sort&#96;, primitive &#96;cp&#96;, and primitive &#96;mv&#96;. Boundary/open-set siblings exercise obsolete syntax, invalid shortcut scope, and grammar edges. Matched-null siblings vary filenames, directories, and wording without changing the current rule trace.</p>
+<p>Mark a sibling affected from executable obligation support:</p>
+<pre><code>affected = (
+    gold_or_optimal_trace_intersects_changed_obligation
+    or graded_final_output_differs
+    or current_optimal_cost_target_changes
+)</code></pre>
+<p>Each task stores paired &#96;r_minus_ground_truth&#96; and &#96;r_plus_ground_truth&#96;, an initial filesystem state, and the expected final state or output needed by replay validation.</p>
+<h2>Compilation</h2>
+<p>&#96;compile_c3_2.py&#96; loads &#96;siblings.json&#96; and writes:</p>
+<pre><code>possible_answer_r_minus.json
+possible_answer_r_plus.json</code></pre>
+<p>The possible-answer files are package-level loader-facing regime answers. C3.2 does not use a repository-level BFCL gold mirror unless a future shared loader requires one.</p>
+<p>Recommended command:</p>
+<pre><code>python data/C_drift_benchmark/C3.2/cli_semantics/compile_c3_2.py --write</code></pre>
+<h2>Validation</h2>
+<p>Run:</p>
+<pre><code>python -m json.tool data/C_drift_benchmark/C3.2/cli_semantics/siblings.json &gt;/dev/null
+python data/C_drift_benchmark/C3.2/cli_semantics/compile_c3_2.py --write
+python data/C_drift_benchmark/C3.2/cli_semantics/validation/replay_cli.py
+bash data/C_drift_benchmark/C3.2/cli_semantics/validation/test_c3_2_architecture.sh</code></pre>
+<p>Acceptance checks:</p>
+<pre><code>19 total siblings with exact 8/4/4/3 slice counts
+manifest-form siblings.json with tasks array
+package-level possible_answer_r_minus.json and possible_answer_r_plus.json
+local r_minus and r_plus regime backends
+D1/D2/D3 allocation is 0/50/50
+D2 has exactly one success and one failure for R1
+D3 has metered probes for R2 and R3
+--path invalid in r_plus
+-l invalid in r_plus
+copy-as executable in r_plus and cheaper than cp+mv
+unchanged-retention siblings replay under both regimes
+boundary/open-set siblings replay expected invalid/current behavior
+matched-null siblings preserve current rule traces
+no fabricated empirical metrics</code></pre>
+<h2>Limitations</h2>
+<p>This pilot is deliberately small and should not be treated as an empirical calibration. Metrics in &#96;construction_report.json&#96; that were not measured must remain &#96;null&#96; or explicitly marked as not measured. The package provides a self-contained CLI/filesystem simulator rather than importing upstream BFCL runtime code.</p>
+<p>Validate:</p>
+<ul>
+<li>oracle correctness on all valid siblings;</li>
+<li>a non-trivial stale-skill gap on affected siblings;</li>
+<li>no evidence/evaluation sibling overlap;</li>
+<li>one-to-one evidence-rule coverage;</li>
+<li>no collateral damage on unchanged-retention siblings;</li>
+<li>correct behavior on boundary/open-set tasks;</li>
+<li>no persistent edit on matched-null tasks;</li>
+<li>replayability of every D2 trajectory and D3 probe;</li>
+<li>exact 8/4/4/3 slice counts;</li>
+<li>no fabricated empirical metrics.</li>
+</ul>
+<p>Primary grading is semantic output/end-state success. Exact trajectory match is diagnostic unless the family explicitly evaluates route cost or invalid actions.</p>
+<h2>9. Acceptance checklist</h2>
+<ul>
+<li>[ ] D1 absent;</li>
+<li>[ ] D2 success/failure pair explicitly reveals one current syntax rule;</li>
+<li>[ ] D3 identifies remaining deprecated/efficiency rules;</li>
+<li>[ ] physical regimes/costs match C3.1;</li>
+<li>[ ] 19 siblings use 8/4/4/3.</li>
+</ul>

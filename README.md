@@ -4,6 +4,8 @@ Build the normalized index and static assets:
 
 ```bash
 python build_site.py \
+  --root ../data/A_drift_benchmark \
+  --root ../data/B_drift_benchmark \
   --root ../data/C_drift_benchmark \
   --root ../data/D_drift_benchmark
 ```

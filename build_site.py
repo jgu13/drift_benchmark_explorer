@@ -51,6 +51,8 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     roots = args.root or [
+        PROJECT_ROOT / "data" / "A_drift_benchmark",
+        PROJECT_ROOT / "data" / "B_drift_benchmark",
         PROJECT_ROOT / "data" / "C_drift_benchmark",
         PROJECT_ROOT / "data" / "D_drift_benchmark",
     ]
@@ -63,7 +65,8 @@ def main() -> None:
     warnings: list[str] = []
     for family_dir in discover_family_dirs(roots):
         family = build_family(family_dir.resolve(), site_dir, overrides)
-        warnings.extend(validate_family(family, allow_incomplete=args.allow_incomplete))
+        incomplete = family["task_count"] == 0 or not family.get("plan")
+        warnings.extend(validate_family(family, allow_incomplete=args.allow_incomplete or incomplete))
         families.append(family)
 
     families.sort(key=lambda family: natural_family_key(family["id"]))
@@ -129,7 +132,7 @@ def build_family(family_dir: Path, site_dir: Path, overrides: dict[str, Any]) ->
     family = {
         "id": family_id,
         "title": family_overrides.get("title", family_id),
-        "platform": family_overrides.get("platform", "BFCL" if family_id.startswith("C") else "OSWorld"),
+        "platform": infer_platform(family_id, family_overrides),
         "mechanism": family_overrides.get("mechanism", ""),
         "status_label": status_label,
         "drift_summary": extract_drift_summary(family_id, drift_spec, overrides),
@@ -144,6 +147,18 @@ def build_family(family_dir: Path, site_dir: Path, overrides: dict[str, Any]) ->
         "files_manifest": build_files_manifest(family_dir),
     }
     return family
+
+
+def infer_platform(family_id: str, family_overrides: dict[str, Any]) -> str:
+    if family_overrides.get("platform"):
+        return family_overrides["platform"]
+    defaults = {
+        "A": "ALFWorld",
+        "B": "SkillLearn",
+        "C": "BFCL",
+        "D": "OSWorld",
+    }
+    return defaults.get(family_id[:1], "Unknown")
 
 
 def _status_from(data: dict[str, Any] | None) -> str | None:

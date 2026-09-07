@@ -1,5 +1,5 @@
 const CHANNELS = ["D1", "D2", "D3"];
-const ASSET_VERSION = "20260826-osworld-label";
+const ASSET_VERSION = "20260907-new-families";
 
 const app = document.querySelector("#app");
 let benchmarkIndex = null;
@@ -50,8 +50,10 @@ function renderOverview() {
   const families = filteredFamilies();
   const platforms = [...new Set(benchmarkIndex.families.map((family) => family.platform))].sort();
   const totalTasks = benchmarkIndex.families.reduce((sum, family) => sum + family.task_count, 0);
-  const bfclCount = benchmarkIndex.families.filter((family) => family.platform === "BFCL").length;
-  const osworldCount = benchmarkIndex.families.filter((family) => family.platform === "OSWorld").length;
+  const platformCounts = platforms.map((platform) => {
+    const count = benchmarkIndex.families.filter((family) => family.platform === platform).length;
+    return summaryItem(`${platform} Families`, count);
+  }).join("");
 
   app.innerHTML = `
     <header class="hero">
@@ -61,8 +63,7 @@ function renderOverview() {
       <div class="summary-grid" aria-label="Benchmark summary">
         ${summaryItem("Families", benchmarkIndex.families.length)}
         ${summaryItem("Tasks", totalTasks)}
-        ${summaryItem("BFCL Families", bfclCount)}
-        ${summaryItem("OSWorld Families", osworldCount)}
+        ${platformCounts}
       </div>
     </header>
     <section class="toolbar" aria-label="Overview filters">

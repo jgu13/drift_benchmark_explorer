@@ -1,0 +1,19 @@
+{
+  "regime": "r_minus",
+  "rules": {
+    "issue_account_credit": {
+      "max_amount_per_action": 100,
+      "allowed_reasons": ["billing_error", "goodwill", "late_fee_adjustment"],
+      "identity_required": false
+    },
+    "update_email": {
+      "requires_valid_email": true
+    },
+    "set_notification_preference": {
+      "allowed_values": ["email", "sms", "none"]
+    },
+    "reset_password": {
+      "allowed": true
+    }
+  }
+}

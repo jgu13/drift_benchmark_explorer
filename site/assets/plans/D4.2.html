@@ -1,0 +1,143 @@
+<h1>D4.2 BFCL Execution Plan</h1>
+<h2>Objective</h2>
+<p>Build an AppWorld-pattern D-family efficiency-drift benchmark where a better path appears after a regime update, and the learner receives D2 and D3 evidence instead of a D1 changelog.</p>
+<pre><code>Benchmark ID: D4.2
+Semantic package: bulk_tag_app
+Drift: action_add
+Topology: improvement
+Schedule: abrupt
+Physical event: one new bulk endpoint replaces 3-5 primitive calls
+Evidence allocation: D1 = 0%, D2 = 50%, D3 = 50%</code></pre>
+<p>The stale route remains semantically correct. Adaptation should infer the new bulk action from observed trajectories and probe evidence, then cost-gate its use only when the endpoint is in scope.</p>
+<h2>Package Layout</h2>
+<p>Construct the benchmark under:</p>
+<pre><code>data/D4.2/
+├── D4_2_BFCL_execution_plan.md
+└── bulk_tag_app/
+    ├── README.md
+    ├── compile_d4_2.py
+    ├── drift_spec.json
+    ├── source_task.json
+    ├── function_doc.json
+    ├── siblings.json
+    ├── sibling_summary.json
+    ├── possible_answer_r_minus.json
+    ├── possible_answer_r_plus.json
+    ├── regime_r_minus.json
+    ├── regime_r_plus.json
+    ├── regime_null.json
+    ├── contact_tag_r_minus.py
+    ├── contact_tag_r_plus.py
+    ├── contact_tag_r_null.py
+    ├── api_r_minus.json
+    ├── api_r_plus.json
+    ├── cost_model.json
+    ├── optimal_costs.json
+    ├── skill_r_minus.md
+    ├── skill_r_plus_oracle.md
+    ├── evidence/
+    │   ├── d2_failure_trajectories.jsonl
+    │   ├── d2_success_trajectories.jsonl
+    │   ├── d3_probe_log.jsonl
+    │   └── evidence_allocation.json
+    └── validation/
+        ├── construction_report.json
+        ├── replay_checks.py
+        └── test_d4_2_architecture.sh</code></pre>
+<p>The family execution plan is stored at the family root. Concrete benchmark artifacts live inside the semantic package. The package is self-contained and does not require upstream BFCL imports.</p>
+<h2>Drift Definition</h2>
+<p>Use the same deterministic contact/tag API as D4.1.</p>
+<p>&#96;r_minus&#96; exposes:</p>
+<pre><code>get_contact(contact_id)
+add_tag(contact_id, tag)
+remove_tag(contact_id, tag)</code></pre>
+<p>&#96;r_plus&#96; preserves all stale endpoints and adds:</p>
+<pre><code>bulk_add_tag(contact_ids, tag)</code></pre>
+<p>The new endpoint is valid only when:</p>
+<pre><code>3 to 5 contact IDs are supplied
+all contacts belong to the same workspace
+the list contains no duplicate IDs
+one shared tag is applied to all listed contacts</code></pre>
+<p>Cost model:</p>
+<pre><code>get_contact = 1
+add_tag = 1
+remove_tag = 1
+bulk_add_tag = 1</code></pre>
+<p>For 3-5 valid same-workspace contacts, the post-drift optimum is one &#96;bulk_add_tag&#96; call instead of 3-5 &#96;add_tag&#96; calls. Final semantic state is identical across regimes.</p>
+<h2>Evidence Allocation</h2>
+<p>Learner-visible evidence is restricted to &#96;bulk_tag_app/evidence/&#96;.</p>
+<pre><code>D1: none
+D2: evidence/d2_success_trajectories.jsonl
+D2: evidence/d2_failure_trajectories.jsonl
+D3: evidence/d3_probe_log.jsonl</code></pre>
+<p>&#96;skill_r_minus.md&#96; is learner-visible stale skill text. &#96;skill_r_plus_oracle.md&#96; is hidden evaluation-only oracle text and must not be exposed as evidence.</p>
+<p>For the single changed obligation &#96;E01&#96;, D2 must contain exactly one success trajectory and one failure trajectory. Both records include an explicit &#96;revealed_rule&#96; field:</p>
+<pre><code>bulk_add_tag(contact_ids, tag) is valid for 3-5 unique same-workspace contacts sharing one tag.</code></pre>
+<p>The D2 success trajectory uses the new endpoint correctly. The D2 failure trajectory violates the same endpoint scope and is replayable against the current regime. D3 provides a disjoint evidence-only probe showing identical final state and strictly lower metered cost, plus an idempotence probe for an already-tagged contact.</p>
+<h2>Sibling Construction</h2>
+<p>Use &#96;siblings.json&#96; as the canonical task source in manifest form. Build exactly 19 evaluation siblings:</p>
+<pre><code>8 affected
+4 unchanged-retention
+4 boundary/open-set
+3 matched-null</code></pre>
+<p>Use stable underscore-delimited IDs:</p>
+<pre><code>D4.2_aff_001 ... D4.2_aff_008
+D4.2_ret_001 ... D4.2_ret_004
+D4.2_bnd_001 ... D4.2_bnd_004
+D4.2_null_001 ... D4.2_null_003</code></pre>
+<p>Each sibling must include:</p>
+<pre><code>id
+slice
+semantic_goal
+obligation_support
+question
+initial_state
+involved_classes
+affected
+r_minus_ground_truth
+r_plus_ground_truth
+expected_final_state
+expected_cost_r_minus
+expected_cost_r_plus</code></pre>
+<p>Mark affectedness from executable obligation support rather than wording:</p>
+<pre><code>affected = (
+    gold_or_optimal_trace_intersects_changed_obligation
+    or graded_final_output_differs
+    or current_optimal_cost_target_changes
+)</code></pre>
+<p>Affected siblings cover 3-5-contact same-tag goals and compound workflows where the final state is unchanged but the optimal post-drift cost decreases. Unchanged-retention siblings cover 1-2 contact adds, tag removal, and read-only lookup. Boundary/open-set siblings cover six contacts, mixed workspaces, empty lists, and duplicates. Matched-null siblings vary wording/order/IDs without a bulk-applicable optimal-cost change.</p>
+<h2>Compilation</h2>
+<p>&#96;compile_d4_2.py&#96; loads &#96;siblings.json&#96;, validates the 8/4/4/3 composition, and writes:</p>
+<pre><code>possible_answer_r_minus.json
+possible_answer_r_plus.json
+optimal_costs.json
+sibling_summary.json</code></pre>
+<p>Package-level &#96;possible_answer_*&#96; files are the loader-facing answer files. This repository does not currently include &#96;data/dataloader.py&#96;; if a shared drift loader is later added, register &#96;D4.2&#96; to point at:</p>
+<pre><code>D4.2/bulk_tag_app/siblings.json</code></pre>
+<h2>Validation</h2>
+<p>Run:</p>
+<pre><code>python data/D4.2/bulk_tag_app/compile_d4_2.py --write
+python data/D4.2/bulk_tag_app/validation/replay_checks.py
+bash data/D4.2/bulk_tag_app/validation/test_d4_2_architecture.sh</code></pre>
+<p>Validation must check:</p>
+<ul>
+<li>JSON parseability for all package JSON artifacts.</li>
+<li>&#96;siblings.json&#96; is a manifest with 19 tasks.</li>
+<li>Exact slice counts are 8/4/4/3.</li>
+<li>All task IDs use the &#96;D4.2_&lt;slice&gt;_&lt;nnn&gt;&#96; convention.</li>
+<li>&#96;r_plus&#96; preserves stale actions and adds only &#96;bulk_add_tag&#96;.</li>
+<li>No D1 evidence files exist.</li>
+<li>D2 success and failure trajectory files are present and replayable.</li>
+<li>D3 probe evidence is present and named with a &#96;d3&#96; prefix.</li>
+<li>&#96;evidence_allocation.json&#96; states D1=0, D2=50, D3=50.</li>
+<li>The oracle skill is outside &#96;evidence/&#96;.</li>
+<li>Compiled possible-answer files cover every task.</li>
+<li>Replay executes r- and r+ traces against local regime backends.</li>
+<li>Affected tasks have equal final states but lower r+ optimal cost.</li>
+<li>Unchanged, boundary, and matched-null controls do not acquire collateral</li>
+<p>optimal-cost changes.</p>
+<li>Construction report leaves unmeasured empirical metrics as &#96;null&#96;.</li>
+</ul>
+<h2>Limitations</h2>
+<p>The package is a deterministic pilot benchmark, not a measured leaderboard calibration. Empirical metrics such as stale-skill gap, oracle accuracy, and adaptation recovery ratio remain &#96;null&#96; until measured by an experiment runner.</p>
+<p>The D4.2 package is placed directly under &#96;data/D4.2/&#96; because the user request asks for that location and this checkout does not contain the guide&#x27;s example &#96;data/C_drift_benchmark/&#96; collection or shared &#96;data/dataloader.py&#96;.</p>
