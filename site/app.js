@@ -1,5 +1,5 @@
 const CHANNELS = ["D1", "D2", "D3"];
-const ASSET_VERSION = "20260907-new-families";
+const ASSET_VERSION = "20260908-b10-1";
 
 const app = document.querySelector("#app");
 let benchmarkIndex = null;

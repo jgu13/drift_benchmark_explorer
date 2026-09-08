@@ -327,7 +327,11 @@ def find_evidence_files(family_dir: Path, allocation_path: Path | None, allocati
         if not path.is_file() or path.name == "evidence_allocation.json":
             continue
         rel = path.relative_to(family_dir).as_posix()
+        if "evidence/" not in rel.replace("\\", "/"):
+            continue
         lowered = rel.lower().replace("-", "_")
+        if "r_plus" in lowered or "oracle" in lowered:
+            continue
         for channel, terms in heuristics.items():
             if any(term in lowered for term in terms):
                 files[channel].add(rel)

@@ -67,6 +67,7 @@ class DriftWebBuildTests(unittest.TestCase):
             "A5.1": (self.a_root / "A5.1", {"D1": 0, "D2": 50, "D3": 50}),
             "B2.3": (self.b_root / "B2.3", {"D1": 0, "D2": 100, "D3": 0}),
             "B6.2": (self.b_root / "B6.2", {"D1": 0, "D2": 100, "D3": 0}),
+            "B10.1": (self.b_root / "B10.1", {"D1": 50, "D2": 0, "D3": 50}),
             "D1.2": (self.d_root / "D1.2", {"D1": 0, "D2": 0, "D3": 100}),
             "D2.1": (self.d_root / "D2.1", {"D1": 30, "D2": 0, "D3": 70}),
             "D2.2": (self.d_root / "D2.2", {"D1": 0, "D2": 0, "D3": 100}),
@@ -137,6 +138,7 @@ class DriftWebBuildTests(unittest.TestCase):
         cases = (
             (self.a_root / "A5.1", "A5.1", 19, "A5.1_aff_001", "affected"),
             (self.b_root / "B2.3", "B2.3", 19, "B2.3_aff_001", "affected"),
+            (self.b_root / "B10.1", "B10.1", 19, "B10.1-aff-001", "affected"),
             (self.c_root / "C3.2", "C3.2", 19, "C3.2_aff_001", "affected"),
             (self.d_root / "D3.1", "D3.1", 19, "D3.1_aff_001", "affected"),
             (self.d_root / "D4.1", "D4.1", 19, "D4.1_aff_001", "affected"),

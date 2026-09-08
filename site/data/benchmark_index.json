@@ -528,7 +528,6 @@
           "present": true,
           "delivery": "Successful post-drift trajectories are supplied once during adaptation. Each trajectory states one current v2 rule and demonstrates it on one sibling.",
           "files": [
-            "B2_3_priority_selection_D2_execution_plan.md",
             "priority_selection/evidence/d2_manifest_private.json",
             "priority_selection/evidence/d2_success_trajectories.jsonl"
           ]
@@ -1592,7 +1591,6 @@
           "present": true,
           "delivery": "Successful post-drift discount-calculation trajectories are supplied once during adaptation. Each trajectory states one current v2 formula rule and demonstrates it on one invoice.",
           "files": [
-            "B6_2_discount_calculation_D2_execution_plan.md",
             "discount_calculation/evidence/d2_manifest_private.json",
             "discount_calculation/evidence/d2_success_trajectories.jsonl"
           ]
@@ -2508,11 +2506,14 @@
       "title": "Account Actions",
       "platform": "Tau2",
       "mechanism": "Policy cap shift plus added precondition",
-      "status_label": "Under construction",
+      "status_label": "Constructed",
       "drift_summary": "Account credit cap falls from 100 to 60, and verify_identity becomes required before issuing credit.",
-      "task_count": 0,
+      "task_count": 19,
       "source_path": "/home/jiayao/Metaskill-library/data/B_drift_benchmark/B10.1",
-      "task_source": null,
+      "task_source": {
+        "path": "account_actions/siblings.json",
+        "format": "json"
+      },
       "plan": {
         "filename": "B10_1_account_actions_execution_plan.md",
         "asset_path": "assets/plans/B10.1.md",
@@ -2522,10 +2523,9 @@
         "D1": {
           "percentage": 50,
           "present": true,
-          "delivery": "A declared rule states that the issue_account_credit cap changed from 100 to 60 units.",
+          "delivery": "A declared rule fully specifies that issue_account_credit may issue at most 60 units; the prior cap was 100. No D2 trajectories are supplied.",
           "files": [
-            "account_actions/policy_r_minus.json",
-            "account_actions/policy_r_plus.json"
+            "account_actions/evidence/d1_rule_credit_cap.md"
           ]
         },
         "D2": {
@@ -2537,11 +2537,486 @@
         "D3": {
           "percentage": 50,
           "present": true,
-          "delivery": "Safe probes reveal that verify_identity is now required before issue_account_credit.",
-          "files": []
+          "delivery": "Metered current-regime probes identify that verify_identity is now required before issue_account_credit.",
+          "files": [
+            "account_actions/evidence/d3_probe_interface.py",
+            "account_actions/evidence/d3_probe_log.jsonl"
+          ]
         }
       },
-      "tasks": [],
+      "tasks": [
+        {
+          "id": "B10.1-aff-001",
+          "slice": "affected",
+          "description": "A credit action must use the new cap and satisfy the added identity-verification precondition.",
+          "instruction": "Please apply a 61 unit goodwill credit to my account.",
+          "source_file": "account_actions/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Please apply a 61 unit goodwill credit to my account."
+                }
+              ]
+            ],
+            "initial_config": {
+              "AccountServiceAPI": {
+                "identity_verified": false
+              }
+            },
+            "semantic_goal": "credit_61_goodwill",
+            "obligation_support": [
+              "E01",
+              "E02"
+            ]
+          }
+        },
+        {
+          "id": "B10.1-aff-002",
+          "slice": "affected",
+          "description": "A credit action must use the new cap and satisfy the added identity-verification precondition.",
+          "instruction": "Issue a 100 unit credit for a billing error.",
+          "source_file": "account_actions/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Issue a 100 unit credit for a billing error."
+                }
+              ]
+            ],
+            "initial_config": {
+              "AccountServiceAPI": {
+                "identity_verified": false
+              }
+            },
+            "semantic_goal": "credit_100_billing_error",
+            "obligation_support": [
+              "E01",
+              "E02"
+            ]
+          }
+        },
+        {
+          "id": "B10.1-aff-003",
+          "slice": "affected",
+          "description": "A credit action must use the new cap and satisfy the added identity-verification precondition.",
+          "instruction": "Add a 60 unit goodwill credit. My account has not been identity verified in this session.",
+          "source_file": "account_actions/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Add a 60 unit goodwill credit. My account has not been identity verified in this session."
+                }
+              ]
+            ],
+            "initial_config": {
+              "AccountServiceAPI": {
+                "identity_verified": false
+              }
+            },
+            "semantic_goal": "credit_60_goodwill_identity_false",
+            "obligation_support": [
+              "E02"
+            ]
+          }
+        },
+        {
+          "id": "B10.1-aff-004",
+          "slice": "affected",
+          "description": "A credit action must use the new cap and satisfy the added identity-verification precondition.",
+          "instruction": "Apply a 40 unit goodwill credit to the account.",
+          "source_file": "account_actions/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Apply a 40 unit goodwill credit to the account."
+                }
+              ]
+            ],
+            "initial_config": {
+              "AccountServiceAPI": {
+                "identity_verified": false
+              }
+            },
+            "semantic_goal": "credit_40_goodwill_identity_false",
+            "obligation_support": [
+              "E02"
+            ]
+          }
+        },
+        {
+          "id": "B10.1-aff-005",
+          "slice": "affected",
+          "description": "A credit action must use the new cap and satisfy the added identity-verification precondition.",
+          "instruction": "Verify identity first, then issue a 60 unit late fee adjustment credit.",
+          "source_file": "account_actions/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Verify identity first, then issue a 60 unit late fee adjustment credit."
+                }
+              ]
+            ],
+            "initial_config": {
+              "AccountServiceAPI": {
+                "identity_verified": false
+              }
+            },
+            "semantic_goal": "verify_then_credit_60",
+            "obligation_support": [
+              "E02"
+            ]
+          }
+        },
+        {
+          "id": "B10.1-aff-006",
+          "slice": "affected",
+          "description": "A credit action must use the new cap and satisfy the added identity-verification precondition.",
+          "instruction": "Change my email to new.customer@example.com and add a 40 unit billing error credit.",
+          "source_file": "account_actions/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Change my email to new.customer@example.com and add a 40 unit billing error credit."
+                }
+              ]
+            ],
+            "initial_config": {
+              "AccountServiceAPI": {
+                "identity_verified": false
+              }
+            },
+            "semantic_goal": "update_email_then_credit_40",
+            "obligation_support": [
+              "E02"
+            ]
+          }
+        },
+        {
+          "id": "B10.1-aff-007",
+          "slice": "affected",
+          "description": "A credit action must use the new cap and satisfy the added identity-verification precondition.",
+          "instruction": "Add a 40 unit goodwill credit, then show the account.",
+          "source_file": "account_actions/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Add a 40 unit goodwill credit, then show the account."
+                }
+              ]
+            ],
+            "initial_config": {
+              "AccountServiceAPI": {
+                "identity_verified": false
+              }
+            },
+            "semantic_goal": "credit_40_then_view",
+            "obligation_support": [
+              "E02"
+            ]
+          }
+        },
+        {
+          "id": "B10.1-aff-008",
+          "slice": "affected",
+          "description": "A credit action must use the new cap and satisfy the added identity-verification precondition.",
+          "instruction": "Set notifications to sms and issue a 75 unit billing error credit.",
+          "source_file": "account_actions/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Set notifications to sms and issue a 75 unit billing error credit."
+                }
+              ]
+            ],
+            "initial_config": {
+              "AccountServiceAPI": {
+                "identity_verified": false
+              }
+            },
+            "semantic_goal": "credit_75_after_unrelated_preference",
+            "obligation_support": [
+              "E01",
+              "E02"
+            ]
+          }
+        },
+        {
+          "id": "B10.1-ret-001",
+          "slice": "unchanged-retention",
+          "description": "Unchanged account actions should keep working without collateral policy edits.",
+          "instruction": "Update my email to retain.one@example.com.",
+          "source_file": "account_actions/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Update my email to retain.one@example.com."
+                }
+              ]
+            ],
+            "initial_config": {
+              "AccountServiceAPI": {}
+            },
+            "semantic_goal": "update_email",
+            "obligation_support": []
+          }
+        },
+        {
+          "id": "B10.1-ret-002",
+          "slice": "unchanged-retention",
+          "description": "Unchanged account actions should keep working without collateral policy edits.",
+          "instruction": "Switch my notification preference to none.",
+          "source_file": "account_actions/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Switch my notification preference to none."
+                }
+              ]
+            ],
+            "initial_config": {
+              "AccountServiceAPI": {}
+            },
+            "semantic_goal": "set_notification_preference",
+            "obligation_support": []
+          }
+        },
+        {
+          "id": "B10.1-ret-003",
+          "slice": "unchanged-retention",
+          "description": "Unchanged account actions should keep working without collateral policy edits.",
+          "instruction": "Show me the current account details.",
+          "source_file": "account_actions/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Show me the current account details."
+                }
+              ]
+            ],
+            "initial_config": {
+              "AccountServiceAPI": {}
+            },
+            "semantic_goal": "view_account",
+            "obligation_support": []
+          }
+        },
+        {
+          "id": "B10.1-ret-004",
+          "slice": "unchanged-retention",
+          "description": "Unchanged account actions should keep working without collateral policy edits.",
+          "instruction": "Start a password reset for the account.",
+          "source_file": "account_actions/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Start a password reset for the account."
+                }
+              ]
+            ],
+            "initial_config": {
+              "AccountServiceAPI": {}
+            },
+            "semantic_goal": "reset_password",
+            "obligation_support": []
+          }
+        },
+        {
+          "id": "B10.1-bnd-001",
+          "slice": "boundary-open-set",
+          "description": "Out-of-scope credit requests should be rejected rather than inventing a new policy.",
+          "instruction": "Identity is already verified; issue exactly a 60 unit goodwill credit.",
+          "source_file": "account_actions/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Identity is already verified; issue exactly a 60 unit goodwill credit."
+                }
+              ]
+            ],
+            "initial_config": {
+              "AccountServiceAPI": {
+                "identity_verified": true
+              }
+            },
+            "semantic_goal": "credit_exactly_60_verified",
+            "obligation_support": [
+              "E01"
+            ]
+          }
+        },
+        {
+          "id": "B10.1-bnd-002",
+          "slice": "boundary-open-set",
+          "description": "Out-of-scope credit requests should be rejected rather than inventing a new policy.",
+          "instruction": "Identity is already verified; issue a 61 unit goodwill credit.",
+          "source_file": "account_actions/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Identity is already verified; issue a 61 unit goodwill credit."
+                }
+              ]
+            ],
+            "initial_config": {
+              "AccountServiceAPI": {
+                "identity_verified": true
+              }
+            },
+            "semantic_goal": "credit_61_verified",
+            "obligation_support": [
+              "E01"
+            ]
+          }
+        },
+        {
+          "id": "B10.1-bnd-003",
+          "slice": "boundary-open-set",
+          "description": "Out-of-scope credit requests should be rejected rather than inventing a new policy.",
+          "instruction": "The customer is already verified. Apply a 40 unit billing error credit.",
+          "source_file": "account_actions/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "The customer is already verified. Apply a 40 unit billing error credit."
+                }
+              ]
+            ],
+            "initial_config": {
+              "AccountServiceAPI": {
+                "identity_verified": true
+              }
+            },
+            "semantic_goal": "credit_identity_already_verified",
+            "obligation_support": [
+              "E02"
+            ]
+          }
+        },
+        {
+          "id": "B10.1-bnd-004",
+          "slice": "boundary-open-set",
+          "description": "Out-of-scope credit requests should be rejected rather than inventing a new policy.",
+          "instruction": "Identity is verified; issue a 'sixty' unit goodwill credit.",
+          "source_file": "account_actions/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Identity is verified; issue a 'sixty' unit goodwill credit."
+                }
+              ]
+            ],
+            "initial_config": {
+              "AccountServiceAPI": {
+                "identity_verified": true
+              }
+            },
+            "semantic_goal": "malformed_credit_amount",
+            "obligation_support": []
+          }
+        },
+        {
+          "id": "B10.1-null-001",
+          "slice": "matched-null",
+          "description": "A cosmetic account-state change should not trigger a persistent policy rewrite.",
+          "instruction": "After confirming identity, place forty units of goodwill credit on the account.",
+          "source_file": "account_actions/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "After confirming identity, place forty units of goodwill credit on the account."
+                }
+              ]
+            ],
+            "initial_config": {
+              "AccountServiceAPI": {
+                "identity_verified": true
+              }
+            },
+            "semantic_goal": "paraphrased_credit_40_verified",
+            "obligation_support": []
+          }
+        },
+        {
+          "id": "B10.1-null-002",
+          "slice": "matched-null",
+          "description": "A cosmetic account-state change should not trigger a persistent policy rewrite.",
+          "instruction": "Ignore the preferred display color and show the account details.",
+          "source_file": "account_actions/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Ignore the preferred display color and show the account details."
+                }
+              ]
+            ],
+            "initial_config": {
+              "AccountServiceAPI": {
+                "display_color": "blue"
+              }
+            },
+            "semantic_goal": "irrelevant_metadata_plus_view",
+            "obligation_support": []
+          }
+        },
+        {
+          "id": "B10.1-null-003",
+          "slice": "matched-null",
+          "description": "A cosmetic account-state change should not trigger a persistent policy rewrite.",
+          "instruction": "Before showing the account, make the email null.three@example.com.",
+          "source_file": "account_actions/siblings.json",
+          "details": {
+            "question": [
+              [
+                {
+                  "role": "user",
+                  "content": "Before showing the account, make the email null.three@example.com."
+                }
+              ]
+            ],
+            "initial_config": {
+              "AccountServiceAPI": {}
+            },
+            "semantic_goal": "order_paraphrase_email_then_view",
+            "obligation_support": []
+          }
+        }
+      ],
       "paired_family": null,
       "family_notes": [],
       "files_manifest": [
@@ -2554,12 +3029,48 @@
           "kind": "json"
         },
         {
+          "path": "account_actions/evidence/d1_rule_credit_cap.md",
+          "kind": "md"
+        },
+        {
+          "path": "account_actions/evidence/d3_probe_interface.py",
+          "kind": "py"
+        },
+        {
+          "path": "account_actions/evidence/d3_probe_log.jsonl",
+          "kind": "jsonl"
+        },
+        {
+          "path": "account_actions/evidence/evidence_allocation.json",
+          "kind": "json"
+        },
+        {
+          "path": "account_actions/sibling_summary.json",
+          "kind": "json"
+        },
+        {
+          "path": "account_actions/siblings.json",
+          "kind": "json"
+        },
+        {
           "path": "account_actions/skill_r_minus.md",
           "kind": "md"
         },
         {
           "path": "account_actions/source_task.json",
           "kind": "json"
+        },
+        {
+          "path": "account_actions/validation/construction_report.json",
+          "kind": "json"
+        },
+        {
+          "path": "account_actions/validation/replay_checks.py",
+          "kind": "py"
+        },
+        {
+          "path": "account_actions/validation/validate_b10_1_architecture.sh",
+          "kind": "sh"
         }
       ]
     },
@@ -7545,9 +8056,7 @@
           "percentage": 0,
           "present": false,
           "delivery": null,
-          "files": [
-            "D1_2_design_level_drift_plan.md"
-          ]
+          "files": []
         },
         "D2": {
           "percentage": 0,
@@ -7722,17 +8231,14 @@
           "present": true,
           "delivery": "The agent receives one TravelHub UI Update Notice during adaptation stating only that hotel-detail navigation has been reorganized and previously stored routes may be stale. D1 does NOT reveal the added intermediate state, the removed graph edge, the replacement route, or the Featured Deluxe shortcut.",
           "files": [
-            "navigation_graph/evidence/d1_notice.md",
-            "navigation_graph/validation/validate_d1_nonleakage.py"
+            "navigation_graph/evidence/d1_notice.md"
           ]
         },
         "D2": {
           "percentage": 0,
           "present": false,
           "delivery": null,
-          "files": [
-            "D2_1_design_level_drift_plan.md"
-          ]
+          "files": []
         },
         "D3": {
           "percentage": 70,
@@ -8253,9 +8759,7 @@
           "percentage": 0,
           "present": false,
           "delivery": null,
-          "files": [
-            "D2_2_design_level_drift_plan.md"
-          ]
+          "files": []
         },
         "D3": {
           "percentage": 100,
@@ -8781,10 +9285,7 @@
           "present": true,
           "delivery": "Metered current-regime probes identify the new drinkware search prior and the blocked hall-to-kitchen path. No changelog or demonstration is supplied.",
           "files": [
-            "D3_1_search_strategy_execution_plan.md",
-            "search_strategy/compile_d3_1.py",
-            "search_strategy/evidence/d3_probe_log.jsonl",
-            "search_strategy/validation/check_d3_1_architecture.sh"
+            "search_strategy/evidence/d3_probe_log.jsonl"
           ]
         }
       },
@@ -9257,11 +9758,8 @@
           "present": true,
           "delivery": "Metered probes reveal the blocked hall-to-kitchen path and when search should stop.",
           "files": [
-            "D3_2_search_strategy_execution_plan.md",
-            "search_strategy/compile_d3_2.py",
             "search_strategy/evidence/d3_probe_interface.py",
-            "search_strategy/evidence/d3_probe_log.jsonl",
-            "search_strategy/validation/check_d3_2_architecture.sh"
+            "search_strategy/evidence/d3_probe_log.jsonl"
           ]
         }
       },

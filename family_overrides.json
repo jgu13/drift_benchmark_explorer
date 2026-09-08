@@ -212,11 +212,11 @@
     "title": "Account Actions",
     "platform": "Tau2",
     "mechanism": "Policy cap shift plus added precondition",
-    "status_label": "Under construction",
+    "status_label": "Constructed",
     "drift_summary": "Account credit cap falls from 100 to 60, and verify_identity becomes required before issuing credit.",
     "evidence_delivery": {
-      "D1": "A declared rule states that the issue_account_credit cap changed from 100 to 60 units.",
-      "D3": "Safe probes reveal that verify_identity is now required before issue_account_credit."
+      "D1": "A declared rule fully specifies that issue_account_credit may issue at most 60 units; the prior cap was 100. No D2 trajectories are supplied.",
+      "D3": "Metered current-regime probes identify that verify_identity is now required before issue_account_credit."
     },
     "task_descriptions": {
       "affected": "A credit action must use the new cap and satisfy the added identity-verification precondition.",
